@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE greencode SYSTEM "greencode.dtd">
+<greencode-cofig>
+	<console writeLog="true" />	
+	<!--
+		bootable: Cache de página. (True: Na inicialização do servidor / False: Na inicialização da página solicitada.
+		seek-change: Cada solicitação feita a página, é verificado se ouve mudanças no arquivo e atualiza o cache.
+		
+		Para produção, aconselho essas configurações.
+		bootable=true
+		seek-change=false
+	 -->
+	<view bootable="false" seek-change="true" charset="utf-8">
+		<template-file>template/template.html</template-file>
+		<use-minified>true</use-minified>
+	</view>
+	<anti-flood>
+		<default-max-request>5</default-max-request>
+	</anti-flood>
+	<!--<database>
+		<default-config-file>database.config.xml</default-config-file>
+		<show-query>true</show-query>	
+		<drivers>
+			<mysql>com.mysql.jdbc.Driver</mysql>
+		</drivers>
+	</database>
+	<internationalization>
+		 <locale language="pt" country="BR" file="msg_pt-BR.properties" charset="utf-8"/>
+		<locale language="en" country="US" file="msg_en-US.properties" charset="utf-8"/> 
+	</internationalization>	-->
+</greencode-cofig>

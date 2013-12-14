@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<database-config>
+	<server-name>127.0.0.1</server-name>
+	<database>mysql</database>
+	<schema>greencode</schema>
+	<username>root</username>
+	<password></password>
+	
+	<!-- <reconnect chance="5">
+		<connection></connection>
+	</reconnect> -->
+</database-config>
