@@ -1,0 +1,32 @@
+<!-- Greencode DTD -->
+
+<!ELEMENT greencode-cofig (console, multipart, response, view, anti-flood, database?, internationalization?)>
+<!ELEMENT console EMPTY>
+	<!ATTLIST console writeLog ( true | false ) "true" >
+	
+<!ELEMENT multipart EMPTY>
+	<!ATTLIST multipart autodectetion ( true | false ) "false" >
+	<!ATTLIST multipart max-request-size CDATA "-1">
+
+<!ELEMENT response EMPTY>
+	<!ATTLIST response gzip ( true | false ) "false" >
+	
+<!ELEMENT view (template-file?, use-minified?)>
+	<!ATTLIST view bootable ( true | false ) "false" >
+	<!ATTLIST view seek-change ( true | false ) "true" >
+	<!ATTLIST view charset CDATA #REQUIRED>
+	<!ELEMENT template-file ANY>
+	<!ELEMENT use-minified ANY>
+	
+<!ELEMENT anti-flood (default-max-request)>
+<!ELEMENT default-max-request ANY>
+<!ELEMENT database (default-config-file, show-query?, drivers)>
+	<!ELEMENT default-config-file ANY>
+	<!ELEMENT show-query ANY>
+	<!ELEMENT drivers ANY>
+<!ELEMENT internationalization (locale+)>
+	<!ELEMENT locale EMPTY>
+		<!ATTLIST locale language CDATA #REQUIRED>
+		<!ATTLIST locale country CDATA #REQUIRED>
+		<!ATTLIST locale file CDATA #REQUIRED>
+		<!ATTLIST locale charset CDATA #REQUIRED>
