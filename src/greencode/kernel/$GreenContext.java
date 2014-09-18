@@ -1,5 +1,7 @@
 package greencode.kernel;
 
+import java.util.HashSet;
+
 import greencode.jscript.Window;
 
 public final class $GreenContext {
@@ -10,4 +12,6 @@ public final class $GreenContext {
 	public static void flushed(GreenContext context, boolean flushed) { context.flushed = flushed; }	
 	public static boolean forceSynchronization(GreenContext context) { return context.forceSynchronization; }	
 	public static void setCurrentWindow(GreenContext context, Window window) { context.currentWindow = window; }
+	public static String[] listAttrSync(GreenContext context) { return context.listAttrSync; }
+	public static HashSet<String> listAttrSyncCache(GreenContext context) { return context.listAttrSyncCache; }	
 }

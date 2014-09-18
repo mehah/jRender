@@ -1,5 +1,6 @@
 package greencode.kernel;
 
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Properties;
 
@@ -48,6 +49,9 @@ public final class GreenContext {
 	boolean executeAction = true;
 	
 	boolean flushed = false;
+	
+	String[] listAttrSync;
+	HashSet<String> listAttrSyncCache;
 	
 	GreenContext(HttpServletRequest request, HttpServletResponse response, Page currentPage) {
 		GreenContext.greenContext.set(this);
@@ -153,6 +157,8 @@ public final class GreenContext {
 		this.databaseConnection = null;
 		this.requestedForm = null;
 		this.userLocale = null;
+		this.listAttrSync = null;
+		this.listAttrSyncCache = null;
 		
 		greenContext.remove();
 		

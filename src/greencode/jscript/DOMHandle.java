@@ -1,6 +1,8 @@
 package greencode.jscript;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.servlet.http.Part;
 
@@ -109,10 +111,38 @@ public final class DOMHandle {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static<C> C getVariableValue(DOM owner, String varName, Class<C> cast, boolean isMethod, String _name, Object... parameters) {
+	private static<C> C getVariableValue(DOM owner, String varName, Class<C> cast, boolean isMethod, final String _name, Object... parameters) {
 		GreenContext context = GreenContext.getInstance();
 		
-		if((greencode.kernel.$GreenContext.forceSynchronization(context) || !owner.variables.containsKey(varName))) {
+		boolean sync = true;		
+		if(greencode.kernel.$GreenContext.forceSynchronization(context)) {			
+			String[] listAttrSync = greencode.kernel.$GreenContext.listAttrSync(context);
+			
+			HashSet<String> listAttrSyncCache = greencode.kernel.$GreenContext.listAttrSyncCache(context);
+			final boolean hasListAttrSyncCache = listAttrSyncCache != null;
+			
+			if(listAttrSync != null) {
+				if(listAttrSync.length > 0) {
+					sync = false;
+					if(!hasListAttrSyncCache || !listAttrSyncCache.contains(_name)) {
+						for (String attr : listAttrSync) {
+							if(attr.equals(_name)) {
+								sync = true;
+								if(hasListAttrSyncCache)
+									listAttrSyncCache.add(_name);
+								break;
+							}
+						}
+					}
+				}else if(hasListAttrSyncCache) {
+					sync = !listAttrSyncCache.contains(_name);
+					if(sync)
+						listAttrSyncCache.add(_name);
+				}
+			}
+		}
+		
+		if(sync || !owner.variables.containsKey(varName)) {
 			Object v = getSyncValue(owner, varName, isMethod, _name, parameters);
 			
 			if(cast != null && !cast.equals(String.class) && !cast.equals(Part.class)) {

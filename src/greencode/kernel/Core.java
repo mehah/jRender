@@ -19,6 +19,7 @@ import greencode.jscript.function.implementation.EventFunction;
 import greencode.jscript.function.implementation.SimpleFunction;
 import greencode.jscript.window.annotation.AfterAction;
 import greencode.jscript.window.annotation.BeforeAction;
+import greencode.jscript.window.annotation.ForceSync;
 import greencode.jscript.window.annotation.PageParameter;
 import greencode.kernel.GreenCodeConfig.Internationalization;
 import greencode.kernel.GreenCodeConfig.Internationalization.Variant;
@@ -43,6 +44,7 @@ import java.sql.SQLException;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
@@ -62,6 +64,7 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.RequestFacade;
 
 import com.google.gson.JsonObject;
+import com.sun.java.swing.plaf.windows.resources.windows;
 
 
 @WebFilter(displayName="core", urlPatterns="/*")
@@ -316,6 +319,14 @@ public final class Core implements Filter {
 				processTime = System.currentTimeMillis();
 			
 			String classNameBootAction = null;
+			
+			ForceSync fs = requestMethod.getAnnotation(ForceSync.class);
+			if(fs != null) {
+				context.forceSynchronization = true;
+				context.listAttrSync = fs.value();
+				if(fs.onlyOnce())
+					context.listAttrSyncCache = new HashSet<String>();
+			}			
 			
 			greencode.kernel.Form.processRequestedForm(context);
 			
