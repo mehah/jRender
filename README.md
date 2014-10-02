@@ -1,4 +1,4 @@
-greencode
+Greencode
 =========
 
 Framework que trabalha similar à aplicações de desktop orientado a eventos, como Java Swing. Podendo chamar funções javascript, registrar eventos, preencher formulário, tudo através da programação Java sem intervenção no HTML.
@@ -7,7 +7,7 @@ Exemplo:
 
 Html: index.html
 
-```
+```html
 <html>
   <head>
   <meta charset="ISO-8859-1">
@@ -17,10 +17,10 @@ Html: index.html
   	<input type="text" name="nome" id="nome" />
   </body>
 </html>
-```
+````
 Java: IndexController.java
 
-```
+```java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 
