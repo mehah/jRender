@@ -7,7 +7,7 @@ Exemplo:
 
 Html: index.html
 
-<!DOCTYPE html>
+```
 <html>
   <head>
   <meta charset="ISO-8859-1">
@@ -17,9 +17,10 @@ Html: index.html
   	<input type="text" name="nome" id="nome" />
   </body>
 </html>
-
+```
 Java: IndexController.java
 
+```
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 
@@ -57,3 +58,4 @@ public class IndexController extends Window {
 		System.out.println(inputElement.value());
 	}
 }
+```
