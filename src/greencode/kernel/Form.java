@@ -115,18 +115,17 @@ final class Form {
 			if(Short.class.equals(instanceClass))
 				return Short.parseShort(valor);
 			
-			if(Date.class.equals(instanceClass))
-			{
+			if(Date.class.equals(instanceClass)) {
 				if(!field.isAnnotationPresent(ConvertDateTime.class))
 					throw new UnknownFormatConversionException("green-0013");
-		        
+				
 				ConvertDateTime convert = field.getAnnotation(ConvertDateTime.class);
 				
-		        try {  
-		            return DateUtils.toDate(valor, convert.pattern());
-		        } catch (ParseException e) {
-		        	Console.warning(LogMessage.getMessage("green-0033", valor, convert.pattern()));
-		        }
+				try {  
+					return DateUtils.toDate(valor, convert.pattern());
+				} catch (ParseException e) {
+					Console.warning(LogMessage.getMessage("green-0033", valor, convert.pattern()));
+				}
 			}else {
 				/*return HttpParameter.Context.getObjectRequest(valor);*/
 			}

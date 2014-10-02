@@ -16,10 +16,8 @@ public class ElementsScan {
 	
 	static ElementsScan getElements(ViewSession viewSession) {
 		ElementsScan elements = (ElementsScan) viewSession.getAttribute("_ELEMENTS"); 
-		if(elements == null) {
-			elements = new ElementsScan();
-			viewSession.setAttribute("_ELEMENTS", elements);
-		}
+		if(elements == null)
+			viewSession.setAttribute("_ELEMENTS", elements = new ElementsScan());
 		
 		return elements;
 	}

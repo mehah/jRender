@@ -21,20 +21,20 @@ public final class ClassUtils {
 		wrapperTypes.add(Byte.class);
 		wrapperTypes.add(Short.class);
 		wrapperTypes.add(Integer.class);
-        wrapperTypes.add(Long.class);
-        wrapperTypes.add(Float.class);
-        wrapperTypes.add(Double.class);
-        wrapperTypes.add(Void.class);
-        
-        primitivesTypes.add(boolean.class);
-        primitivesTypes.add(char.class);
-        primitivesTypes.add(byte.class);
-        primitivesTypes.add(short.class);
-        primitivesTypes.add(int.class);
-        primitivesTypes.add(long.class);
-        primitivesTypes.add(float.class);
-        primitivesTypes.add(double.class);
-        primitivesTypes.add(void.class);
+		wrapperTypes.add(Long.class);
+		wrapperTypes.add(Float.class);
+		wrapperTypes.add(Double.class);
+		wrapperTypes.add(Void.class);
+		
+		primitivesTypes.add(boolean.class);
+		primitivesTypes.add(char.class);
+		primitivesTypes.add(byte.class);
+		primitivesTypes.add(short.class);
+		primitivesTypes.add(int.class);
+		primitivesTypes.add(long.class);
+		primitivesTypes.add(float.class);
+		primitivesTypes.add(double.class);
+		primitivesTypes.add(void.class);
 	}
 	
 	public final static Class<?> toWrapperClass(Class<?> c) {

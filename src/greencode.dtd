@@ -1,8 +1,11 @@
 <!-- Greencode DTD -->
 
-<!ELEMENT greencode-cofig (console, multipart, response, view, anti-flood, database?, internationalization?)>
+<!ELEMENT greencode-config (console, consoleBrowser, multipart, response, view, anti-flood, database?, internationalization?)>
 <!ELEMENT console EMPTY>
 	<!ATTLIST console writeLog ( true | false ) "true" >
+	
+<!ELEMENT consoleBrowser EMPTY>
+	<!ATTLIST consoleBrowser writeLog ( true | false ) "true" >
 	
 <!ELEMENT multipart EMPTY>
 	<!ATTLIST multipart autodectetion ( true | false ) "false" >
@@ -24,9 +27,14 @@
 	<!ELEMENT default-config-file ANY>
 	<!ELEMENT show-query ANY>
 	<!ELEMENT drivers ANY>
+	
 <!ELEMENT internationalization (locale+)>
 	<!ELEMENT locale EMPTY>
 		<!ATTLIST locale language CDATA #REQUIRED>
 		<!ATTLIST locale country CDATA #REQUIRED>
 		<!ATTLIST locale file CDATA #REQUIRED>
 		<!ATTLIST locale charset CDATA #REQUIRED>
+		
+<!ELEMENT plugins (plugin+)>
+	<!ELEMENT plugin EMPTY>
+		<!ATTLIST plugin class CDATA #REQUIRED>

@@ -21,9 +21,11 @@ import greencode.jscript.window.annotation.AfterAction;
 import greencode.jscript.window.annotation.BeforeAction;
 import greencode.jscript.window.annotation.ForceSync;
 import greencode.jscript.window.annotation.PageParameter;
+import greencode.kernel.GreenCodeConfig.ConsoleBrowser;
 import greencode.kernel.GreenCodeConfig.Internationalization;
 import greencode.kernel.GreenCodeConfig.Internationalization.Variant;
 import greencode.kernel.implementation.BootActionImplementation;
+import greencode.kernel.implementation.PluginImplementation;
 import greencode.util.ArrayUtils;
 import greencode.util.ClassUtils;
 import greencode.util.FileUtils;
@@ -41,6 +43,7 @@ import java.nio.charset.Charset;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -64,15 +67,16 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.RequestFacade;
 
 import com.google.gson.JsonObject;
-import com.sun.java.swing.plaf.windows.resources.windows;
 
 
 @WebFilter(displayName="core", urlPatterns="/*")
 public final class Core implements Filter {
-	final static String CONTEXT_PATH = null;
-	final static String projectName = null;
-	final static String defaultLogMsg = null;	
-	final static Boolean hasError = true;
+	final static String
+			CONTEXT_PATH = null,
+			projectName = null,
+			defaultLogMsg = null;
+	private final static String SCRIPT_HTML_CORE_JS = null;
+	private final static Boolean hasError = true;
 	
 	private final static String[] jsFiles = {
 		"sizzle.js"
@@ -94,10 +98,17 @@ public final class Core implements Filter {
 		"StringBuilder.js"*/
 	};
 	
-	public void destroy() {		
+	public void destroy() {
 		if(Cache.bootAction != null) {
 			System.out.print(defaultLogMsg+"Destroying BootAction...");
 			Cache.bootAction.destroy();
+			System.out.print(" [done]\n");
+		}
+		
+		if(Cache.plugins != null) {
+			System.out.print(defaultLogMsg+"Destroying Plugins...");
+			for (PluginImplementation plugin : Cache.plugins)
+				plugin.destroy();
 			System.out.print(" [done]\n");
 		}
 		
@@ -109,21 +120,21 @@ public final class Core implements Filter {
 		}
 		
 		Enumeration<Driver> drivers = DriverManager.getDrivers();
-        while (drivers.hasMoreElements()) {
-            Driver driver = drivers.nextElement();
-            try {
-                DriverManager.deregisterDriver(driver);
-                System.out.print(defaultLogMsg+String.format("Deregistering jdbc driver: %s\n", driver));
-            } catch (SQLException e) {
-               e.printStackTrace();
-            }
-        }
+		while (drivers.hasMoreElements()) {
+			Driver driver = drivers.nextElement();
+			try {
+				DriverManager.deregisterDriver(driver);
+				System.out.print(defaultLogMsg+String.format("Deregistering jdbc driver: %s\n", driver));
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 	
-    private static boolean acceptsGZipEncoding(HttpServletRequest httpRequest) {
-        String acceptEncoding = httpRequest.getHeader("Accept-Encoding");
-        return acceptEncoding != null && acceptEncoding.indexOf("gzip") != -1;
-    }
+	private static boolean acceptsGZipEncoding(HttpServletRequest httpRequest) {
+		String acceptEncoding = httpRequest.getHeader("Accept-Encoding");
+		return acceptEncoding != null && acceptEncoding.indexOf("gzip") != -1;
+	}
 
 	private final static Field requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request");
 	
@@ -260,7 +271,7 @@ public final class Core implements Filter {
 					if(!page.pageAnnotation.selector().isEmpty())
 						content = page.getSelectedContent(page.pageAnnotation.selector(), context);
 					else 
-						content = "<script type=\"text/javascript\" src=\""+Core.CONTEXT_PATH+"/jscript/greencode/core.js\"></script>"+page.getContent(context);
+						content = SCRIPT_HTML_CORE_JS+page.getContent(context);
 				}
 
 				context.getResponse().getWriter().write(content);
@@ -302,8 +313,8 @@ public final class Core implements Filter {
 							listArgs[i] = context;
 						}else {
 							DOM dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);
-							eArg.args[hasContextClass ? i-1 : i] = DOMHandle.getUID(dom);						
-							listArgs[i] = dom;							
+							eArg.args[hasContextClass ? i-1 : i] = DOMHandle.getUID(dom);
+							listArgs[i] = dom;
 						}
 					}
 				}
@@ -331,8 +342,7 @@ public final class Core implements Filter {
 			greencode.kernel.Form.processRequestedForm(context);
 			
 			final boolean hasBootaction = Cache.bootAction != null;
-			if(hasBootaction)
-			{
+			if(hasBootaction) {
 				classNameBootAction = Cache.bootAction.getClass().getSimpleName();
 				
 				BeforeAction a = requestMethod.getAnnotation(BeforeAction.class);
@@ -447,75 +457,70 @@ public final class Core implements Filter {
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "projectName", new File(fConfig.getServletContext().getRealPath("/")).getName());
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "defaultLogMsg", "["+Core.projectName+"] ");
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "CONTEXT_PATH", fConfig.getServletContext().getContextPath());
+		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "SCRIPT_HTML_CORE_JS", "<script type=\"text/javascript\" src=\""+Core.CONTEXT_PATH+"/jscript/greencode/core.js\"></script>");
 		
 		System.out.println("\nLoading Project: ["+projectName+"]");
 		
 		try {
-			GreenCodeConfig.load();
-		} catch (IOException e1) {
-			System.err.println("Could not find file: src/greencode.config.xml");
-			return;
-		}
-		
-		Variant variant = Internationalization.getVariantLogByLocale(Locale.getDefault());
-		
-		if(variant == null)
-			variant = Internationalization.getVariantLogByLocale(new Locale("pt", "BR"));
-		
-		if(variant != null)
-		{
 			try {
-				LogMessage.instance.load(new InputStreamReader(variant.resource.openStream(), variant.charsetName));
-			} catch (Exception e) {
-				e.printStackTrace();
-				return;
+				GreenCodeConfig.load();
+			} catch (IOException e1) {
+				throw new IOException("Could not find file: src/greencode.config.xml");
 			}
 			
-			for (Variant v : Internationalization.pagesLocale) {
-				try {
-					Properties p = new Properties();
-					p.load(new InputStreamReader(v.resource.openStream(), v.charsetName));
-					Message.properties.put(v.locale.toString(), p);
-				} catch (Exception e) {
-					System.err.println(LogMessage.getMessage("green-0002", v.fileName));
-					return;
+			Variant variant = Internationalization.getVariantLogByLocale(Locale.getDefault());
+			
+			if(variant == null)
+				variant = Internationalization.getVariantLogByLocale(new Locale("pt", "BR"));
+			
+			if(variant != null) {
+				LogMessage.instance.load(new InputStreamReader(variant.resource.openStream(), variant.charsetName));
+				
+				for (Variant v : Internationalization.pagesLocale) {
+					try {
+						Properties p = new Properties();
+						p.load(new InputStreamReader(v.resource.openStream(), v.charsetName));
+						Message.properties.put(v.locale.toString(), p);
+					} catch (Exception e) {
+						throw new IOException(LogMessage.getMessage("green-0002", v.fileName));
+					}
 				}
 			}
-		}
-		
-		if(GreenCodeConfig.DataBase.defaultConfigFile != null)
-			GreenCodeConfig.DataBase.getConfig(GreenCodeConfig.DataBase.defaultConfigFile);
-				
-		try {
-			Class.forName("com.google.gson.Gson");
-		} catch (ClassNotFoundException e) {
-			System.err.println(LogMessage.getMessage("green-0001"));
-			return;
-		}
-		
-		Class<BootActionImplementation> classBootAction = null;
-		Class<DatabaseConnectionEvent> classDatabaseConnection = null;
-		
-		final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-		
-		System.out.print(defaultLogMsg+"Copying JavaScript Tools...");
-		
-		File jScriptFolter = FileUtils.getFileInWebContent("jscript/");
-		if(!jScriptFolter.exists())
-			jScriptFolter.mkdir();
-		
-		final File greencodeFolder = new File(jScriptFolter.getPath()+"/greencode/");
-		if(!greencodeFolder.exists())
-			greencodeFolder.mkdir();
-		
-		try {
-			StringBuilder greencodeCore = new StringBuilder("var CONTEXT_PATH = '"+fConfig.getServletContext().getContextPath()+"';");			
-			for (String fileName : coreJSFiles)
-				greencodeCore.append(FileUtils.getContentFile(classLoader.getResource("greencode/jscript/files/"+fileName)));
+			
+			if(GreenCodeConfig.DataBase.defaultConfigFile != null)
+				GreenCodeConfig.DataBase.getConfig(GreenCodeConfig.DataBase.defaultConfigFile);
+					
+			try {
+				Class.forName("com.google.gson.Gson");
+			} catch (ClassNotFoundException e) {
+				throw new ClassNotFoundException(LogMessage.getMessage("green-0001"));
+			}
+			
+			Class<BootActionImplementation> classBootAction = null;
+			Class<DatabaseConnectionEvent> classDatabaseConnection = null;
+			
+			final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+			
+			System.out.print(defaultLogMsg+"Copying JavaScript Tools...");
+			
+			File jScriptFolter = FileUtils.getFileInWebContent("jscript/");
+			if(!jScriptFolter.exists())
+				jScriptFolter.mkdir();
+			
+			final File greencodeFolder = new File(jScriptFolter.getPath()+"/greencode/");
+			if(!greencodeFolder.exists())
+				greencodeFolder.mkdir();
+			
+			StringBuilder greencodeCore = new StringBuilder("var CONTEXT_PATH = '"+fConfig.getServletContext().getContextPath()+"', DEBUG_MODE = "+ConsoleBrowser.writeLog+";");
 			
 			final String greencodePath = greencodeFolder.getPath();
 			
-			FileUtils.createFile(greencodeCore.toString(), greencodePath+"/core.js");
+			final CoreFileJS coreFileJS = new CoreFileJS(greencodeCore, greencodePath);
+			
+			for (String fileName : coreJSFiles)
+				coreFileJS.append(classLoader.getResource("greencode/jscript/files/"+fileName));
+			
+			coreFileJS.save();
 			
 			for (String fileName : jsFiles)
 				FileUtils.createFile(
@@ -525,11 +530,11 @@ public final class Core implements Filter {
 			
 			final Charset charset = Charset.forName(GreenCodeConfig.View.charset);
 			final long currentTime = new Date().getTime();			
-			for (Variant v : Internationalization.pagesLocale) {				
+			for (Variant v : Internationalization.pagesLocale) {
 				Page p = new Page();
 				p.lastModified = currentTime;
 				
-				p.setContent(FileUtils.getContentFile(v.resource, charset, new FileRead() {					
+				p.setContent(FileUtils.getContentFile(v.resource, charset, new FileRead() {
 					public String reading(String line) {
 						final int indexOf = line.indexOf('=');
 						if(indexOf != -1) {
@@ -545,101 +550,81 @@ public final class Core implements Filter {
 				
 				Page.pages.put("jscript/greencode/msg_"+v.locale.toString()+".js", p);
 			}
-		} catch (IOException e) {
-			System.err.println(e);
-			return;
-		}
-		
-		System.out.println(" [done]");
-		
-		System.out.print(defaultLogMsg+"Caching Classes...");
-		try {
 			
+			System.out.println(" [done]");
+			
+			System.out.print(defaultLogMsg+"Caching Classes...");
 			List<Class<?>> classesTeste = PackageUtils.getClasses("/", true);
-			for (Class<?> Class : classesTeste) {				
+			for (Class<?> Class : classesTeste) {
 				if(classBootAction == null && ArrayUtils.contains(Class.getInterfaces(), BootActionImplementation.class))
 					classBootAction = (java.lang.Class<BootActionImplementation>) Class;
 				else if(classDatabaseConnection == null && ArrayUtils.contains(Class.getInterfaces(), DatabaseConnectionEvent.class))
 					classDatabaseConnection = (java.lang.Class<DatabaseConnectionEvent>) Class;
 				/*else if(ClassUtils.isParent(Class, Validator.class))
 					ValidatorFactory.getValidationInstance((java.lang.Class<? extends Validator>) Class);*/
-				else if(ClassUtils.isParent(Class, Form.class) && !Modifier.isAbstract(Class.getModifiers()))
-				{
-					if(!Class.isAnnotationPresent(Name.class)) {
-						System.err.println(LogMessage.getMessage("green-0027", Class));
-						return;
-					}
+				else if(ClassUtils.isParent(Class, Form.class) && !Modifier.isAbstract(Class.getModifiers())) {
+					if(!Class.isAnnotationPresent(Name.class))
+						throw new IllegalAccessException(LogMessage.getMessage("green-0027", Class));
 					
 					final String name = Class.getAnnotation(Name.class).value();
 					
-					if(Cache.forms.containsKey(name)) {
-						System.err.println(LogMessage.getMessage("green-0031", name, Class.getSimpleName()));
-						return;
-					}
+					if(Cache.forms.containsKey(name))
+						throw new Exception(LogMessage.getMessage("green-0031", name, Class.getSimpleName()));
 					
 					Cache.forms.put(name, (java.lang.Class<? extends Form>) Class);						
-				}else if(ClassUtils.isParent(Class, Window.class) && !Modifier.isAbstract(Class.getModifiers()))
-				{
+				}else if(ClassUtils.isParent(Class, Window.class) && !Modifier.isAbstract(Class.getModifiers())) {
 					Annotation.processWindowAnnotation((java.lang.Class<? extends Window>) Class, classLoader, greencodeFolder);
 					Cache.registeredWindows.put(Class.getSimpleName(), (java.lang.Class<? extends Window>) Class);
 				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			return;
-		}
-		System.out.print(" [done]\n");
-		
-		if(GreenCodeConfig.View.templateFile != null)
-		{
-			System.out.println(defaultLogMsg+"Caching Default Template: "+GreenCodeConfig.View.templateFile);
-			Cache.defaultTemplate = FileUtils.getFileInWebContent(GreenCodeConfig.View.templateFile);
-			if(!Cache.defaultTemplate.exists()) {
-				System.err.println(LogMessage.getMessage("green-0002", GreenCodeConfig.View.templateFile));
-				return;
-			}
-		}
-		
-		if(classDatabaseConnection != null)
-		{
-			try {
-				System.out.print("Initializing Database Connection Event ...");
-				Cache.classDatabaseConnectionEvent = classDatabaseConnection;
-				System.out.println(" [done]");
-			} catch (Exception e) {
-				e.printStackTrace();
-				return;
-			}
-		}else
-		{
-			DatabaseConnection db = new DatabaseConnection();			
-			db.setConfig(GreenCodeConfig.DataBase.configs.get(GreenCodeConfig.DataBase.defaultConfigFile));
+			System.out.print(" [done]\n");
 			
-			if(db.getConfig() != null)
-			{			
-				try {
-					db.start();
-				} catch (SQLException e) {
-					e.printStackTrace();
-					return;
-				}
+			if(GreenCodeConfig.View.templateFile != null) {
+				System.out.println(defaultLogMsg+"Caching Default Template: "+GreenCodeConfig.View.templateFile);
+				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", FileUtils.getFileInWebContent(GreenCodeConfig.View.templateFile));
+				if(!Cache.defaultTemplate.exists())
+					throw new IOException(LogMessage.getMessage("green-0002", GreenCodeConfig.View.templateFile));
 			}
-		}
-		
-		if(classBootAction != null)
-		{
-			try {
+			
+			if(classDatabaseConnection != null) {
+				System.out.print("Initializing Database Connection Event ...");
+				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "classDatabaseConnectionEvent", classDatabaseConnection);
+				System.out.println(" [done]");
+			}else{
+				DatabaseConnection db = new DatabaseConnection();			
+				db.setConfig(GreenCodeConfig.DataBase.configs.get(GreenCodeConfig.DataBase.defaultConfigFile));
+				
+				if(db.getConfig() != null)			
+					db.start();
+			}
+			
+			if(classBootAction != null) {
 				System.out.print(defaultLogMsg+"Initializing Boot Action ...");
 				
-				Cache.bootAction = (BootActionImplementation) classBootAction.newInstance();				
-				Cache.bootAction.init();
+				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "bootAction", (BootActionImplementation) classBootAction.newInstance());
+				
+				Cache.bootAction.init(greencodePath, classLoader, fConfig.getServletContext(), coreFileJS);
 				System.out.println(" [done]");
-			} catch (Exception e) {
-				e.printStackTrace();
-				return;
 			}
-		}
-		
-		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "hasError", false);
+			
+			if(GreenCodeConfig.Plugins.list.length > 0) {
+				System.out.print(defaultLogMsg+"Initializing Plugins ...");
+				
+				ArrayList<PluginImplementation> list = new ArrayList<PluginImplementation>();
+				for (Class<PluginImplementation> c : GreenCodeConfig.Plugins.list) {
+					PluginImplementation plugin = c.newInstance();
+					plugin.init(greencodePath, classLoader, fConfig.getServletContext(), coreFileJS);
+					list.add(plugin);
+				}
+				
+				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "plugins", list.toArray(new PluginImplementation[list.size()]));
+				
+				System.out.println(" [done]");
+			}
+			
+			GenericReflection.NoThrow.setFinalStaticValue(Core.class, "hasError", false);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}		
 	}
 }

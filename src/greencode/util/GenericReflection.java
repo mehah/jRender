@@ -169,7 +169,7 @@ public final class GenericReflection {
 	public static void setFinalAccessible(Field field) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
 		Field modifiersField = Field.class.getDeclaredField("modifiers");
 		modifiersField.setAccessible(true);
-	    modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+		modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -318,7 +318,7 @@ public final class GenericReflection {
 			try {
 				Field modifiersField = Field.class.getDeclaredField("modifiers");
 				modifiersField.setAccessible(true);
-			    modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+				modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

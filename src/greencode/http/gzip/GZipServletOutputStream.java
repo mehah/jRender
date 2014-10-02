@@ -10,7 +10,7 @@ import javax.servlet.ServletOutputStream;
  * Reference: http://tutorials.jenkov.com/java-servlets/gzip-servlet-filter.html
  */
 class GZipServletOutputStream extends ServletOutputStream {
-	private GZIPOutputStream    gzipOutputStream = null;
+	private GZIPOutputStream gzipOutputStream = null;
 	
 	public GZipServletOutputStream(OutputStream output) throws IOException {
 		super();

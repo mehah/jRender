@@ -23,7 +23,7 @@ import greencode.kernel.serialization.DOMDeserializer;
 import greencode.kernel.serialization.DOMSerializer;
 
 public final class GreenContext {
-	final static ThreadLocal<GreenContext> greenContext = new ThreadLocal<GreenContext>();
+	private final static ThreadLocal<GreenContext> greenContext = new ThreadLocal<GreenContext>();
 		
 	public static BootActionImplementation getBootAction() { return Cache.bootAction; }
 	public static GreenContext getInstance() { return greenContext.get(); }
@@ -33,7 +33,7 @@ public final class GreenContext {
 	final JsonArray errors = new JsonArray();
 	final HttpRequest request;
 	final HttpServletResponse response;
-	final public Gson gsonInstance;
+	final public Gson gsonInstance = getGsonInstance();
 	final greencode.jscript.window.annotation.Page currentPageAnnotation;
 	
 	boolean forceSynchronization = false;
@@ -67,20 +67,16 @@ public final class GreenContext {
 		
 		Locale locale = (Locale) request.getSession().getAttribute("USER_LOCALE");
 		
-		if(locale != null)
-		{
+		if(locale != null) {
 			this.userLocale = locale;
 			this.currentMessagePropertie = (Properties) request.getSession().getAttribute("CURRENT_MESSAGE_PROPERTIE");
-			if(!getRequest().isAjax())
+			if(!this.request.isAjax())
 				userLocaleChanged = true;	
-		}else
-		{
+		} else {
 			locale = Locale.getDefault();
 			if(Message.properties.containsKey(locale.toString()))
 				setUserLocale(locale);
 		}
-		
-		this.gsonInstance = getGsonInstance();
 	}
 	
 	public HttpServletResponse getResponse() { exceptionCheck(); return response; }
@@ -99,20 +95,17 @@ public final class GreenContext {
 	}
 	
 	private Gson getGsonInstance() {
-		GsonBuilder instance = new GsonBuilder();
-		instance.serializeNulls();
-		instance.registerTypeHierarchyAdapter(DOM.class, new DOMSerializer());
-		instance.registerTypeHierarchyAdapter(DOM.class, new DOMDeserializer(this));		
+		GsonBuilder instance = new GsonBuilder()
+			.serializeNulls()
+			.registerTypeHierarchyAdapter(DOM.class, new DOMSerializer())
+			.registerTypeHierarchyAdapter(DOM.class, new DOMDeserializer(this));
+
 		return instance.create();
 	}
 	
 	public DatabaseConnection getDatabaseConnection() {
-		exceptionCheck();	
-		
-		if(this.databaseConnection == null)
-			this.databaseConnection = new DatabaseConnection();
-		
-		return this.databaseConnection;
+		exceptionCheck();		
+		return this.databaseConnection == null ? this.databaseConnection = new DatabaseConnection() : this.databaseConnection;
 	}
 	
 	public void forceSync(boolean force) {
@@ -149,12 +142,13 @@ public final class GreenContext {
 	}
 	
 	void destroy() {
-		if(this.databaseConnection != null)
+		if(this.databaseConnection != null) {
 			this.databaseConnection.close();
+			this.databaseConnection = null;
+		}
 		
 		this.currentMessagePropertie = null;
 		this.currentWindow = null;
-		this.databaseConnection = null;
 		this.requestedForm = null;
 		this.userLocale = null;
 		this.listAttrSync = null;

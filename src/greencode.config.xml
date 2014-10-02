@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE greencode SYSTEM "greencode.dtd">
-<greencode-cofig>
+<greencode-config>
 	<console writeLog="true" />	
+	<consoleBrowser writeLog="false" />	
+	
 	<multipart autodectetion="false" max-request-size="-1" />
 	
 	<!-- Contem problemas -->
@@ -30,7 +32,11 @@
 		</drivers>
 	</database>
 	<internationalization>
-		 <locale language="pt" country="BR" file="msg_pt-BR.properties" charset="utf-8"/>
+		<locale language="pt" country="BR" file="msg_pt-BR.properties" charset="utf-8"/>
 		<locale language="en" country="US" file="msg_en-US.properties" charset="utf-8"/> 
-	</internationalization>	-->
-</greencode-cofig>
+	</internationalization>
+	<plugins>
+		<plugin class="greencode.sengi.Core" /> 
+	</plugins>
+	-->
+</greencode-config>

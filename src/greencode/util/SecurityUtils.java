@@ -16,18 +16,18 @@ public final class SecurityUtils {
 	}
 	
 	public final static byte[] generateHash(String text, TYPE type) throws NoSuchAlgorithmException {
-	    MessageDigest md = MessageDigest.getInstance(type.type);
-	    md.update(text.getBytes());
-	    return md.digest();
+		MessageDigest md = MessageDigest.getInstance(type.type);
+		md.update(text.getBytes());
+		return md.digest();
 	}
 	
 	public final static String generateString(String text, TYPE type) {
-	    try {
+		try {
 			return new BigInteger(1, SecurityUtils.generateHash(text, type)).toString(16);
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
-	    
-	    return null;
+		
+		return null;
 	}	
 }

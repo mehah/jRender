@@ -340,7 +340,7 @@ public final class Page {
 					final Method[] methods = GenericReflection.getDeclaredMethods(c);								
 					for (Method method : methods) {
 						if(!method.getName().equals("init") && method.getParameterTypes().length == 0) {
-							FunctionHandle func = new FunctionHandle(c, method.getName());						
+							FunctionHandle func = new FunctionHandle(c, method.getName());
 							methodsJS.append("var ")
 								.append(method.getName()).append("=function() {var param =").append(new Gson().toJson(func))
 								.append(";param.viewId = __viewId;param.cid = __cid;param.url = CONTEXT_PATH+param.url;Bootstrap.callRequestMethod(principalElement, {}, {event: 'undefined'}, param, []);};");

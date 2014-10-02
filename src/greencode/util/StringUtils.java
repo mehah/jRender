@@ -44,14 +44,14 @@ public final class StringUtils {
 	 * <p>A {@code null} reference passed to this method is a no-op.</p>
 	 *
 	 * <pre>
-	 * StringUtils.replace(null, *, *)		= null
-	 * StringUtils.replace("", *, *)		  = ""
-	 * StringUtils.replace("any", null, *)	= "any"
-	 * StringUtils.replace("any", *, null)	= "any"
-	 * StringUtils.replace("any", "", *)	  = "any"
-	 * StringUtils.replace("aba", "a", null)  = "aba"
-	 * StringUtils.replace("aba", "a", "")	= "b"
-	 * StringUtils.replace("aba", "a", "z")   = "zbz"
+	 * StringUtils.replace(null, *, *)			= null
+	 * StringUtils.replace("", *, *)			= ""
+	 * StringUtils.replace("any", null, *)		= "any"
+	 * StringUtils.replace("any", *, null)		= "any"
+	 * StringUtils.replace("any", "", *)		= "any"
+	 * StringUtils.replace("aba", "a", null)	= "aba"
+	 * StringUtils.replace("aba", "a", "")		= "b"
+	 * StringUtils.replace("aba", "a", "z")		= "zbz"
 	 * </pre>
 	 *
 	 * @see #replace(String text, String searchString, String replacement, int max)
@@ -244,12 +244,12 @@ public final class StringUtils {
 	 *
 	 * <pre>
 	 * StringUtils.join(null, *)				= null
-	 * StringUtils.join([], *)				  = ""
-	 * StringUtils.join([null], *)			  = ""
-	 * StringUtils.join(["a", "b", "c"], "--")  = "a--b--c"
-	 * StringUtils.join(["a", "b", "c"], null)  = "abc"
+	 * StringUtils.join([], *)					= ""
+	 * StringUtils.join([null], *)				= ""
+	 * StringUtils.join(["a", "b", "c"], "--")	= "a--b--c"
+	 * StringUtils.join(["a", "b", "c"], null)	= "abc"
 	 * StringUtils.join(["a", "b", "c"], "")	= "abc"
-	 * StringUtils.join([null, "", "a"], ',')   = ",,a"
+	 * StringUtils.join([null, "", "a"], ',')	= ",,a"
 	 * </pre>
 	 *
 	 * @param array  the array of values to join together, may be null

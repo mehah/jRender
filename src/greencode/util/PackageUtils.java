@@ -15,17 +15,17 @@ public final class PackageUtils {
 	private PackageUtils(){}
 	
 	/* Based LINK: http://snippets.dzone.com/posts/show/4831  */
-	public static File getPackageFolder(String packageName) throws IOException {        
-       return getPackageFolder(packageName, Thread.currentThread().getContextClassLoader());
+	public static File getPackageFolder(String packageName) throws IOException {		
+		return getPackageFolder(packageName, Thread.currentThread().getContextClassLoader());
 	}
 	
-	private static File getPackageFolder(String packageName, ClassLoader classLoader) throws IOException {        
-        Enumeration<URL> resources = classLoader.getResources(packageName.replace('.', '/'));
-        	        
-        if(resources.hasMoreElements())
-        	return new File(resources.nextElement().getFile());
-        
-       return null;
+	private static File getPackageFolder(String packageName, ClassLoader classLoader) throws IOException {		
+		Enumeration<URL> resources = classLoader.getResources(packageName.replace('.', '/'));
+					
+		if(resources.hasMoreElements())
+			return new File(resources.nextElement().getFile());
+		
+		return null;
 	}
 	
 	public static List<File> getFilesByPackgeName(String packageName) throws IOException

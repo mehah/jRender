@@ -1,5 +1,5 @@
-var DEBUG_MODE = false,
-	internationalization_msg = {},
+
+var internationalization_msg = {},
 	Bootstrap = {},
 	__isFirefox = window.mozInnerScreenX != null,
 	__isIE8orLess = document.addEventListener == null;
@@ -29,8 +29,7 @@ Bootstrap.analizeJSON = function(mainElement, j, target) {
 	});
 };
 
-Bootstrap.analizeParameters = function(parameters, variableName, mainElement)
-{
+Bootstrap.analizeParameters = function(parameters, variableName, mainElement) {
 	var methodParameters = "";
 	if(parameters != null) {
 		for(var i in parameters) {		

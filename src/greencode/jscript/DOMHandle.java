@@ -1,6 +1,5 @@
 package greencode.jscript;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -22,6 +21,7 @@ public final class DOMHandle {
 	private DOMHandle() {}
 	
 	public static Integer getUID(DOM d) { return d.uid; }
+	public static Window getWindow(DOM d) { return d.window; }
 	
 	public static void replaceReference(DOM dom, DOM newDom) {
 		dom.uid = newDom.uid;
@@ -118,10 +118,9 @@ public final class DOMHandle {
 		if(greencode.kernel.$GreenContext.forceSynchronization(context)) {			
 			String[] listAttrSync = greencode.kernel.$GreenContext.listAttrSync(context);
 			
-			HashSet<String> listAttrSyncCache = greencode.kernel.$GreenContext.listAttrSyncCache(context);
-			final boolean hasListAttrSyncCache = listAttrSyncCache != null;
-			
 			if(listAttrSync != null) {
+				HashSet<String> listAttrSyncCache = greencode.kernel.$GreenContext.listAttrSyncCache(context);
+				final boolean hasListAttrSyncCache = listAttrSyncCache != null;
 				if(listAttrSync.length > 0) {
 					sync = false;
 					if(!hasListAttrSyncCache || !listAttrSyncCache.contains(_name)) {
@@ -135,8 +134,7 @@ public final class DOMHandle {
 						}
 					}
 				}else if(hasListAttrSyncCache) {
-					sync = !listAttrSyncCache.contains(_name);
-					if(sync)
+					if(sync = !listAttrSyncCache.contains(_name))
 						listAttrSyncCache.add(_name);
 				}
 			}

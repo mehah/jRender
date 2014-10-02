@@ -6,7 +6,17 @@ import greencode.kernel.LogMessage;
 import greencode.util.GenericReflection;
 
 public final class ElementHandle {
-	public static Element getInstance(Window window) { return new Element(window); }
+	public static Element getInstance(Window window) { return new Element(window); }	
+	
+	public static void dataTransfer(Element of, Element to) {
+		String type = DOMHandle.containVariableKey(to, "type") ? DOMHandle.getVariableValue(to, "type", String.class) : null;
+		
+		greencode.jscript.$DOMHandle.setUID(to, DOMHandle.getUID(of));
+		greencode.jscript.$DOMHandle.setVariables(to, greencode.jscript.$DOMHandle.getVariables(of));
+		
+		if(type != null)
+			DOMHandle.setVariableValue(to, "type", type);
+	}
 	
 	public static<E extends Element> E cast(Element element, Class<E> castTo) {
 		try {
@@ -15,13 +25,7 @@ public final class ElementHandle {
 			
 			E e = GenericReflection.NoThrow.getDeclaredConstrutor(castTo, Window.class).newInstance(element.window);
 		
-			String type = DOMHandle.containVariableKey(e, "type") ? DOMHandle.getVariableValue(e, "type", String.class) : null;
-			
-			greencode.jscript.$DOMHandle.setUID(e, DOMHandle.getUID(element));
-			greencode.jscript.$DOMHandle.setVariables(e, greencode.jscript.$DOMHandle.getVariables(element));
-			
-			if(type != null)
-				DOMHandle.setVariableValue(e, "type", type);
+			dataTransfer(element, e);
 			
 			return e;
 		} catch (Exception e1) {
@@ -31,5 +35,11 @@ public final class ElementHandle {
 	
 	public static void empty(Element e) {
 		DOMHandle.execCommand(e, "customMethod.empty");
+	}
+	
+	public static Element getOrCreateElementByTagName(Element owner, String tagName) {
+		Element e = new Element(owner.window);		
+		DOMHandle.registerElementByCommand(owner, e, "customMethod.getOrCreateElementByTagName", tagName);		
+		return e;
 	}
 }

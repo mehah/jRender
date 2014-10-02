@@ -26,7 +26,7 @@ import greencode.util.GenericReflection;
 public final class FunctionHandle {
 	private final transient GreenContext context = GreenContext.getInstance();
 	
-	private Integer
+	private final Integer
 		viewId = context == null ? null : context.getRequest().getViewSession().getId(),
 		   cid = context == null ? null : context.getRequest().getConversationId();
 		

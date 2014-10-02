@@ -89,14 +89,6 @@ Greencode.customMethod = {
 		delete cometReceber;
 		cometReceber = null;
 	},
-	selectOptionByValue: function(v) {
-		Greencode.crossbrowser.querySelector.call(this, 'option[value="'+v+'"]').selected = true;
-		return this;
-	},
-	selectOptionByText: function(t) {
-		Greencode.crossbrowser.querySelector.call(this, 'option:contains("'+t+'")"').selected = true;
-		return this;
-	},
 	resetForm: function() {
 		try {
 			this.reset();
@@ -111,6 +103,10 @@ Greencode.customMethod = {
 			--ii;
 		}		
 		return this;
+	},
+	getOrCreateElementByTagName: function(tagName) {
+		var list = this.getElementsByTagName(tagName);						
+		return list.length == 0 ? table.appendChild(document.createElement(tagName)) : list[0];
 	}
 };
 
@@ -123,12 +119,12 @@ Greencode.customEvent.scrollreachpercent = {
 			data: {}
 		};
 		
-		handleObj.data.percent = parseInt(data);				
+		handleObj.data.percent = parseInt(data);
 		handleObj.data.beginDown = handleObj.lastCcrollPercent > handleObj.data.percent;
 		handleObj.data.beginUp = handleObj.lastCcrollPercent < handleObj.data.percent;
 		
 		Greencode.crossbrowser.registerEvent.call(this, 'scroll', function(event) {
-			Greencode.customEvent.scrollreachpercent.handle.call(this, callback, event, handleObj);				
+			Greencode.customEvent.scrollreachpercent.handle.call(this, callback, event, handleObj);
 		});
 	},
 	remove: function() {

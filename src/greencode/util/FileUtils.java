@@ -79,19 +79,19 @@ public final class FileUtils {
 	
 	public final static void copyTo(Part part, String folder) throws IOException {
 		OutputStream out = null;
-	    InputStream filecontent = null;
-	    try {
-	        out = new FileOutputStream(new File(folder));
-	        filecontent = part.getInputStream();
+		InputStream filecontent = null;
+		try {
+			out = new FileOutputStream(new File(folder));
+			filecontent = part.getInputStream();
 
-	        int read = 0;
-	        final byte[] bytes = new byte[1024];
-	        while ((read = filecontent.read(bytes)) != -1)
-	            out.write(bytes, 0, read);
-	    } finally {
-	        if (out != null) out.close();
-	        if (filecontent != null) filecontent.close();
-	    }
+			int read = 0;
+			final byte[] bytes = new byte[1024];
+			while ((read = filecontent.read(bytes)) != -1)
+				out.write(bytes, 0, read);
+		} finally {
+			if (out != null) out.close();
+			if (filecontent != null) filecontent.close();
+		}
 	}
 	
 	public final static void createFile(String content, File file) throws IOException {

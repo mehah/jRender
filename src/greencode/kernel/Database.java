@@ -21,7 +21,6 @@ class Database {
 			config.setUserName(cA.userName().isEmpty() ? defaultConfig.getUserName() : cA.userName());
 		}
 		
-		context.getDatabaseConnection().setConfig(config);		
-		context.getDatabaseConnection().start();
+		context.getDatabaseConnection().setConfig(config).start();
 	}
 }

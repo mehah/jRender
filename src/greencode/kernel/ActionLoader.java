@@ -33,26 +33,22 @@ final class ActionLoader {
 	
 	private ActionLoader() {}
 	
-	static void process(final GreenContext context, final HttpAction controller, Method requestMethod) throws UnsupportedEncodingException, IllegalArgumentException, IllegalAccessException, SecurityException, InvocationTargetException, NoSuchMethodException
-	{
+	static void process(final GreenContext context, final HttpAction controller, Method requestMethod) throws UnsupportedEncodingException, IllegalArgumentException, IllegalAccessException, SecurityException, InvocationTargetException, NoSuchMethodException {
 		Field[] fields = GenericReflection.getDeclaredFieldsByConditionId(controller.getClass(), "httpAction:annotations");
 				
 		if(fields == null)
 			fields = GenericReflection.getDeclaredFieldsByCondition(controller.getClass(), "httpAction:annotations", conditionAnnotationField, true);
 		
-		for (Field f : fields)
-		{
+		for (Field f : fields) {
 			Class<?> fieldType = f.getType();
-			if(f.isAnnotationPresent(In.class))
-			{				
+			if(f.isAnnotationPresent(In.class)) {				
 				In in = f.getAnnotation(In.class);
 				
 				final boolean isDiffConversation = in.conversationId() != Conversation.CURRENT && in.conversationId() != context.getRequest().getConversationId();
 				
 				Conversation conversation = isDiffConversation ? greencode.http.$Conversation.getInstance(context.getRequest(), in.conversationId()) : context.getRequest().getConversation();				
 				
-				if(ClassUtils.isParent(fieldType, Window.class))
-				{	
+				if(ClassUtils.isParent(fieldType, Window.class)) {	
 					f.set(controller, in.create() ?
 							WindowHandle.getInstance((Class<Window>)fieldType, conversation)
 						:
@@ -61,16 +57,14 @@ final class ActionLoader {
 				}
 			}else if(f.isAnnotationPresent(RequestParameter.class))
 			{
-				if(ClassUtils.isPrimitiveOrWrapper(fieldType))
-				{
+				if(ClassUtils.isPrimitiveOrWrapper(fieldType)) {
 					String parametro = ((RequestParameter)f.getAnnotation(RequestParameter.class)).value();
 					
 					if(parametro.isEmpty())
 						parametro = f.getName();
 					
 					Object value = context.request.getParameter(parametro);
-					if(value != null)
-					{
+					if(value != null) {
 						value = fieldType.equals(String.class) ? StringUtils.toCharset((String) value, GreenCodeConfig.View.charset)
 							  : GenericReflection.getDeclaredMethod(ClassUtils.toWrapperClass(fieldType), "valueOf", String.class).invoke(null, context.request.getParameter(parametro));
 						f.set(controller, value);
@@ -94,16 +88,17 @@ final class ActionLoader {
 			greencode.kernel.Validate.validate(context, requestMethod, context.requestedForm);
 	}
 	
-	public static DatabaseConnectionEvent connection(GreenContext context, Method requestMethod) throws SQLException, InstantiationException, IllegalAccessException
-	{
+	public static DatabaseConnectionEvent connection(GreenContext context, Method requestMethod) throws SQLException, InstantiationException, IllegalAccessException {
 		DatabaseConnectionEvent databaseConnectionEvent = null;
 		if(requestMethod.isAnnotationPresent(Connection.class)) {
 			Connection cA = requestMethod.getAnnotation(Connection.class);
-			if(Cache.classDatabaseConnectionEvent != null) {
+			if(Cache.classDatabaseConnectionEvent == null)
+				Database.startConnection(context, cA);
+			else {
 				databaseConnectionEvent = (DatabaseConnectionEvent) Cache.classDatabaseConnectionEvent.newInstance();
 				databaseConnectionEvent.beforeRequest(cA);
-			} else
-				Database.startConnection(context, cA);
+			}
+				
 		}
 		
 		return databaseConnectionEvent;

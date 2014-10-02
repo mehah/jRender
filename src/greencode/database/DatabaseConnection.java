@@ -124,5 +124,5 @@ public final class DatabaseConnection {
 	{return addPreparedStatements(new DatabasePreparedStatement(getConnection().prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability)));}
 
 	public DatabaseConfig getConfig() {return config;}
-	public void setConfig(DatabaseConfig config) {this.config = config;}
+	public DatabaseConnection setConfig(DatabaseConfig config) { this.config = config; return this; }
 }
