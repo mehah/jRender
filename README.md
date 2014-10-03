@@ -5,5 +5,5 @@ Framework that works similar to desktop apps event oriented, like java swing. Th
 
 Examples:  
 - [Basic](/samples/basic.md)  
-- [Form](/samples/Form.md)  
-- [Comet](/samples/Comet.md)
+- [Form](/samples/form.md)  
+- [Comet](/samples/comet.md)
