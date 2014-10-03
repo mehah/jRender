@@ -10,11 +10,11 @@ Html: index.html
 ```html
 <html>
   <head>
-  <meta charset="ISO-8859-1">
+  <meta charset="UTF-8">
     <title>Sample</title>
   </head>
   <body>
-  	<input type="text" name="nome" id="nome" />
+  	<input type="text" name="name" id="name" />
   </body>
 </html>
 ````
@@ -24,12 +24,16 @@ Java: IndexController.java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 
-	private InputTextElement inputElement = InputTextElement.cast(document.getElementById("nome"));
+	private InputTextElement inputElement = InputTextElement.cast(document.getElementById("name"));
 	
 	public void init() {
+		// Register Event
 		inputElement.addEventListener(Events.KEY_UP, new FunctionHandle("onKeyup"));
 		
+		// Creating Div Element
 		final DivElement div = document.createElement(DivElement.class);
+		
+		// Append div on Body
 		document.body.appendChild(div);
 		
 		// Sample: Comet System - With Anonymous Classes
@@ -39,7 +43,7 @@ public class IndexController extends Window {
 			public void init() {
 				while(true) {					
 					try {
-						div.textContent(++i+"");
+						div.textContent(++i+""); // Set Text Content
 						flush(); // Flushing
 						
 						Thread.sleep(1000);
@@ -53,33 +57,44 @@ public class IndexController extends Window {
 		}, 0);
 		
 		// Sample 2: Comet System - Calling Method
+		// http://en.wikipedia.org/wiki/Comet_(programming)
 		setTimeout(new FunctionHandle("autoChangeColor"), 0);
 	}
 
 	@ForceSync(value="value", onlyOnce=true)
 	public void onKeyup() {
+		// Get and print Input(Name) Value
 		System.out.println(inputElement.value());
 	}
 	
 	private final String[] colors = new String[]{"red", "blue", "green"};
 	private int i = -1;
 	public void autoChangeColor() {
-		final DivElement div = document.createElement(DivElement.class);		
-		document.body.appendChild(div);		
+	
+		// Creating Element
+		final DivElement div = document.createElement(DivElement.class);
+		
+		// Append div on Body
+		document.body.appendChild(div);
+		
+		// Set Text Content
 		div.textContent("Auto Change Color");
 		
-		while(true)  {			
-			try {
-				div.style("color", colors[++i]);
-				if(colors.length-1 == i)
-					i = -1;
-				
-				flush();
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		try {
+			while(true)  {			
+				try {
+					div.style("color", colors[++i]);
+					if(colors.length-1 == i)
+						i = -1;
+					
+					flush();
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					throw new RuntimeException(e);
+				}
 			}
+		} catch(ConnectionLost e) {
+			// On Connection Lost
 		}
 	}
 }
