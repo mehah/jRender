@@ -26,12 +26,14 @@ public class IndexController extends Window {
         setTimeout(new SimpleFunction() {			
 			private int i = -1;
             public void init() {
+			
+				//Loop to keep the conection and releasing the mods when necessary, using flushing method
                 while(true) {                   
                     try {
                         div.textContent(++i+""); // Set Text Content
                         flush(); // Flushing
 
-                        Thread.sleep(1000);
+                        Thread.sleep(1000); // Sleep 1 Second
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     } catch (ConnectionLost e) {
@@ -61,14 +63,15 @@ public class IndexController extends Window {
         div.textContent("Auto Change Color");
 
         try {
+			//Loop to keep the conection and releasing the mods when necessary, using flushing method
             while(true)  {          
                 try {
-                    div.style("color", colors[++i]);
+                    div.style("color", colors[++i]); // Change Text Color
                     if(colors.length-1 == i)
-                        i = -1;
+                        i = -1; // Reset Variable to -1
 
-                    flush();
-                    Thread.sleep(200);
+                    flush();  // Flushing
+                    Thread.sleep(200); // Sleep 200ms
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }

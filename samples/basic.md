@@ -24,7 +24,7 @@ public class IndexController extends Window {
 		inputElement.addEventListener(Events.KEY_UP, new FunctionHandle("onKeyup"));
 	}
 
-	@ForceSync(value="value", onlyOnce=true)
+	@ForceSync(value="value")
 	public void onKeyup() {
 		// Get and print Input(Name) Value
 		System.out.println(inputElement.value());
