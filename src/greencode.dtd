@@ -1,11 +1,11 @@
 <!-- Greencode DTD -->
 
-<!ELEMENT greencode-config (console, consoleBrowser, multipart, response, view, anti-flood, database?, internationalization?)>
+<!ELEMENT greencode-config (console, browser, multipart, response, view, anti-flood, database?, internationalization?)>
 <!ELEMENT console EMPTY>
 	<!ATTLIST console writeLog ( true | false ) "true" >
 	
-<!ELEMENT consoleBrowser EMPTY>
-	<!ATTLIST consoleBrowser writeLog ( true | false ) "true" >
+<!ELEMENT browser EMPTY>
+	<!ATTLIST browser consoleDebug ( true | false ) "true" >
 	
 <!ELEMENT multipart EMPTY>
 	<!ATTLIST multipart autodectetion ( true | false ) "false" >

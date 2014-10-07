@@ -2,7 +2,7 @@
 <!DOCTYPE greencode SYSTEM "greencode.dtd">
 <greencode-config>
 	<console writeLog="true" />	
-	<consoleBrowser writeLog="false" />	
+	<browser consoleDebug="false" />	
 	
 	<multipart autodectetion="false" max-request-size="-1" />
 	

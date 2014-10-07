@@ -85,6 +85,10 @@ public class Document extends Node {
 		return e;
 	}
 	
+	public<E extends Element> E getElementById(String id, Class<E> cast) {		
+		return ElementHandle.cast(getElementById(id), cast);
+	}
+	
 	public Element[] getElementsByName(String tagName)
 	{ return getElementsBy("getElementsByName.length", "getElementsByName", tagName); }
 	

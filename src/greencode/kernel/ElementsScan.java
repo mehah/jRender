@@ -8,8 +8,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.JsonObject;
+
 public class ElementsScan {
 	private final List<JSCommand> comm = new ArrayList<JSCommand>(); /* commands */
+	private JsonObject sync;
 	Integer[] args;
 	
 	private ElementsScan() {}
@@ -26,13 +29,22 @@ public class ElementsScan {
 		getElements(greencode.jscript.$DOMHandle.getViewSession(e)).comm.add(new JSCommand(e, name, args));
 	}
 	
+	static void setSync(GreenContext context, int uid, String varName, JSCommand jsCommand) {
+		JsonObject json = new JsonObject();
+		json.addProperty("uid", uid);
+		json.addProperty("varName", varName);
+		json.add("command", context.gsonInstance.toJsonTree(jsCommand));
+		getElements(context.getRequest().getViewSession()).sync = json;
+	}
+	
 	public static void sendElements(GreenContext context) throws IOException {
 		ElementsScan elements = ElementsScan.getElements(context.getRequest().getViewSession());
 		
-		if(elements.comm.size() > 0 || elements.args != null) {
+		if(elements.comm.size() > 0 || elements.args != null || elements.sync != null) {
 			send(context, elements);		
 			elements.comm.clear();
 			elements.args = null;
+			elements.sync = null;
 		}
 	}
 	

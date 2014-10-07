@@ -82,20 +82,10 @@ public final class DOMHandle {
 				methodOrPropName = '#'+methodOrPropName;		
 			
 			JSCommand jsCommand = new JSCommand(owner, methodOrPropName, parameters);
-
-			JsonObject json = new JsonObject();
-			json.addProperty("uid", owner.uid);
-			json.addProperty("varName", varName);
-			json.add("command", context.gsonInstance.toJsonTree(jsCommand));
-			JsonObject j = new JsonObject();						
-			j.add("sync", json);
 			
-			try {				
-				owner.flush(false);
-				
-				greencode.kernel.$ElementsScan.send(context, j);
-				
-				context.getResponse().flushBuffer();
+			try {
+				greencode.kernel.$ElementsScan.setSync(context, owner.uid, varName, jsCommand);
+				owner.flush();
 				
 				getDOMSync(owner.viewSession).put(owner.uid, owner);
 				
@@ -114,8 +104,9 @@ public final class DOMHandle {
 	private static<C> C getVariableValue(DOM owner, String varName, Class<C> cast, boolean isMethod, final String _name, Object... parameters) {
 		GreenContext context = GreenContext.getInstance();
 		
-		boolean sync = true;		
-		if(greencode.kernel.$GreenContext.forceSynchronization(context)) {			
+		boolean sync = false;		
+		if(greencode.kernel.$GreenContext.forceSynchronization(context)) {
+			sync = true;
 			String[] listAttrSync = greencode.kernel.$GreenContext.listAttrSync(context);
 			
 			if(listAttrSync != null) {

@@ -47,9 +47,9 @@ public final class GreenCodeConfig {
 			if(!listCurrentElement.isEmpty())
 				GenericReflection.NoThrow.setFinalStaticValue(Console.class, "writeLog", Boolean.parseBoolean(listCurrentElement.get(0).attr("writeLog").trim()));
 			
-			listCurrentElement = greencodeCofig.getElementsByTag("consoleBrowser");
+			listCurrentElement = greencodeCofig.getElementsByTag("browser");
 			if(!listCurrentElement.isEmpty())
-				GenericReflection.NoThrow.setFinalStaticValue(ConsoleBrowser.class, "writeLog", Boolean.parseBoolean(listCurrentElement.get(0).attr("writeLog").trim()));
+				GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "consoleDebug", Boolean.parseBoolean(listCurrentElement.get(0).attr("consoleDebug").trim()));
 			
 			listCurrentElement = greencodeCofig.getElementsByTag("multipart");
 			if(!listCurrentElement.isEmpty()) {
@@ -139,8 +139,8 @@ public final class GreenCodeConfig {
 		public final static Boolean writeLog = true;
 	}
 	
-	public final static class ConsoleBrowser {
-		public final static Boolean writeLog = false;
+	public final static class Browser {
+		public final static Boolean consoleDebug = false;
 	}
 	
 	public final static class Multipart {
@@ -184,7 +184,7 @@ public final class GreenCodeConfig {
 					if(databaseConfigXml == null)
 						throw new IOException("Could not find the configuration file database called '"+path+"'.");
 					
-					src = Jsoup.parse(new File(databaseConfigXml.getPath()), "utf-8");
+					src = Jsoup.parse(new File(databaseConfigXml.getPath()), GreenCodeConfig.DEFAULT_CHARSET);
 					
 					List<Element> listCurrentElement = src.getElementsByTag("database-config");
 					if(!listCurrentElement.isEmpty()) {

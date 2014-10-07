@@ -21,7 +21,7 @@ import greencode.jscript.window.annotation.AfterAction;
 import greencode.jscript.window.annotation.BeforeAction;
 import greencode.jscript.window.annotation.ForceSync;
 import greencode.jscript.window.annotation.PageParameter;
-import greencode.kernel.GreenCodeConfig.ConsoleBrowser;
+import greencode.kernel.GreenCodeConfig.Browser;
 import greencode.kernel.GreenCodeConfig.Internationalization;
 import greencode.kernel.GreenCodeConfig.Internationalization.Variant;
 import greencode.kernel.implementation.BootActionImplementation;
@@ -417,7 +417,9 @@ public final class Core implements Filter {
 				databaseConnectionEvent.onSuccess();
 		} catch (StopProcess e) {
 		} catch (Exception e) {
-			Console.error(e.getCause() == null ? e : e.getCause());
+			try {
+				Console.error(e.getCause() == null ? e : e.getCause());
+			} catch (StopProcess e2) {}
 			
 			JsonObject json = new JsonObject();
 			json.add("errors", context.errors);
@@ -511,7 +513,7 @@ public final class Core implements Filter {
 			if(!greencodeFolder.exists())
 				greencodeFolder.mkdir();
 			
-			StringBuilder greencodeCore = new StringBuilder("var CONTEXT_PATH = '"+fConfig.getServletContext().getContextPath()+"', DEBUG_MODE = "+ConsoleBrowser.writeLog+";");
+			StringBuilder greencodeCore = new StringBuilder("var CONTEXT_PATH = '"+fConfig.getServletContext().getContextPath()+"', DEBUG_MODE = "+Browser.consoleDebug+";");
 			
 			final String greencodePath = greencodeFolder.getPath();
 			

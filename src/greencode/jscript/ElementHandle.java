@@ -1,5 +1,6 @@
 package greencode.jscript;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
 
 import greencode.kernel.LogMessage;
@@ -31,6 +32,16 @@ public final class ElementHandle {
 		} catch (Exception e1) {
 			throw new RuntimeException(e1);
 		}		
+	}
+	
+	public static<E extends Element> E[] cast(Element[] elements, Class<E> castTo) {
+		@SuppressWarnings("unchecked")
+		E[] list = (E[]) Array.newInstance(castTo, elements.length);
+		
+		for (int i = -1; ++i < elements.length;)
+			list[i] = cast(elements[i], castTo);
+		
+		return list;
 	}
 	
 	public static void empty(Element e) {
