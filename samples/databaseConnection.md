@@ -97,7 +97,7 @@ XML: Add in greencode.config.xml
 	</database>
 ```
 
-XML: src/greencode.config.xml
+XML: src/database.config.xml
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
