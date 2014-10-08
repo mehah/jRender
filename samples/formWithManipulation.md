@@ -47,7 +47,6 @@ public class IndexController extends Window {
     	checkboxAllOptions.addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {			
     		@ForceSync("checked")
 			public void init() {
-    			System.out.println(checkboxAllOptions.checked());
     			for (InputCheckboxElement inputCheckboxElement : countries) {
     				inputCheckboxElement.checked(checkboxAllOptions.checked());
 				}

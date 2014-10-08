@@ -12,9 +12,11 @@ Requirements
 
 Examples:  
 - [Basic](/samples/basic.md)  
-- [Form Basic](/samples/formBasic.md)  
-- [Form Basic With outside Button](/samples/formBasicWithOutsideButton.md)  
+- [Basic Form ](/samples/formBasic.md)  
+- [Basic Form With outside Button](/samples/formBasicWithOutsideButton.md)  
 - [Form Validation](/samples/formValidation.md)  
 - [Form With Data Manipulation](/samples/formWithManipulation.md)  
 - [Comet](/samples/comet.md)  
 - [Internationalization](/samples/internationalization.md)  
+- [Database Connection with MYSQL](/samples/databaseConnection.md)  
+- [Database Connection with MYSQL/Hibernate](/samples/customDatabaseConnectionHibernate.md)  
