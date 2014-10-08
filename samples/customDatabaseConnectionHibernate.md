@@ -2,20 +2,19 @@ Requirements:
 - [MYSQL JDBC](http://dev.mysql.com/get/Downloads/Connector-J/mysql-connector-java-5.1.33.tar.gz)  
   
 - [[Hibernate](http://hibernate.org/)]  
-```
-Libs:  
-- antlr-2.7.7.jar  
-- c3p0-0.9.2.1.jar  
-- dom4j-1.6.1.jar  
-- hibernate-c3p0-4.2.7.SP1.jar  
-- hibernate-commons-annotations-4.0.2.Final.jar  
-- hibernate-core-4.2.2.Final.jar  
-- hibernate-jpa-2.0-api-1.0.1.Final.jar  
-- javassist-3.15.0-GA.jar  
-- jboss-logging-3.1.0.GA.jar  
-- jboss-transaction-api_1.1_spec-1.0.1.Final.jar  
-- mchange-commons-java-0.2.3.4.jar  
-```
+	Libs:  
+	- antlr-2.7.7.jar  
+	- c3p0-0.9.2.1.jar  
+	- dom4j-1.6.1.jar  
+	- hibernate-c3p0-4.2.7.SP1.jar  
+	- hibernate-commons-annotations-4.0.2.Final.jar  
+	- hibernate-core-4.2.2.Final.jar  
+	- hibernate-jpa-2.0-api-1.0.1.Final.jar  
+	- javassist-3.15.0-GA.jar  
+	- jboss-logging-3.1.0.GA.jar  
+	- jboss-transaction-api_1.1_spec-1.0.1.Final.jar  
+	- mchange-commons-java-0.2.3.4.jar  
+
 Html: index.html
 
 ```html
