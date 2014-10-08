@@ -1,0 +1,57 @@
+Html: index.html
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Form</title>
+	<style>
+		li {list-style-type: none;}
+	</style>
+</head>
+<body>
+	<div>Teste</div>
+	<div>
+		<button type="button" name="append" id="append">Append</button><button type="button" name="empty" id="empty">Empty</button>
+	</div>
+	<div id="content"></div>
+</body>
+</html>
+````
+Html: newContent.html
+
+```html
+New Content (Any Text)
+````
+
+Java: IndexController.java
+
+```java
+@Page(name="index", path="index.html")
+public class IndexController extends Window {
+	private final Element div = document.getElementById("content");
+	
+    public void init() {
+		document.getElementById("append").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
+			public void init() {
+				div.appendController(AnyController.class);
+			}
+		}));
+		
+		document.getElementById("empty").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
+			public void init() {
+				div.innerHTML("");
+			}
+		}));
+    }
+}
+```
+Java: AnyController.java
+
+```java
+@Page(name="any", path="newContent.html")
+public class AnyController extends Window {	
+    public void init() {}
+}
+```

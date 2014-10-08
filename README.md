@@ -20,3 +20,5 @@ Examples:
 - [Internationalization](/samples/internationalization.md)  
 - [Database Connection with MYSQL](/samples/databaseConnection.md)  
 - [Database Connection with MYSQL/Hibernate](/samples/customDatabaseConnectionHibernate.md)  
+- [Append Controller](/samples/appendController.md)  
+- [Redirect](/samples/redirect.md)  
