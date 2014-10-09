@@ -26,4 +26,4 @@ Examples:
 - [Call Custom Function With Callback](/samples/callCustomFunctionWithCallbackFunction.md)  
 - [Template](/samples/template.md)  
 - [Join Header Files](/samples/joinHeaderFiles.md)  
-- [User Princial/Rules](/samples/userPrincipalRules.md)  
+- [User Principal/Rules](/samples/userPrincipalRules.md)  
