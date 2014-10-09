@@ -27,7 +27,4 @@ Examples:
 - [Template](/samples/template.md)  
 - [Join Header Files](/samples/joinHeaderFiles.md)  
 - [User Principal/Rules](/samples/userPrincipalRules.md)  
-<<<<<<< HEAD
 - [File Upload](/samples/fileUpload.md)  
-=======
->>>>>>> origin/master
