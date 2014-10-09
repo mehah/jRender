@@ -24,7 +24,7 @@ public abstract class Form extends Element {
 		super(context.currentWindow());
 		String name = getClass().getAnnotation(Name.class).value();
 		
-		DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "crossbrowser.querySelector", "form[name=\""+name+"\"]");
+		DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "@crossbrowser.querySelector", "form[name=\""+name+"\"]");
 	}
 	
 	void processAnnotation() {
@@ -95,6 +95,6 @@ public abstract class Form extends Element {
 		return DOMHandle.getVariableValueByProperty(this, "target", String.class, "target");
 	}
 	
-	public void reset() { DOMHandle.execCommand(this, "customMethod.resetForm"); }
+	public void reset() { DOMHandle.execCommand(this, "@customMethod.resetForm"); }
 	public void submit() { DOMHandle.execCommand(this, "submit"); }
 }

@@ -10,17 +10,17 @@ public abstract class EventTarget extends DOM {
 	 * No internet explorer irá usar attachEvent
 	 */
 	public void addEventListener(String eventName, FunctionHandle handle)
-	{ DOMHandle.execCommand(this, "crossbrowser.registerEvent", eventName, handle); }
+	{ DOMHandle.execCommand(this, "@crossbrowser.registerEvent", eventName, handle); }
 	
 	/**
 	 * No internet explorer irá usar fireEvent
 	 */
 	public void dispatchEvent(String eventName)
-	{ DOMHandle.execCommand(this, "crossbrowser.shootEvent", eventName); }
+	{ DOMHandle.execCommand(this, "@crossbrowser.shootEvent", eventName); }
 	
 	/**
 	 * No internet explorer irá usar detachEvent
 	 */
 	public void removeEventListener(String eventName, FunctionHandle handle)
-	{ DOMHandle.execCommand(this, "crossbrowser.removeEvent", eventName, handle); }
+	{ DOMHandle.execCommand(this, "@crossbrowser.removeEvent", eventName, handle); }
 }

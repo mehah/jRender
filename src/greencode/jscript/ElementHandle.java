@@ -45,12 +45,12 @@ public final class ElementHandle {
 	}
 	
 	public static void empty(Element e) {
-		DOMHandle.execCommand(e, "customMethod.empty");
+		DOMHandle.execCommand(e, "@customMethod.empty");
 	}
 	
 	public static Element getOrCreateElementByTagName(Element owner, String tagName) {
 		Element e = new Element(owner.window);		
-		DOMHandle.registerElementByCommand(owner, e, "customMethod.getOrCreateElementByTagName", tagName);		
+		DOMHandle.registerElementByCommand(owner, e, "@customMethod.getOrCreateElementByTagName", tagName);		
 		return e;
 	}
 }

@@ -27,7 +27,7 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 	
 	Greencode.crossbrowser.registerEvent.call(window, 'popstate', function (e) {
     	if(e.state != null && e.state.content != null) {
-    		var o = Greencode.crossbrowser.querySelector.call(document.body, e.state.selector);
+    		var o = e.state.selector == 'body' ? document.body : Greencode.crossbrowser.querySelector.call(document.body, e.state.selector);
     		o.innerHTML = e.state.content;
     		
     		var tags = listTags[window.location.href];    		

@@ -149,10 +149,10 @@ public class Node extends EventTarget {
 	}
 	
 	public void textContent(String text) {
-		DOMHandle.execCommand(this, "crossbrowser.text", text);
+		DOMHandle.execCommand(this, "@crossbrowser.text", text);
 	}
 	
 	public String textContent() {
-		return DOMHandle.getVariableValueByCommand(this, "textContent", String.class, "crossbrowser.text");
+		return DOMHandle.getVariableValueByCommand(this, "textContent", String.class, "@crossbrowser.text");
 	}	
 }

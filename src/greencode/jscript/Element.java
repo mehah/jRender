@@ -9,7 +9,7 @@ public class Element extends Node {
 	protected Element(Window window, String tagName) { super(window); DOMHandle.setVariableValue(this, "tagName", tagName); }
 	
 	public Boolean hasAttribute(String name) {
-		return DOMHandle.getVariableValueByCommand(this, "hasAttribute", Boolean.class, "crossbrowser.hasAttribute", name);
+		return DOMHandle.getVariableValueByCommand(this, "hasAttribute", Boolean.class, "@crossbrowser.hasAttribute", name);
 	}
 	
 	public String getAttribute(String name) {
@@ -40,18 +40,18 @@ public class Element extends Node {
 	}
 	
 	public Element[] getElementsByClassName(String tagName) {
-		return getElementsBy("getElementsByClassName.length", "crossbrowser.getElementsByClassName", tagName);
+		return getElementsBy("getElementsByClassName.length", "@crossbrowser.getElementsByClassName", tagName);
 	}
 	
 	public Element querySelector(String selector) {
 		Element e = new Element(this.window);		
-		DOMHandle.registerElementByCommand(this, e, "crossbrowser.querySelector", selector);
+		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
 		
 		return e;
 	}
 	
 	public Element[] querySelectorAll(String selector) {
-		return getElementsBy("querySelectorAll.length", "crossbrowser.querySelectorAll", selector);
+		return getElementsBy("querySelectorAll.length", "@crossbrowser.querySelectorAll", selector);
 	}
 	
 	private Element[] getElementsBy(String varName, String command, String tagName) {
@@ -91,7 +91,7 @@ public class Element extends Node {
 		if(conversation == null)
 			conversation = GreenContext.getInstance().getRequest().getConversation();
 		
-		DOMHandle.execCommand(this, "customMethod.appendController", url, conversation.getId());
+		DOMHandle.execCommand(this, "@customMethod.appendController", url, conversation.getId());
 	}
 	
 	public void innerHTML(String html) { DOMHandle.setProperty(this, "innerHTML", html); }

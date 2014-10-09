@@ -240,8 +240,8 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 
 Bootstrap.adaptiveCommand = function(commandName, parameters)
 {
-	return (commandName.indexOf('crossbrowser') != -1 || commandName.indexOf('customMethod') != -1) ?
-			'Greencode.' + commandName + '.call(e'+(parameters ? ','+parameters : '')+');'
+	return (commandName.indexOf('@crossbrowser') != -1 || commandName.indexOf('@customMethod') != -1) ?
+			'Greencode.' + commandName.substring(1) + '.call(e'+(parameters ? ','+parameters : '')+');'
 		  : 'e.' + commandName + '('	+ parameters + ');';
 };
 
@@ -326,8 +326,8 @@ Bootstrap.buttons = function(mainElement) {
 	
 	for (var i = -1; ++i < elements.length;) {
 		var element = elements[i],
-			appendTo = element.getAttribute('appendTo'),
-			o = Greencode.crossbrowser.querySelector.call(mainElement, appendTo);
+			appendTo = element.getAttribute('appendTo').toLowerCase(),
+			o = appendTo == "body" ? document.body : Greencode.crossbrowser.querySelector.call(mainElement, appendTo);
 		
 		element.setAttribute('swept', 'swept');
 		

@@ -6,7 +6,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 public abstract class Console {	
-	public static void error(Throwable e) {		
+	public static void error(Throwable e) {
+		if(e.getClass().equals(StopProcess.class))
+			return;
+		
 		GreenContext context = GreenContext.getInstance();
 		e.printStackTrace();
 		if(context != null && context.getResponse() != null) {

@@ -96,16 +96,16 @@ public class Document extends Node {
 	{ return getElementsBy("getElementsByTagName.length", "getElementsByTagName", tagName); }
 	
 	public Element[] getElementsByClassName(String tagName)
-	{ return getElementsBy("getElementsByClassName.length", "crossbrowser.getElementsByClassName", tagName); }
+	{ return getElementsBy("getElementsByClassName.length", "@crossbrowser.getElementsByClassName", tagName); }
 	
 	public Element querySelector(String selector) {
 		Element e = new Element(this.window);		
-		DOMHandle.registerElementByCommand(this, e, "crossbrowser.querySelector", selector);
+		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
 		
 		return e;
 	}
 	
-	public Element[] querySelectorAll(String selector) { return getElementsBy("querySelectorAll.length", "crossbrowser.querySelectorAll", selector); }
+	public Element[] querySelectorAll(String selector) { return getElementsBy("querySelectorAll.length", "@crossbrowser.querySelectorAll", selector); }
 	
 	private Element[] getElementsBy(String varName, String command, String tagName) {
 		final int qnt = DOMHandle.getVariableValueByPropertyNoCache(this, varName, Integer.class, command+"('"+tagName+"').length");
