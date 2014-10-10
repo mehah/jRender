@@ -8,12 +8,12 @@ Ex:
 ```java
 @Page(name="index", path="index.html")
 ```
-Name: Um nome qualquer e único, apenas para referencias.
-Path= Caminho de onde se encontra o HTML, partir do webcontent.
+Name: Um nome qualquer e único, apenas para referencias.  
+Path: Caminho de onde se encontra o HTML, partir do webcontent.  
 
-Outros atributos:
-Mobile: Use a anotação @Mobile(path="") para dizer o caminho do site que seja voltado para mobile.
-Ex:
+Outros atributos:  
+Mobile: Use a anotação @Mobile(path="") para dizer o caminho do site que seja voltado para mobile.  
+Ex:  
 ```java
 @Page(name="index",
 	path="index.html", /* HTML que será utilizado em browsers para DESKTOP */
@@ -21,8 +21,8 @@ Ex:
 )
 ```
 
-URLName :Serve para definir um nome único para  URL.
-Ex:
+URLName :Serve para definir um nome único para  URL.  
+Ex:  
 
 ```java
 @Page(name="register",
@@ -30,8 +30,8 @@ Ex:
 	URLName=”register” // http://localhost/project/register
 )
 ```
-Selector : Serve para quando chamar uma página, ir apenas um conteúdo selecionado passando como parâmetro (Query Selector).
-Ex:
+Selector : Serve para quando chamar uma página, ir apenas um conteúdo selecionado passando como parâmetro (Query Selector).  
+Ex:  
 ```html
  <html>
 	<body>
@@ -44,17 +44,17 @@ Ex:
 @Page(name="register", path="register.html", selector=”#content”)
 ```
 
-Return: ```Any thing```
+Return: ```Any thing```  
 
-ajaxSelector: Mesma coisa que o de cima, a diferença que é apenas para requisições AJAX.
-Rules = Serve para registrar REGRAS DE ACESSO.
+ajaxSelector: Mesma coisa que o de cima, a diferença que é apenas para requisições AJAX.  
+Rules = Serve para registrar REGRAS DE ACESSO.  
 Ex: [User Principal/Rules](../samples/userPrincipalRules.md)  
 
-jsModule: Caso queira manipular o HTML sem ser no java, poderá fazer isso nativamente, apontando o local do  JS.
+jsModule: Caso queira manipular o HTML sem ser no java, poderá fazer isso nativamente, apontando o local do  JS.  
 Ex: [Java Script Module System](../samples/javaScriptModuleSystem.md)  
 
-Parameters: Para registrar parâmetro fixo ao entrar na página, como se tivesse passando por GET(?name=value), porem o parâmetro fica escondido.
-Ex: 
+Parameters: Para registrar parâmetro fixo ao entrar na página, como se tivesse passando por GET(?name=value), porem o parâmetro fica escondido.  
+Ex:
 ```java
 @RegisterPage({
 	@Page(name="includeUser", path="maintainUser.html", URLName="includeUser", parameters={@PageParameter(name="clean", value="true"), @PageParameter(name="type", value="include")}),
