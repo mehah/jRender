@@ -30,13 +30,6 @@ Examples:
 - [Call Custom Function With Callback](/samples/callCustomFunctionWithCallbackFunction.md)  
 - [Template](/samples/template.md)  
 - [Join Header Files](/samples/joinHeaderFiles.md)  
-- [User Principal/Rules](/samples/userPrincipalRules.md)  
-<<<<<<< HEAD
+- [User Principal/Rules](/samples/userPrincipalRules.md) 
 - [File Upload](/samples/fileUpload.md)  
 - [Java Script Module System](/samples/javaScriptModuleSystem.md)  
-=======
-<<<<<<< HEAD
-- [File Upload](/samples/fileUpload.md)  
-=======
->>>>>>> origin/master
->>>>>>> parent of c59f5c2... Update readme.md
