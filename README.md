@@ -10,6 +10,10 @@ Requirements
 - [JSOUP](http://http://jsoup.org/)  
 - [HTMLCompressor](https://code.google.com/p/htmlcompressor/) (Optional)  
 
+Understand:  
+- Annotation
+	- [Page and RegisterPage](/understand/pageRegisterPage.md)  
+
 Examples:  
 - [Basic](/samples/basic.md)  
 - [Basic Form ](/samples/formBasic.md)  
@@ -28,3 +32,4 @@ Examples:
 - [Join Header Files](/samples/joinHeaderFiles.md)  
 - [User Principal/Rules](/samples/userPrincipalRules.md)  
 - [File Upload](/samples/fileUpload.md)  
+- [Java Script Module System](/samples/javaScriptModuleSystem.md)  
