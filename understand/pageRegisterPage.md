@@ -47,6 +47,7 @@ Ex:
 Return: ```Any thing```  
 
 ajaxSelector: Mesma coisa que o de cima, a diferença que é apenas para requisições AJAX.  
+
 Rules = Serve para registrar REGRAS DE ACESSO.  
 Ex: [User Principal/Rules](../samples/userPrincipalRules.md)  
 
