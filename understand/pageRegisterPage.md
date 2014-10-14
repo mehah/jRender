@@ -1,8 +1,8 @@
 ```java
-@RegisterPage //serve para registrar várias @Page para o mestro Controlador.
+@RegisterPage //serve para registrar várias @Page para o mesmo Controlador.
 ```
 ```java
-@Page // serve basicamente para dizer qual controlador será utilizador para a página registrada.
+@Page // serve para dizer qual controlador será utilizador para a página registrada.
 ```
 Ex:
 ```java
@@ -21,7 +21,7 @@ Ex:
 )
 ```
 
-URLName :Serve para definir um nome único para  URL.  
+URLName: Serve para definir um nome único para a URL.  
 Ex:  
 
 ```java
@@ -30,7 +30,7 @@ Ex:
 	URLName=”register” // http://localhost/project/register
 )
 ```
-Selector : Serve para quando chamar uma página, ir apenas um conteúdo selecionado passando como parâmetro (Query Selector).  
+Selector : Serve para quando chamar uma página, ir apenas o conteúdo selecionado passando como parâmetro (Query Selector).  
 Ex:  
 ```html
  <html>
@@ -48,13 +48,13 @@ Return: ```Any thing```
 
 ajaxSelector: Mesma coisa que o de cima, a diferença que é apenas para requisições AJAX.  
 
-Rules = Serve para registrar REGRAS DE ACESSO.  
+Rules: Serve para registrar REGRAS DE ACESSO.  
 Ex: [User Principal/Rules](../samples/userPrincipalRules.md)  
 
-jsModule: Caso queira manipular o HTML sem ser no java, poderá fazer isso nativamente, apontando o local do  JS.  
+jsModule: Caso queira manipular o HTML nativamente, isso é, por JavaScript.
 Ex: [Java Script Module System](../samples/javaScriptModuleSystem.md)  
 
-Parameters: Para registrar parâmetro fixo ao entrar na página, como se tivesse passando por GET(?name=value), porem o parâmetro fica escondido.  
+Parameters: Para registrar parâmetros fixos ao entrar na página, como se tivesse passando por GET(?name=value), porem o parâmetro fica escondido.  
 Ex:
 ```java
 @RegisterPage({
