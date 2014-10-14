@@ -7,7 +7,7 @@ Requirements
 - Java 1.6
 - Servlet 3.0
 - [Gson](https://code.google.com/p/google-gson/)  
-- [JSOUP](http://http://jsoup.org/)  
+- [JSOUP](http://jsoup.org/)  
 - [HTMLCompressor](https://code.google.com/p/htmlcompressor/) (Optional)  
 
 Understand:  
