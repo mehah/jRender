@@ -342,8 +342,8 @@ public final class Page {
 						if(!method.getName().equals("init") && method.getParameterTypes().length == 0) {
 							FunctionHandle func = new FunctionHandle(c, method.getName());
 							methodsJS.append("var ")
-								.append(method.getName()).append("=function() {var param =").append(new Gson().toJson(func))
-								.append(";param.viewId = __viewId;param.cid = __cid;param.url = CONTEXT_PATH+param.url;Bootstrap.callRequestMethod(principalElement, {}, {event: 'undefined'}, param, []);};");
+								.append(method.getName()).append("=function(onComplete) {var param =").append(new Gson().toJson(func))
+								.append(";param.viewId = __viewId;param.cid = __cid;param.url = CONTEXT_PATH+param.url;Bootstrap.callRequestMethod(principalElement, {}, {event: 'undefined', onComplete: onComplete}, param, []);};");
 						}
 					}
 					

@@ -609,7 +609,7 @@ public final class Core implements Filter {
 				System.out.println(" [done]");
 			}
 			
-			if(GreenCodeConfig.Plugins.list.length > 0) {
+			if(GreenCodeConfig.Plugins.list != null && GreenCodeConfig.Plugins.list.length > 0) {
 				System.out.print(defaultLogMsg+"Initializing Plugins ...");
 				
 				ArrayList<PluginImplementation> list = new ArrayList<PluginImplementation>();
@@ -627,6 +627,6 @@ public final class Core implements Filter {
 			GenericReflection.NoThrow.setFinalStaticValue(Core.class, "hasError", false);
 		} catch(Exception e) {
 			e.printStackTrace();
-		}		
+		}
 	}
 }

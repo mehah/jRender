@@ -222,6 +222,10 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 			
 			objectEvent.processing = false;
 			
+			if(event.onComplete != null) {
+				event.onComplete();
+			}
+			
 			if(objectEvent.methods.length > 0) {
 				objectEvent.methods[0]();
 				objectEvent.methods.splice(0, 1);
