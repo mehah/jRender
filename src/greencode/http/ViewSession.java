@@ -90,8 +90,6 @@ public final class ViewSession implements Serializable {
 		
 		currentSheduled.cancel(true);
 		scheduled.shutdownNow();
-		
-		System.out.println("view session destruida.");
 	}
 	
 	public boolean isValid() { return context.views.containsKey(id); }
