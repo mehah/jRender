@@ -1,5 +1,6 @@
 package greencode.http;
 
+import greencode.kernel.GreenCodeConfig;
 import greencode.util.GenericReflection;
 
 import java.io.Serializable;
@@ -29,7 +30,7 @@ public final class ViewSession implements Serializable {
 	private final long creationTime = System.currentTimeMillis();
 	private long lastAccessedTime = creationTime, thisAccessedTime = creationTime;
 	
-	private int maxInactiveInterval = 1800; // 60*30 = 1800 (30min)
+	private int maxInactiveInterval = GreenCodeConfig.ViewSession.maxInactiveInterval;
 	
 	boolean isNew = true;
 	private final StandardSession session;
@@ -89,6 +90,8 @@ public final class ViewSession implements Serializable {
 		
 		currentSheduled.cancel(true);
 		scheduled.shutdownNow();
+		
+		System.out.println("view session destruida.");
 	}
 	
 	public boolean isValid() { return context.views.containsKey(id); }

@@ -1,9 +1,10 @@
 package greencode.http;
 
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class Conversation {
-	public static final int FIRST = -1, CURRENT = 0;
+	public static final int FIRST = -3, NEXT = -2, LAST = -1, CURRENT = 0;
 	
 	private final ViewSession viewSession;
 	private int id;
@@ -51,13 +52,21 @@ public class Conversation {
 		return map;
 	}
 	
-	static Conversation getInstance(HttpRequest request, int cid)
-	{		
+	static Conversation getInstance(HttpRequest request, int cid) {
 		if(cid == FIRST)
-			return new Conversation(request.getViewSession(), getConverstionMap(request.getViewSession()).keySet().iterator().next());
-		else if(cid != CURRENT && request.getConversationId() != cid)
-			return new Conversation(request.getViewSession(), cid);
+			cid = getConverstionMap(request.getViewSession()).keySet().iterator().next();
+		else if(cid == NEXT)
+			return request.getConversation().next();
+		else if(cid == CURRENT)
+			return request.getConversation();
+		else if(cid == LAST) {
+			final Iterator<Integer> it = getConverstionMap(request.getViewSession()).keySet().iterator();
+			while (it.hasNext()) cid = it.next();
+		}
 		
-		return request.getConversation();
+		if(cid == request.getConversationId())
+			return request.getConversation();
+		
+		return new Conversation(request.getViewSession(), cid);
 	}
 }

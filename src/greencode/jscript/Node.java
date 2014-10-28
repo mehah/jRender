@@ -25,8 +25,7 @@ public class Node extends EventTarget {
 	
 	public Node parentNode() { return parentNode(Node.class); }
 	
-	public<C extends Node> Node nextSibling(Class<C> cast)
-	{
+	public<C extends Node> Node nextSibling(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
 			DOMHandle.registerElementByProperty(this, node, "nextSibling");
@@ -36,8 +35,7 @@ public class Node extends EventTarget {
 		}
 	}
 	
-	public<C extends Node> Node previousSibling(Class<C> cast)
-	{
+	public<C extends Node> Node previousSibling(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
 			DOMHandle.registerElementByProperty(this, node, "previousSibling");
@@ -47,8 +45,7 @@ public class Node extends EventTarget {
 		}
 	}
 	
-	public<C extends Node> Node firstChild(Class<C> cast)
-	{
+	public<C extends Node> Node firstChild(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
 			DOMHandle.registerElementByProperty(this, node, "firstChild");
@@ -58,8 +55,7 @@ public class Node extends EventTarget {
 		}
 	}
 	
-	public<C extends Node> Node lastChild(Class<C> cast)
-	{
+	public<C extends Node> Node lastChild(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
 			DOMHandle.registerElementByProperty(this, node, "lastChild");
@@ -69,8 +65,7 @@ public class Node extends EventTarget {
 		}
 	}
 	
-	public<C extends Node> C parentNode(Class<C> cast)
-	{
+	public<C extends Node> C parentNode(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
 			DOMHandle.registerElementByProperty(this, node, "parentNode");

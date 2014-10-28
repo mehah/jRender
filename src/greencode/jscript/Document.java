@@ -26,8 +26,7 @@ public class Document extends Node {
 	@SuppressWarnings("unchecked")
 	public<F extends Form> F forms(Class<F> formClass) {
 		F form = (F) forms.get(formClass);
-		if(form == null)
-		{
+		if(form == null) {
 			try {
 				form = formClass.newInstance();
 				form.processAnnotation();

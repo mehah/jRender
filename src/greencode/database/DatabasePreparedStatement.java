@@ -24,13 +24,11 @@ import java.sql.SQLWarning;
 import java.sql.SQLXML;
 import java.sql.Time;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Calendar;
 
 
 public final class DatabasePreparedStatement implements PreparedStatement {
 	private final PreparedStatement ps;
-	final ArrayList<ResultSet> resultSets = new ArrayList<ResultSet>();
 	
 	public DatabasePreparedStatement(PreparedStatement s) { this.ps = s; }
 		
@@ -43,7 +41,6 @@ public final class DatabasePreparedStatement implements PreparedStatement {
 				Console.log(queryString.substring(queryString.indexOf(':')+2));
 			}
 			
-			resultSets.add(s);
 			return s;
 		} catch (SQLException e) {
 			String queryString = ps.toString();

@@ -66,8 +66,7 @@ public final class WindowHandle {
 			RegisterPage rp = controllerClass.getAnnotation(RegisterPage.class);
 			if(pageName == null || pageName.isEmpty())
 				page = rp.value()[0];
-			else
-			{
+			else {
 				for (greencode.jscript.window.annotation.Page p : rp.value()) {
 					if(p.name().equals(pageName)) {
 						page = p;

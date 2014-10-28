@@ -43,12 +43,9 @@ public abstract class DOM {
 		txt2kb = _txt2kb.toString();
 	}
 	
-	static void sendByte(GreenContext context) throws IOException
-	{
-		if(!greencode.http.$HttpRequest.contentIsHtml(context.getRequest()) || context.getRequest().isIFrameHttpRequest())
-		{
-			if(!greencode.kernel.$GreenContext.flushed(context)) 
-			{
+	static void sendByte(GreenContext context) throws IOException {
+		if(!greencode.http.$HttpRequest.contentIsHtml(context.getRequest()) || context.getRequest().isIFrameHttpRequest()) {
+			if(!greencode.kernel.$GreenContext.flushed(context))  {
 				//TODO: fazer tb para Safari
 				//boolean isInternetExplorer = context.getRequest().getHeader("User-Agent").indexOf("MSIE") > -1;
 				//if(isInternetExplorer)

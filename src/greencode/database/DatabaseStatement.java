@@ -8,11 +8,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
-import java.util.ArrayList;
 
 public final class DatabaseStatement implements Statement {
 	private final Statement st;
-	final ArrayList<ResultSet> resultSets = new ArrayList<ResultSet>();
 	
 	public DatabaseStatement(Statement s) { this.st = s; }
 	
@@ -20,8 +18,7 @@ public final class DatabaseStatement implements Statement {
 		if(GreenCodeConfig.DataBase.showResultQuery)
 			Console.log(sql);
 		
-		ResultSet s = this.st.executeQuery(sql);		
-		resultSets.add(s);
+		ResultSet s = this.st.executeQuery(sql);
 		return s;		
 	}
 

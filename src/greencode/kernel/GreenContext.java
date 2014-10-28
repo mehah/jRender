@@ -1,5 +1,6 @@
 package greencode.kernel;
 
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Properties;
@@ -36,8 +37,6 @@ public final class GreenContext {
 	final public Gson gsonInstance = getGsonInstance();
 	final greencode.jscript.window.annotation.Page currentPageAnnotation;
 	
-	boolean forceSynchronization = false;
-	
 	boolean userLocaleChanged = false;	
 	Locale userLocale;
 	Properties currentMessagePropertie;
@@ -50,6 +49,7 @@ public final class GreenContext {
 	
 	boolean flushed = false;
 	
+	boolean forceSynchronization = false;
 	String[] listAttrSync;
 	HashSet<String> listAttrSyncCache;
 	
@@ -141,10 +141,42 @@ public final class GreenContext {
 			throw new OperationNotAllowedException(LogMessage.getMessage("green-0034"));
 	}
 	
+	boolean isForcingSynchronization(final String property) {
+		boolean sync;
+		if(sync = forceSynchronization) {			
+			if(this.listAttrSync != null) {
+				final boolean hasListAttrSyncCache = this.listAttrSyncCache != null;
+				if(this.listAttrSync.length > 0) {
+					sync = false;
+					if(!hasListAttrSyncCache || !this.listAttrSyncCache.contains(property)) {
+						for (String attr : this.listAttrSync) {
+							if(attr.equals(property)) {
+								sync = true;
+								if(hasListAttrSyncCache)
+									listAttrSyncCache.add(property);
+								break;
+							}
+						}
+					}
+				}else if(hasListAttrSyncCache) {
+					if(sync = !listAttrSyncCache.contains(property))
+						listAttrSyncCache.add(property);
+				}
+			}
+		}
+		
+		return sync;
+	}
+	
 	void destroy() {
 		if(this.databaseConnection != null) {
-			this.databaseConnection.close();
-			this.databaseConnection = null;
+			try {
+				this.databaseConnection.close();
+			} catch (SQLException e) {
+				throw new RuntimeException(e);
+			} finally {
+				this.databaseConnection = null;
+			}			
 		}
 		
 		this.currentMessagePropertie = null;

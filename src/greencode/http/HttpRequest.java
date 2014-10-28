@@ -37,12 +37,11 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 		
 		contentIsHtml = !isAjax || Boolean.parseBoolean(request.getParameter("__contentIsHtml"));
 		
-		String v;
-		if((v = request.getParameter("viewId")) != null && !v.isEmpty()) {
+		String v = request.getParameter("viewId");
+		if(v != null && !v.isEmpty()) {
 			viewId = Integer.parseInt(v);
 			getViewSession().isNew = false;
-		}else
-		{
+		}else {
 			if(!isAjax) request.getSession(true);			
 			Integer lastViewID = (Integer) request.getSession().getAttribute("LAST_VIEW_ID");
 			
@@ -55,9 +54,7 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 		
 		this.conversation = new Conversation(getViewSession(), cid);
 		
-		this.userPrincipal = (UserPrincipal) getSession().getAttribute("__USER_PRINCIPAL__");
-		
-		
+		this.userPrincipal = (UserPrincipal) getSession().getAttribute("__USER_PRINCIPAL__");		
 	}
 	
 	public Principal getUserPrincipal() { return this.userPrincipal; }
@@ -74,10 +71,7 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 	static boolean isMobile(String userAgent) { return pattern.matcher(userAgent).find(); }
 	
 	public boolean isMobile() {
-		if(isMobile == null)
-			isMobile = isMobile(this.getHeader("user-agent"));
-		
-		return isMobile;
+		return isMobile == null ? isMobile = isMobile(this.getHeader("user-agent")) : isMobile;
 	}
 	
 	public boolean isMethod(RequestMethod methodType) { return getMethod().equals(methodType.name()); }
@@ -94,9 +88,7 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 		if(this.viewSession == null) {
 			ViewSessionContext viewContext = new ViewSessionContext(getSession());
 			
-			this.viewSession = viewContext.getViewSession(viewId);
-			
-			if(this.viewSession == null) {
+			if((this.viewSession = viewContext.getViewSession(viewId)) == null) {
 				if(GreenContext.getInstance().getResponse().isCommitted())
 					throw new IllegalStateException("Cannot create a view session after the response has been committed");
 				

@@ -1,6 +1,6 @@
 <!-- Greencode DTD -->
 
-<!ELEMENT greencode-config (console, browser, multipart, response, view, anti-flood, database?, internationalization?)>
+<!ELEMENT greencode-config (console, browser, multipart, response, view, viewSession, anti-flood, database?, internationalization?)>
 <!ELEMENT console EMPTY>
 	<!ATTLIST console writeLog ( true | false ) "true" >
 	
@@ -20,6 +20,9 @@
 	<!ATTLIST view charset CDATA #REQUIRED>
 	<!ELEMENT template-file ANY>
 	<!ELEMENT use-minified ANY>
+	
+<!ELEMENT viewSession EMPTY>
+	<!ATTLIST viewSession maxInactiveInterval CDATA #REQUIRED>
 	
 <!ELEMENT anti-flood (default-max-request)>
 <!ELEMENT default-max-request ANY>

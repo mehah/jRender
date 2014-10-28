@@ -21,6 +21,9 @@
 		<!-- <template-file>template/template.html</template-file> -->
 		<use-minified>false</use-minified>
 	</view>
+	
+	<viewSession maxInactiveInterval="1800" /> <!-- 60*30 = 1800 (30min) -->
+	
 	<anti-flood>
 		<default-max-request>5</default-max-request>
 	</anti-flood>

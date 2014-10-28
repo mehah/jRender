@@ -97,8 +97,7 @@ final class ActionLoader {
 			else {
 				databaseConnectionEvent = (DatabaseConnectionEvent) Cache.classDatabaseConnectionEvent.newInstance();
 				databaseConnectionEvent.beforeRequest(cA);
-			}
-				
+			}				
 		}
 		
 		return databaseConnectionEvent;

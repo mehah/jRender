@@ -86,16 +86,11 @@ public final class Core implements Filter {
 		"json2.js",
 		"greencode.js",
 		"greencodeFunction.js",
-		/*"crossbrowser.js",*/
 		"iframeHttpRequest.js",
 		"comet.js",
 		"greenCodeStyle.js",
 		"bootstrap.js",
-		"init.js",
-		/*,
-		"Math.js",
-		"String.js",
-		"StringBuilder.js"*/
+		"init.js"
 	};
 	
 	public void destroy() {
@@ -267,12 +262,10 @@ public final class Core implements Filter {
 				String content;				
 				if(context.request.isAjax())
 					content = page.pageAnnotation.ajaxSelector().isEmpty() ? page.getContent(context) : page.getAjaxSelectedContent(page.pageAnnotation.ajaxSelector(), context);
-				else {
-					if(!page.pageAnnotation.selector().isEmpty())
+				else if(!page.pageAnnotation.selector().isEmpty())
 						content = page.getSelectedContent(page.pageAnnotation.selector(), context);
-					else 
-						content = SCRIPT_HTML_CORE_JS+page.getContent(context);
-				}
+				else 
+					content = SCRIPT_HTML_CORE_JS+page.getContent(context);
 
 				context.getResponse().getWriter().write(content);
 			}
@@ -361,8 +354,7 @@ public final class Core implements Filter {
 					
 					ActionLoader.process(context, requestController, requestMethod);
 					
-					if(context.executeAction)
-					{
+					if(context.executeAction) {
 						if(page != null && requestController instanceof Window) {
 							((Window) requestController).init();
 							
@@ -402,8 +394,7 @@ public final class Core implements Filter {
 				}
 			}
 			
-			if(context.userLocaleChanged)
-			{
+			if(context.userLocaleChanged) {
 				DOMHandle.execCommand(
 					context.currentWindow, "Greencode.util.loadScript",
 					Core.CONTEXT_PATH+"/jscript/greencode/msg_"+context.userLocale.toString()+".js",
@@ -434,12 +425,11 @@ public final class Core implements Filter {
 				((GZipServletResponseWrapper) response).close();
 		}
 		
-		if(GreenCodeConfig.Console.writeLog)
-		{
+		if(GreenCodeConfig.Console.writeLog) {
 			processTime = System.currentTimeMillis()-processTime;
-			int ms=(int) ((processTime)%1000);
-			int seconds=(int) ((processTime/1000)%60);
-			long minutes=((processTime-seconds)/1000)/60;
+			int ms = (int)((processTime)%1000);
+			int seconds = (int)((processTime/1000)%60);
+			long minutes =((processTime-seconds)/1000)/60;
 			
 			StringBuilder pt = new StringBuilder("Processing time: ");
 			if(minutes > 0)

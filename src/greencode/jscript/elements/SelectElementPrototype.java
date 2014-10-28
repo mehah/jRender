@@ -70,7 +70,7 @@ public abstract class SelectElementPrototype extends Element {
 	public OptionElementCollection options() { return options(false); }
 	
 	public OptionElementCollection options(boolean eager) {
-		if(greencode.kernel.$GreenContext.forceSynchronization(GreenContext.getInstance()))
+		if(greencode.kernel.$GreenContext.isForcingSynchronization(GreenContext.getInstance(), "options"))
 			options = null;
 		
 		if(options == null)

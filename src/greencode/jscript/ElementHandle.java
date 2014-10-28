@@ -9,12 +9,11 @@ import greencode.util.GenericReflection;
 public final class ElementHandle {
 	public static Element getInstance(Window window) { return new Element(window); }	
 	
-	public static void dataTransfer(Element of, Element to) {
-		String type = DOMHandle.containVariableKey(to, "type") ? DOMHandle.getVariableValue(to, "type", String.class) : null;
-		
+	public static void dataTransfer(Element of, Element to) {		
 		greencode.jscript.$DOMHandle.setUID(to, DOMHandle.getUID(of));
 		greencode.jscript.$DOMHandle.setVariables(to, greencode.jscript.$DOMHandle.getVariables(of));
 		
+		String type = DOMHandle.containVariableKey(to, "type") ? DOMHandle.getVariableValue(to, "type", String.class) : null;
 		if(type != null)
 			DOMHandle.setVariableValue(to, "type", type);
 	}

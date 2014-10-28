@@ -189,15 +189,12 @@ public final class FunctionHandle {
 		}
 	}
 	
-	private void checkMethodAnnotation()
-	{
-		if(this.method.isAnnotationPresent(Form.class))
-		{
+	private void checkMethodAnnotation() {
+		if(this.method.isAnnotationPresent(Form.class)) {
 			Class<? extends greencode.jscript.Form> form = this.method.getAnnotation(Form.class).value();
 			
 			Field[] fields = greencode.jscript.$Form.processFields(form);
-			if(fields != null && fields.length > 0)
-			{
+			if(fields != null && fields.length > 0) {
 				this.formName = form.getAnnotation(Name.class).value();
 				this.formNameFields = new ArrayList<String>();
 				

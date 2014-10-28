@@ -73,6 +73,10 @@ public final class GreenCodeConfig {
 				if(!listCurrentElement.isEmpty() && !(value = listCurrentElement.get(0).text()).isEmpty())
 					GenericReflection.NoThrow.setFinalStaticValue(View.class, "templateFile", value);
 			}
+			
+			listCurrentElement = greencodeCofig.getElementsByTag("viewSession");
+			if(!listCurrentElement.isEmpty())
+				GenericReflection.NoThrow.setFinalStaticValue(ViewSession.class, "maxInactiveInterval", Integer.parseInt(listCurrentElement.get(0).attr("maxInactiveInterval")));
 							
 			listCurrentElement = greencodeCofig.getElementsByTag("anti-flood");
 			if(!listCurrentElement.isEmpty()) {	
@@ -159,7 +163,11 @@ public final class GreenCodeConfig {
 		public final static String charset = DEFAULT_CHARSET;
 		public final static Boolean seekChange = true;
 	}
-
+	
+	public final static class ViewSession {
+		public final static Integer maxInactiveInterval = 1800;
+	}
+	
 	public final static class AntiFlood {			
 		public final static Short defaultMaxRequest = 200;
 	}

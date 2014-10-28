@@ -1,7 +1,6 @@
 package greencode.jscript;
 
 import java.util.HashMap;
-import java.util.HashSet;
 
 import javax.servlet.http.Part;
 
@@ -104,34 +103,7 @@ public final class DOMHandle {
 	private static<C> C getVariableValue(DOM owner, String varName, Class<C> cast, boolean isMethod, final String _name, Object... parameters) {
 		GreenContext context = GreenContext.getInstance();
 		
-		boolean sync = false;		
-		if(greencode.kernel.$GreenContext.forceSynchronization(context)) {
-			sync = true;
-			String[] listAttrSync = greencode.kernel.$GreenContext.listAttrSync(context);
-			
-			if(listAttrSync != null) {
-				HashSet<String> listAttrSyncCache = greencode.kernel.$GreenContext.listAttrSyncCache(context);
-				final boolean hasListAttrSyncCache = listAttrSyncCache != null;
-				if(listAttrSync.length > 0) {
-					sync = false;
-					if(!hasListAttrSyncCache || !listAttrSyncCache.contains(_name)) {
-						for (String attr : listAttrSync) {
-							if(attr.equals(_name)) {
-								sync = true;
-								if(hasListAttrSyncCache)
-									listAttrSyncCache.add(_name);
-								break;
-							}
-						}
-					}
-				}else if(hasListAttrSyncCache) {
-					if(sync = !listAttrSyncCache.contains(_name))
-						listAttrSyncCache.add(_name);
-				}
-			}
-		}
-		
-		if(sync || !owner.variables.containsKey(varName)) {
+		if(greencode.kernel.$GreenContext.isForcingSynchronization(context, _name) || !owner.variables.containsKey(varName)) {
 			Object v = getSyncValue(owner, varName, isMethod, _name, parameters);
 			
 			if(cast != null && !cast.equals(String.class) && !cast.equals(Part.class)) {
@@ -196,5 +168,9 @@ public final class DOMHandle {
 	
 	public static JsonArray getJSONArrayByProperty(DOM owner, String varName, String propertyName, String... propertyNames) {
 		return getVariableValue(owner, varName, JsonArray.class, false, "#[]"+propertyName, (Object[])propertyNames);
+	}
+	
+	public static boolean isForcingSynchronization(GreenContext context, String property) {
+		return greencode.kernel.$GreenContext.isForcingSynchronization(context, property);
 	}
 }
