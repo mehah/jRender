@@ -94,11 +94,11 @@ public final class FileUtils {
 		}
 	}
 	
-	public final static void createFile(String content, File file) throws IOException {
-		createFile(content, file.getAbsolutePath());
+	public final static File createFile(String content, File file) throws IOException {
+		return createFile(content, file.getAbsolutePath());
 	}
 	
-	public final static void createFile(String content, String folder) throws IOException {
+	public final static File createFile(String content, String folder) throws IOException {
 		Writer output = null;
 		try {
 			File newFile = new File(folder);
@@ -107,6 +107,8 @@ public final class FileUtils {
 			
 			output = new BufferedWriter(new FileWriter(newFile));
 			output.write(content);
+			
+			return newFile;
 		} finally {
 			if(output != null) output.close();
 		}

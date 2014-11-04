@@ -24,6 +24,7 @@ import greencode.jscript.FunctionHandle;
 import greencode.jscript.Window;
 import greencode.util.FileUtils;
 import greencode.util.GenericReflection;
+import greencode.util.MergedFile;
 import greencode.util.StringUtils;
 
 public final class Page {
@@ -154,8 +155,7 @@ public final class Page {
 					Document templateImported = null;
 					
 					String strTemplate = ele.attr("src");
-					if(strTemplate != null && !strTemplate.isEmpty())
-					{
+					if(strTemplate != null && !strTemplate.isEmpty()) {
 						String caminho = file.getParentFile().getAbsolutePath()+"/"+strTemplate;
 						File f = new File(caminho);
 						try {
@@ -168,8 +168,7 @@ public final class Page {
 						} catch (IOException e) {
 							Console.error(LogMessage.getMessage("green-0020", strTemplate, "template:import", file.getName()));
 						}
-					}else
-					{
+					} else {
 		 				Page template = loadStructure(Cache.defaultTemplate);
 						templateImported = template.document;
 						
@@ -177,10 +176,11 @@ public final class Page {
 							inserted.add(template);
 					}
 					
-					if(templateImported != null) {						
-						src.head().append(templateImported.head().html());
-						src.body().append(templateImported.body().html());
+					if(templateImported != null) {
+						src.head().replaceWith(templateImported.head().clone());
+						src.body().replaceWith(templateImported.body().clone().append(src.body().html()));
 					}
+					
 					ele.remove();
 					
 					String title = ele.attr("title");
@@ -191,17 +191,20 @@ public final class Page {
 							e.get(0).text(title);
 					}
 					
+					List<Element> elementsHead = src.getElementsByTag("template:head");
+					if(!elementsHead.isEmpty()) {
+						for (Element e : elementsHead)
+							src.head().append(e.html());
+					}
+					
 					List<Element> elementsDefine = src.getElementsByTag("template:define");
-					if(!elementsDefine.isEmpty())
-					{
+					if(!elementsDefine.isEmpty()) {
 						List<Element> elementsInsert = src.getElementsByTag("template:insert");
 						
-						if(!elementsInsert.isEmpty())
-						{
+						if(!elementsInsert.isEmpty()) {
 							for (Element eInsert : elementsInsert) {
 								for (Element eDefine : elementsDefine) {
-									if(eInsert.attr("name").equals(eDefine.attr("name")))
-									{
+									if(eInsert.attr("name").equals(eDefine.attr("name"))) {
 										eInsert.after(eDefine.html()).remove();
 										eDefine.remove();
 									}
@@ -212,11 +215,9 @@ public final class Page {
 				}
 				
 				List<Element> elementsInclude = src.getElementsByTag("template:include");
-				for (Element element : elementsInclude)
-				{
+				for (Element element : elementsInclude) {
 					String attrSrc = element.attr("src");
-					if(attrSrc != null && !attrSrc.isEmpty())
-					{
+					if(attrSrc != null && !attrSrc.isEmpty()) {
 						File f = new File(file.getParentFile().getAbsolutePath()+"/"+attrSrc);
 						try {
 							Page _page = loadStructure(f);
@@ -233,25 +234,29 @@ public final class Page {
 				
 				List<Element> joins = src.head().getElementsByAttribute("join");
 				for (Element e : joins) {
-					String[] filesName = e.attr("join").split(",");
-					
-					StringBuilder joinContent = new StringBuilder();
-					for (String name : filesName) {						
-						File f = FileUtils.getFileInWebContent(name.trim());
-						if(!f.exists()) {
-							Console.error(LogMessage.getMessage("green-0020", name.trim(), e.tagName(), file.getName()));
-							continue;
-						}
-						
-						joinContent.append(FileUtils.getContentFile(f.toURI().toURL()));
-					}
-					
-					if(e.attr("file").isEmpty()) {
+					String filePath = e.attr("file");
+					if(filePath.isEmpty()) {
 						Console.error(LogMessage.getMessage("green-0021", "file", e.tagName(), file.getName()));
 						continue;
 					}
-						
-					FileUtils.createFile(joinContent.toString(), FileUtils.getFileInWebContent(e.attr("file")));
+					
+					String[] filesName = e.attr("join").split(",");
+					
+					File[] files = new File[filesName.length];
+					for (int i = -1, s = filesName.length; ++i < s;) {
+						String name = filesName[i].trim();
+						File f = FileUtils.getFileInWebContent(name);
+						if(!f.exists()) {
+							Console.error(LogMessage.getMessage("green-0020", name, e.tagName(), file.getName()));
+							continue;
+						}
+						files[i] = f;
+					}
+					
+					MergedFile mergedFile = new MergedFile(FileUtils.getFileInWebContent(e.attr("file")).toURI(), files);
+					
+					Cache.mergedFiles.put(filePath, mergedFile);
+
 					e.removeAttr("join").removeAttr("file");
 				}
 				
@@ -372,33 +377,37 @@ public final class Page {
 		if(GreenCodeConfig.View.bootable)
 			return page;
 		
-		boolean isView = false;
-		
-		if(page != null) {
-			if(page.content != null) {
-				if(GreenCodeConfig.View.seekChange) {
-					(page.mobilePage != null && greencode.http.$HttpRequest.isMobile(request.getHeader("user-agent")) ?
-						page.mobilePage : page).verifyChanges();
+		try {
+			boolean isView = false;			
+			
+			if(page != null) {
+				if(page.content != null) {
+					if(GreenCodeConfig.View.seekChange) {
+						(page.mobilePage != null && greencode.http.$HttpRequest.isMobile(request.getHeader("user-agent")) ?
+							page.mobilePage : page).verifyChanges();
+					}
+					
+					return page;
 				}
 				
-				return page;
-			}else {
 				servletPath = page.pageAnnotation.path();
 				isView = true;
-			}
-		}
+			} else {
+				final String ext = FileUtils.getExtension(servletPath);
+				
+				final boolean isCss = ext.equals("css"), isJs = ext.equals("js");
+				if((GreenCodeConfig.View.seekChange) && (isCss || isJs)) {
+					MergedFile mergedFile = Cache.mergedFiles.get(servletPath);
+					if(mergedFile != null)
+						mergedFile.verifyChanges();
+				}				
+				
+				isView = ext.equals("html") || ext.equals("xhtml") || ext.equals("jsp") || ext.equals("htm");
 		
-		if(!isView) {
-			final String ext = FileUtils.getExtension(servletPath);
-			
-			final boolean isCss = ext.equals("css"), isJs = ext.equals("js");
-			isView = ext.equals("html") || ext.equals("xhtml") || ext.equals("jsp") || ext.equals("htm");
-	
-			if(!isCss && !isJs && !isView)
-				return page;
-		}
-			
-		try {
+				if(!isCss && !isJs && !isView)
+					return page;
+			}			
+		
 			if(page == null && !requestsCached.contains(servletPath) || page != null && page.document == null) {
 				File file = FileUtils.getFileInWebContent(servletPath);
 				if(file != null && file.exists()) {		

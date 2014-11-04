@@ -143,7 +143,7 @@ public final class GreenContext {
 	
 	boolean isForcingSynchronization(final String property) {
 		boolean sync;
-		if(sync = forceSynchronization) {			
+		if(sync = this.forceSynchronization) {			
 			if(this.listAttrSync != null) {
 				final boolean hasListAttrSyncCache = this.listAttrSyncCache != null;
 				if(this.listAttrSync.length > 0) {
@@ -173,10 +173,10 @@ public final class GreenContext {
 			try {
 				this.databaseConnection.close();
 			} catch (SQLException e) {
-				throw new RuntimeException(e);
-			} finally {
-				this.databaseConnection = null;
-			}			
+				e.printStackTrace();
+			}
+			
+			this.databaseConnection = null;
 		}
 		
 		this.currentMessagePropertie = null;
