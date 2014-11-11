@@ -68,7 +68,7 @@ public final class DatabaseConnection implements Connection {
 		if(connection == null)
 			throw new SQLException(LogMessage.getMessage("green-db-0004"));
 		
-		if(isClosed())
+		if(connection.isClosed())
 			throw new SQLException(LogMessage.getMessage("green-db-0005"));
 		
 		return connection;

@@ -26,7 +26,6 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 
-
 public final class DatabasePreparedStatement implements PreparedStatement {
 	private final PreparedStatement ps;
 	

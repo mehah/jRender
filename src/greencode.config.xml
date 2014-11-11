@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE greencode SYSTEM "greencode.dtd">
+<!DOCTYPE HTML PUBLIC "Greencode" "https://raw.githubusercontent.com/mehah/Greencode-Framework/master/src/greencode.dtd">
 <greencode-config>
 	<console writeLog="true" />	
 	<browser consoleDebug="false" />	
