@@ -120,7 +120,7 @@ public final class DatabaseConnection implements Connection {
 
 	public void close() throws SQLException {
 		for (Statement statement : this.statements) {			
-			statement.getResultSet().close();
+			if(statement.getResultSet() != null) statement.getResultSet().close();
 			statement.close();
 		}
 		this.statements.clear();
