@@ -50,8 +50,16 @@ public class Element extends Node {
 		return e;
 	}
 	
+	public<E extends Element> E querySelector(String selector, Class<E> castTo) {
+		return ElementHandle.cast(querySelector(selector), castTo);
+	}
+	
 	public Element[] querySelectorAll(String selector) {
 		return getElementsBy("querySelectorAll.length", "@crossbrowser.querySelectorAll", selector);
+	}
+	
+	public<E extends Element> E[] querySelectorAll(String selector, Class<E> castTo) {
+		return ElementHandle.cast(querySelectorAll(selector), castTo);
 	}
 	
 	private Element[] getElementsBy(String varName, String command, String tagName) {

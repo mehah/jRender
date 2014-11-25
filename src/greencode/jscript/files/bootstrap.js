@@ -242,15 +242,24 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 	}
 };
 
-Bootstrap.adaptiveCommand = function(commandName, parameters)
-{
-	return (commandName.indexOf('@crossbrowser') != -1 || commandName.indexOf('@customMethod') != -1) ?
+Bootstrap.isGreencodeCommand = function(commandName) {
+	return (commandName.indexOf('@crossbrowser') != -1 || commandName.indexOf('@customMethod') != -1);
+}
+
+Bootstrap.toGreencodeCommand = function(commandName) {
+	var s;
+	if(commandName.indexOf(s = '@crossbrowser') != -1 || commandName.indexOf(s = '@customMethod') != -1)
+		commandName = commandName.replace(s, 'Greencode.'+s.substring(1));
+	return commandName;
+}
+
+Bootstrap.adaptiveCommand = function(commandName, parameters) {
+	return Bootstrap.isGreencodeCommand(commandName) ?
 			'Greencode.' + commandName.substring(1) + '.call(e'+(parameters ? ','+parameters : '')+');'
 		  : 'e.' + commandName + '('	+ parameters + ');';
 };
 
-Bootstrap.readCommand = function(mainElement)
-{
+Bootstrap.readCommand = function(mainElement) {
 	if(this == null)
 		return;
 	
@@ -548,7 +557,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 					var p = sync.command.parameters,
 						parameters = Bootstrap.analizeParameters(p, "p", mainElement),
 						value,
-						strEval,
+						strEval = '',
 						filter,
 						forceArray = false;
 					
@@ -561,16 +570,25 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 							for(var i in p)
 								value[i] = e[p[i]];
 						}else {
-							if(sync.command.name.indexOf('#') === 0) {	
+							if(sync.command.name.indexOf('#') === 0) {
+								var isGreencodeCommand = Bootstrap.isGreencodeCommand(sync.command.name);
+								if(!isGreencodeCommand)
+									strEval = "e.";
+								else {
+									sync.command.name = Bootstrap.toGreencodeCommand(sync.command.name);
+									var l = sync.command.name.indexOf('(');
+									sync.command.name = (sync.command.name.substring(0, l)+'.call(e,'+sync.command.name.substring(l+1));
+								}
+								
 								if(sync.command.name.indexOf('##[]') === 0) {
 									filter = p;
-									strEval = "e."+sync.command.name.substring(4);
+									strEval += sync.command.name.substring(4);
 									forceArray = true;
 								}else if(sync.command.name.indexOf('##') === 0) {
 									filter = p;
-									strEval = "e."+sync.command.name.substring(2);
+									strEval += sync.command.name.substring(2);
 								}else
-									strEval = "e."+sync.command.name.substring(1);
+									strEval += sync.command.name.substring(1);
 							} else
 								strEval = Bootstrap.adaptiveCommand(sync.command.name, parameters);
 										

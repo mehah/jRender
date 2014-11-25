@@ -92,6 +92,9 @@ public final class ClassUtils {
 	}
 	
 	public final static boolean isParent(Class<?> Class, Class<?> parentClass) {
+		if(Class.isArray())
+			Class = Class.getComponentType();
+		
 		HashSet<Class<?>> parents = parentsClass.get(Class);
 		
 		if(parents == null) {

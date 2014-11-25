@@ -20,6 +20,9 @@ public final class ElementHandle {
 	
 	public static<E extends Element> E cast(Element element, Class<E> castTo) {
 		try {
+			if(castTo.equals(Element.class))
+				return (E) element;
+			
 			if(Modifier.isAbstract(castTo.getModifiers()))
 				throw new RuntimeException(LogMessage.getMessage("green-0037", castTo.getSimpleName()));
 			
@@ -34,6 +37,9 @@ public final class ElementHandle {
 	}
 	
 	public static<E extends Element> E[] cast(Element[] elements, Class<E> castTo) {
+		if(castTo.equals(Element.class))
+			return (E[]) elements;
+		
 		@SuppressWarnings("unchecked")
 		E[] list = (E[]) Array.newInstance(castTo, elements.length);
 		
