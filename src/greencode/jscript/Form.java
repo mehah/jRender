@@ -1,12 +1,14 @@
 package greencode.jscript;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 
 import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.annotation.QuerySelector;
 import greencode.jscript.form.annotation.Event;
 import greencode.jscript.form.annotation.Name;
 import greencode.jscript.form.annotation.RegisterEvent;
+import greencode.jscript.form.annotation.Visible;
 import greencode.kernel.GreenContext;
 import greencode.kernel.LogMessage;
 import greencode.util.ClassUtils;
@@ -29,7 +31,15 @@ public abstract class Form extends Element {
 		super(context.currentWindow());
 		String name = getClass().getAnnotation(Name.class).value();
 		
-		DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "@crossbrowser.querySelector", "form[name=\""+name+"\"]");
+		Visible visibleAnnotation = getClass().getAnnotation(Visible.class);
+		
+		if(visibleAnnotation == null)
+			DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "@crossbrowser.querySelector", "form[name=\""+name+"\"]");
+		else {
+			HashMap<String, String[]> attrs = new HashMap<String, String[]>();
+			attrs.put("display", new String[]{"none"});
+			DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "@customMethod.querySelector", "form[name=\""+name+"\"]", attrs, !visibleAnnotation.value());
+		}
 	}
 	
 	void processAnnotation() {
@@ -42,7 +52,7 @@ public abstract class Form extends Element {
 				continue;
 			
 			QuerySelector a = f.getAnnotation(QuerySelector.class);
-			final Class<? extends Element> type = (Class<? extends Element>)f.getType();			
+			Class<? extends Element> type = (Class<? extends Element>)f.getType();			
 			
 			Element context = null;
 			if(!a.context().isEmpty()) {
@@ -59,6 +69,7 @@ public abstract class Form extends Element {
 			
 			Object v = null;
 			if(type.isArray()) {
+				type = (Class<? extends Element>) type.getComponentType();
 				if(context == null)
 					v = ElementHandle.cast(window.document.querySelectorAll(a.selector()), type);
 				else

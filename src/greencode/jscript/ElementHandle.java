@@ -2,6 +2,9 @@ package greencode.jscript;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
+
+import com.google.gson.Gson;
 
 import greencode.kernel.LogMessage;
 import greencode.util.GenericReflection;
@@ -40,7 +43,6 @@ public final class ElementHandle {
 		if(castTo.equals(Element.class))
 			return (E[]) elements;
 		
-		@SuppressWarnings("unchecked")
 		E[] list = (E[]) Array.newInstance(castTo, elements.length);
 		
 		for (int i = -1; ++i < elements.length;)
@@ -57,5 +59,24 @@ public final class ElementHandle {
 		Element e = new Element(owner.window);		
 		DOMHandle.registerElementByCommand(owner, e, "@customMethod.getOrCreateElementByTagName", tagName);		
 		return e;
+	}
+	
+	public static Element querySelector(Element owner, String selector, HashMap<String, String[]> attrs, boolean not) {
+		Element e = new Element(owner.window);		
+		DOMHandle.registerElementByCommand(owner, e, "@customMethod.querySelector", selector, attrs, not);		
+		return e;
+	}
+	
+	public static Element[] querySelectorAll(Element owner, String selector, HashMap<String, String[]> attrs, boolean not) {
+		final int qnt = DOMHandle.getVariableValueByPropertyNoCache(owner, "querySelectorAll.length", Integer.class, "@customMethod.querySelectorAll('"+selector+"', "+new Gson().toJson(attrs)+","+not+").length");
+		
+		Element[] elements = new Element[qnt];
+		int[] uids = new int[qnt];
+		for (int i = -1; ++i < qnt;)
+			uids[i] = DOMHandle.getUID(elements[i] = new Element(owner.window));
+		
+		DOMHandle.registerReturnByCommand(owner, uids, "@customMethod.querySelectorAll", selector, attrs, not);
+		
+		return elements;
 	}
 }

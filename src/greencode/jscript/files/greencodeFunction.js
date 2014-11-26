@@ -107,6 +107,36 @@ Greencode.customMethod = {
 	getOrCreateElementByTagName: function(tagName) {
 		var list = this.getElementsByTagName(tagName);						
 		return list.length == 0 ? table.appendChild(document.createElement(tagName)) : list[0];
+	},
+	querySelector: function(selector, attrs, not) {
+		return Greencode.customMethod.querySelectorAll(selector, attrs, not)[0];
+	},
+	querySelectorAll: function(selector, attrs, not) {
+		var newList = new Array();
+		var list = Greencode.crossbrowser.querySelectorAll.call(this, selector);
+		for(var i in list) {			
+			var e = list[i];
+			for(var a in attrs) {
+				var pushed = false;
+				var attrValues = attrs[a];
+				var cssValue = e.style[a];
+				for(var v in attrValues) {
+					if(attrValues[v] == cssValue) {
+						newList.push(e);
+						pushed = true;
+						break;
+					}
+				}
+				if(pushed)
+					break;
+				else if(not) {
+					newList.push(e);
+					break;
+				}
+			}
+		}
+		
+		return newList;
 	}
 };
 
