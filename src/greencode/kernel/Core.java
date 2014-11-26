@@ -516,7 +516,7 @@ public final class Core implements Filter {
 			
 			for (String fileName : jsFiles)
 				FileUtils.createFile(
-					FileUtils.getContentFile(classLoader.getResource("greencode/jscript/files/"+fileName)).toString(),
+					FileUtils.getContentFile(classLoader.getResource("greencode/jscript/files/"+fileName)),
 					greencodePath+"/"+fileName
 				);
 			
@@ -538,7 +538,7 @@ public final class Core implements Filter {
 						return null;
 					}
 					
-				}).toString());
+				}));
 				
 				Page.pages.put("jscript/greencode/msg_"+v.locale.toString()+".js", p);
 			}

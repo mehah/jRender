@@ -3,8 +3,13 @@ package greencode.jscript;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+
 import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.annotation.QuerySelector;
+import greencode.jscript.form.annotation.ElementValue;
 import greencode.jscript.form.annotation.Event;
 import greencode.jscript.form.annotation.Name;
 import greencode.jscript.form.annotation.RegisterEvent;
@@ -16,6 +21,8 @@ import greencode.util.GenericReflection;
 import greencode.util.GenericReflection.Condition;
 
 public abstract class Form extends Element {
+	final Field[] elementFields = $Form.processFields(getClass());
+	
 	private static Condition<Field> fieldsWithRegisterEvent = new Condition<Field>() {		
 		public boolean init(Field arg0) { return arg0.isAnnotationPresent(RegisterEvent.class) && ClassUtils.isParent(arg0.getType(), EventTarget.class); }
 	};
@@ -23,7 +30,6 @@ public abstract class Form extends Element {
 	private static Condition<Field> fieldsWithFindElement = new Condition<Field>() {		
 		public boolean init(Field arg0) { return ClassUtils.isParent(arg0.getType(), Element.class) && arg0.isAnnotationPresent(QuerySelector.class); }
 	};
-	
 	
 	public Form() { this(GreenContext.getInstance()); }
 	
@@ -151,6 +157,28 @@ public abstract class Form extends Element {
 		return DOMHandle.getVariableValueByProperty(this, "target", String.class, "target");
 	}
 	
-	public void reset() { DOMHandle.execCommand(this, "@customMethod.resetForm"); }
+	public void reset() { DOMHandle.CustomMethod.call(this, "resetForm"); }
 	public void submit() { DOMHandle.execCommand(this, "submit"); }
+	
+	public void fill() {
+		Gson g = new Gson();
+		JsonArray fields = new JsonArray();
+		for (Field field : elementFields) {
+			Object value = GenericReflection.NoThrow.getValue(field, this);
+			if(value != null) {
+				ElementValue annotation = field.getAnnotation(ElementValue.class);
+				String name = annotation.name();
+				if(name.isEmpty())
+					name = field.getName();
+				
+				JsonObject o = new JsonObject();
+				o.addProperty("name", name);
+				o.add("values", g.toJsonTree(value));
+				fields.add(o);
+			}
+		}
+		
+		if(fields.size() > 0)
+			DOMHandle.CustomMethod.call(this, "fillForm", fields);
+	}
 }

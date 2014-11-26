@@ -15,13 +15,16 @@ import javax.servlet.http.Part;
 public final class $Form {
 	private $Form() {}
 	
+	public static Field[] getElementFields(Form form) {
+		return form.elementFields;
+	}
+	
 	private static boolean registerFields(Class<?> Class, List<Field> fieldList) {
 		if(Class.equals(Form.class))
 			return false;
 		
 		for (Field field : GenericReflection.getDeclaredFields(Class)) {
-			if(field.isAnnotationPresent(greencode.jscript.form.annotation.ElementValue.class))
-			{
+			if(field.isAnnotationPresent(greencode.jscript.form.annotation.ElementValue.class)) {
 				Class<?> type = field.getType();
 				if(type.isArray())
 					type = type.getComponentType();
@@ -36,11 +39,10 @@ public final class $Form {
 		return true;
 	}
 	
-	public static Field[] processFields(Class<? extends Form> currentClass)
+	static Field[] processFields(Class<? extends Form> currentClass)
 	{
 		Field[] fields = GenericReflection.getDeclaredFieldsByConditionId(currentClass, "form:elements");
-		if(fields == null)
-		{			
+		if(fields == null) {			
 			List<Field> fieldList = new ArrayList<Field>();
 			
 			registerFields(currentClass, fieldList);

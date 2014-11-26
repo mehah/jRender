@@ -19,62 +19,58 @@ import java.nio.charset.Charset;
 import javax.servlet.http.Part;
 
 public final class FileUtils {
-	private static String pathWebContent;
+	private static final String pathWebContent = GreenContext.class.getClassLoader().getResource("").getPath()+"../../";
 	
 	private FileUtils() {}
 	
 	public final static String getExtension(String filePath) { return filePath.substring(filePath.lastIndexOf(".")+1); }
 	
-	public final static StringBuilder getContentFile(URL file) throws IOException {
+	public final static String getContentFile(URL file) throws IOException {
 		InputStream fstream = null;		
 		DataInputStream in = null;
-		BufferedReader br = null;
-		StringBuilder str = null;
-		
+		BufferedReader br = null;		
 		try {
 			fstream = file.openStream();			
 			in = new DataInputStream(fstream);
 			br = new BufferedReader(new InputStreamReader(in));
 						
 			String strLine;
-			str = new StringBuilder();
+			StringBuilder str = new StringBuilder();
 			while ((strLine = br.readLine()) != null)
 				str.append(str.length() == 0 ? "" : "\n").append(strLine);
+			
+			return str.toString();
 		} finally {
-			if(fstream !=null) fstream.close();
-			if(in !=null) in.close();
-			if(br !=null) br.close();
+			if(fstream != null) fstream.close();
+			if(in != null) in.close();
+			if(br != null) br.close();
 		}
-		
-		return str;
 	}
 	
-	public final static StringBuilder getContentFile(URL file, Charset charset, FileRead read) throws IOException {
+	public final static String getContentFile(URL file, Charset charset, FileRead read) throws IOException {
 		InputStream fstream = null;		
 		DataInputStream in = null;
-		BufferedReader br = null;
-		StringBuilder str = null;
-		
+		BufferedReader br = null;		
 		try {
 			fstream = file.openStream();			
 			in = new DataInputStream(fstream);
 			br = new BufferedReader(new InputStreamReader(in, charset));
 						
 			String strLine;
-			str = new StringBuilder();
+			StringBuilder str = new StringBuilder();
 			while ((strLine = br.readLine()) != null && (strLine = read.reading(strLine)) != null)
 				str.append(strLine);
+			
+			return str.toString();
 		} finally {
-			if(fstream !=null) fstream.close();
-			if(in !=null) in.close();
-			if(br !=null) br.close();
+			if(fstream != null) fstream.close();
+			if(in != null) in.close();
+			if(br != null) br.close();
 		}
-		
-		return str;
 	}
 	
 	public final static void copyTo(URL file, String folder) throws IOException {
-		createFile(getContentFile(file).toString(), folder);
+		createFile(getContentFile(file), folder);
 	}
 	
 	public final static void copyTo(Part part, String folder) throws IOException {
@@ -95,29 +91,25 @@ public final class FileUtils {
 	}
 	
 	public final static File createFile(String content, File file) throws IOException {
-		return createFile(content, file.getAbsolutePath());
-	}
-	
-	public final static File createFile(String content, String folder) throws IOException {
 		Writer output = null;
 		try {
-			File newFile = new File(folder);
-			if(!newFile.exists())
-				newFile.createNewFile();
+			if(!file.exists())
+				file.createNewFile();
 			
-			output = new BufferedWriter(new FileWriter(newFile));
+			output = new BufferedWriter(new FileWriter(file));
 			output.write(content);
 			
-			return newFile;
+			return file;
 		} finally {
 			if(output != null) output.close();
 		}
 	}
 	
+	public final static File createFile(String content, String folder) throws IOException {
+		return createFile(content, new File(folder));
+	}
+	
 	public static File getFileInWebContent(String end) {
-		if(pathWebContent == null)
-			pathWebContent = GreenContext.class.getClassLoader().getResource("").getPath()+"../../";
-			
 		return new File(pathWebContent+end);
 	}
 	

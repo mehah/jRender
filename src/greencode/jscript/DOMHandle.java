@@ -54,7 +54,7 @@ public final class DOMHandle {
 
 	
 	public static void execCommand(DOM dom, String methodName, Object... args) { ElementsScan.registerCommand(dom, methodName, args); }
-
+	
 	public static void setProperty(DOM dom, String name, Object value) {
 		dom.variables.put(name, value);
 		ElementsScan.registerCommand(dom, "#"+name, value);
@@ -172,5 +172,19 @@ public final class DOMHandle {
 	
 	public static boolean isForcingSynchronization(GreenContext context, String property) {
 		return greencode.kernel.$GreenContext.isForcingSynchronization(context, property);
+	}
+	
+	public static class CustomMethod {
+		public static void call(DOM dom, String methodName, Object... args) { execCommand(dom, "@customMethod."+methodName, args); }
+		
+		public static void registerElement(DOM owner, Node e, String name, Object... parameters)
+		{ registerReturnByCommand(owner, e.uid, "@customMethod."+name, parameters); }
+						
+		public static void registerReturn(DOM owner, int uid, String name, Object... parameters)
+		{ registerReturnByCommand(owner, uid, "@customMethod."+name, parameters); }
+		
+		public static void registerReturn(DOM owner, int[] uids, String name, Object... parameters) {
+			registerReturnByCommand(owner, uids, "@customMethod."+name, parameters);
+		}
 	}
 }

@@ -261,16 +261,14 @@ public final class Page {
 				}
 				
 				content = src.html().replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
-			}
-			
-			if(content == null)
-				content = FileUtils.getContentFile(file.toURI().toURL()).toString();
+			} else
+				content = FileUtils.getContentFile(file.toURI().toURL());
 			
 			if(GreenCodeConfig.View.useMinified) {
 				HtmlCompressor html = new HtmlCompressor();
 				html.setRemoveIntertagSpaces(true);
 				content = html.compress(content);
-			}			
+			}
 			
 			if(isView) {
 				if(page == null) {
@@ -338,9 +336,7 @@ public final class Page {
 					if(!modulesFolder.exists())
 						modulesFolder.mkdir();
 					
-					final StringBuilder
-						fileContent = FileUtils.getContentFile(url),
-						methodsJS = new StringBuilder();
+					final StringBuilder methodsJS = new StringBuilder();
 					
 					final Method[] methods = GenericReflection.getDeclaredMethods(c);								
 					for (Method method : methods) {
@@ -353,7 +349,7 @@ public final class Page {
 					}
 					
 					FileUtils.createFile(
-						"Greencode.modules."+page.name()+"=function(principalElement, __viewId, __cid){"+methodsJS.toString()+fileContent.toString()+"}",
+						"Greencode.modules."+page.name()+"=function(principalElement, __viewId, __cid){"+methodsJS.toString()+FileUtils.getContentFile(url)+"}",
 						modulesFolder.getPath()+"/"+modulePath.substring(modulePath.lastIndexOf('/'))
 					);
 				} catch (IOException e) {

@@ -42,7 +42,7 @@ public final class ElementHandle {
 	public static<E extends Element> E[] cast(Element[] elements, Class<E> castTo) {
 		if(castTo.equals(Element.class))
 			return (E[]) elements;
-		
+			
 		E[] list = (E[]) Array.newInstance(castTo, elements.length);
 		
 		for (int i = -1; ++i < elements.length;)
@@ -52,12 +52,12 @@ public final class ElementHandle {
 	}
 	
 	public static void empty(Element e) {
-		DOMHandle.execCommand(e, "@customMethod.empty");
+		DOMHandle.CustomMethod.call(e, "empty");
 	}
 	
 	public static Element getOrCreateElementByTagName(Element owner, String tagName) {
 		Element e = new Element(owner.window);		
-		DOMHandle.registerElementByCommand(owner, e, "@customMethod.getOrCreateElementByTagName", tagName);		
+		DOMHandle.CustomMethod.registerElement(owner, e, "getOrCreateElementByTagName", tagName);		
 		return e;
 	}
 	

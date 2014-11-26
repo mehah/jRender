@@ -99,7 +99,7 @@ public class Element extends Node {
 		if(conversation == null)
 			conversation = GreenContext.getInstance().getRequest().getConversation();
 		
-		DOMHandle.execCommand(this, "@customMethod.appendController", url, conversation.getId());
+		DOMHandle.CustomMethod.call(this, "appendController", url, conversation.getId());
 	}
 	
 	public void innerHTML(String html) { DOMHandle.setProperty(this, "innerHTML", html); }

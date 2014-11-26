@@ -26,7 +26,7 @@ final class Form {
 			
 			context.requestedForm = context.currentWindow.document.forms(formClass);
 			
-			Field[] fields = greencode.jscript.$Form.processFields(formClass);
+			Field[] fields = greencode.jscript.$Form.getElementFields(context.requestedForm);
 			
 			final boolean METHOD_TYPE_IS_GET = context.getRequest().isMethod(RequestMethod.GET);
 			

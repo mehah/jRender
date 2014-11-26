@@ -108,6 +108,61 @@ Greencode.customMethod = {
 		var list = this.getElementsByTagName(tagName);						
 		return list.length == 0 ? table.appendChild(document.createElement(tagName)) : list[0];
 	},
+	fillForm: function(a) {
+		for(var i in a) {
+			var o = a[i];
+			
+			var elements = Greencode.crossbrowser.querySelectorAll.call(this, '[name="'+o.name+'"]');
+			if(elements == null)
+				continue;
+			
+			if(!Greencode.jQuery.isArray(o.values))
+				o.values = [o.values];
+			
+			var first = elements[0];
+			if(first.tagName == 'TEXTAREA')
+				first.value = o.values;
+			else if(first.tagName == 'SELECT') {
+				for(var i2 in first.options) {
+					var option = first.options[i2];
+					if(first.multiple) {
+						for(var i3 in o.values) {
+							if(option.value == o.values[i3]) {
+								option.selected = true;
+								break;
+							}
+						}
+					}else if(option.value == o.values[0]){
+						option.selected = true;
+						break;
+					}
+				}
+			}else if(first.tagName == 'INPUT') {
+				var isRadio = first.type == 'radio';
+				if(isRadio || first.type == 'checkbox') {
+					for(var i2 in elements) {
+						var e = elements[i2];
+						var achou = false;
+						for(var i3 in o.values) {
+							if(e.value == o.values[i3]) {
+								e.checked = true;
+								if(isRadio) {
+									achou = true;
+									break;
+								}
+							}
+							
+							if(achou)
+								break;
+						}
+					}					
+				}else
+					first.value = o.values[0];
+			}				
+		}
+		
+		return this;
+	},
 	querySelector: function(selector, attrs, not) {
 		return Greencode.customMethod.querySelectorAll(selector, attrs, not)[0];
 	},
