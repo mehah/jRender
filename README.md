@@ -10,6 +10,10 @@ Requirements
 - [JSOUP](http://jsoup.org/)  
 - [HTMLCompressor](https://code.google.com/p/htmlcompressor/) (Optional)  
 
+Support javascript Development
+- [Sizzle](http://sizzlejs.com/)  
+- [JSON3](http://bestiejs.github.io/json3/)
+
 Understand:  
 - Annotation
 	- [Page and RegisterPage](/understand/pageRegisterPage.md)  
