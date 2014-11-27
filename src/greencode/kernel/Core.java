@@ -83,7 +83,7 @@ public final class Core implements Filter {
 	};
 	
 	private final static String[] coreJSFiles = {
-		"json2.js",
+		"json3.js",
 		"greencode.js",
 		"greencodeFunction.js",
 		"iframeHttpRequest.js",
