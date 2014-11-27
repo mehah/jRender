@@ -1,7 +1,6 @@
 package greencode.jscript;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -41,11 +40,8 @@ public abstract class Form extends Element {
 		
 		if(visibleAnnotation == null)
 			DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "@crossbrowser.querySelector", "form[name=\""+name+"\"]");
-		else {
-			HashMap<String, String[]> attrs = new HashMap<String, String[]>();
-			attrs.put("display", new String[]{"none"});
-			DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "@customMethod.querySelector", "form[name=\""+name+"\"]", attrs, !visibleAnnotation.value());
-		}
+		else
+			DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "@customMethod.querySelector", "form[name=\""+name+"\"]", "return (this.offsetHeight "+(visibleAnnotation.value() ? "!" : "=")+"== 0);");
 	}
 	
 	void processAnnotation() {
@@ -77,12 +73,12 @@ public abstract class Form extends Element {
 			if(type.isArray()) {
 				type = (Class<? extends Element>) type.getComponentType();
 				if(context == null)
-					v = ElementHandle.cast(window.document.querySelectorAll(a.selector()), type);
+					v = ElementHandle.cast(this.querySelectorAll(a.selector()), type);
 				else
 					v = ElementHandle.cast(context.querySelectorAll(a.selector()), type);
 			} else {
 				if(context == null)
-					v = ElementHandle.cast(window.document.querySelector(a.selector()), type);
+					v = ElementHandle.cast(this.querySelector(a.selector()), type);
 				else
 					v = ElementHandle.cast(context.querySelector(a.selector()), type);
 			}

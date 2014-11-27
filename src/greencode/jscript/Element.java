@@ -32,7 +32,7 @@ public class Element extends Node {
 	}
 	
 	public String style(String property) {
-		return DOMHandle.getVariableValueByProperty(this, "style."+property, String.class, "style."+property);
+		return DOMHandle.getVariableValueByCommand(this, "style."+property, String.class, "@crossbrowser.getStyle", property);
 	}
 	
 	public Element[] getElementsByTagName(String tagName) {

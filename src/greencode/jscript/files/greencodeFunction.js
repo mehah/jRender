@@ -58,6 +58,35 @@ Greencode.crossbrowser = {
 	hasAttribute: function(attrName) {
 		return this.hasAttribute ? this.hasAttribute(attrName)
                 : this[attrName] !== undefined;
+	},
+	/*
+	 * Ref:
+	 * http://stackoverflow.com/questions/2664045/how-to-retrieve-a-styles-value-in-javascript
+	 */
+	getStyle: function(styleProp) {
+		var value, defaultView = (this.ownerDocument || document).defaultView;
+		if (defaultView && defaultView.getComputedStyle) {
+			styleProp = styleProp.replace(/([A-Z])/g, "-$1").toLowerCase();
+			return defaultView.getComputedStyle(this, null).getPropertyValue(
+					styleProp);
+		} else if (this.currentStyle) {
+			styleProp = styleProp.replace(/\-(\w)/g, function(str, letter) {
+				return letter.toUpperCase();
+			});
+			value = this.currentStyle[styleProp];
+			if (/^\d+(em|pt|%|ex)?$/i.test(value)) {
+				return (function(value) {
+					var oldLeft = this.style.left, oldRsLeft = this.runtimeStyle.left;
+					this.runtimeStyle.left = this.currentStyle.left;
+					this.style.left = value || 0;
+					value = this.style.pixelLeft + "px";
+					this.style.left = oldLeft;
+					this.runtimeStyle.left = oldRsLeft;
+					return value;
+				})(value);
+			}
+			return value;
+		}
 	}
 };
 
@@ -164,29 +193,40 @@ Greencode.customMethod = {
 		return this;
 	},
 	querySelector: function(selector, attrs, not) {
-		return Greencode.customMethod.querySelectorAll(selector, attrs, not)[0];
+		return Greencode.customMethod.querySelectorAll.call(this, selector, attrs, not)[0];
 	},
 	querySelectorAll: function(selector, attrs, not) {
-		var newList = new Array();
-		var list = Greencode.crossbrowser.querySelectorAll.call(this, selector);
-		for(var i in list) {			
+		var newList = new Array(),
+			list = Greencode.crossbrowser.querySelectorAll.call(this, selector),
+			attrIsString = typeof attrs === "string",
+			validator = function() {
+				return eval('(function() {' +attrs+ '}.call(this));');
+			};
+		
+		for(var i = -1; ++i < list.length;) {
 			var e = list[i];
-			for(var a in attrs) {
-				var pushed = false;
-				var attrValues = attrs[a];
-				var cssValue = e.style[a];
-				for(var v in attrValues) {
-					if(attrValues[v] == cssValue) {
+			
+			if(attrIsString) {
+				if(validator.call(e))
+					newList.push(e);
+			} else {
+				for(var a in attrs) {
+					var pushed = false;
+					var attrValues = attrs[a];
+					var cssValue = Greencode.crossbrowser.getStyle.call(e, a);
+					for(var v in attrValues) {
+						if(attrValues[v] == cssValue) {
+							newList.push(e);
+							pushed = true;
+							break;
+						}
+					}
+					if(pushed)
+						break;
+					else if(not) {
 						newList.push(e);
-						pushed = true;
 						break;
 					}
-				}
-				if(pushed)
-					break;
-				else if(not) {
-					newList.push(e);
-					break;
 				}
 			}
 		}

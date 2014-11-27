@@ -61,21 +61,40 @@ public final class ElementHandle {
 		return e;
 	}
 	
-	public static Element querySelector(Element owner, String selector, HashMap<String, String[]> attrs, boolean not) {
+	public static Element querySelector(Element owner, String selector, HashMap<String, String[]> cssAttrs, boolean not) {
 		Element e = new Element(owner.window);		
-		DOMHandle.registerElementByCommand(owner, e, "@customMethod.querySelector", selector, attrs, not);		
+		DOMHandle.registerElementByCommand(owner, e, "@customMethod.querySelector", selector, cssAttrs, not);		
 		return e;
 	}
 	
-	public static Element[] querySelectorAll(Element owner, String selector, HashMap<String, String[]> attrs, boolean not) {
-		final int qnt = DOMHandle.getVariableValueByPropertyNoCache(owner, "querySelectorAll.length", Integer.class, "@customMethod.querySelectorAll('"+selector+"', "+new Gson().toJson(attrs)+","+not+").length");
+	public static Element[] querySelectorAll(Element owner, String selector, HashMap<String, String[]> cssAttrs, boolean not) {
+		final int qnt = DOMHandle.getVariableValueByPropertyNoCache(owner, "querySelectorAll.length", Integer.class, "@customMethod.querySelectorAll('"+selector+"', "+new Gson().toJson(cssAttrs)+","+not+").length");
 		
 		Element[] elements = new Element[qnt];
 		int[] uids = new int[qnt];
 		for (int i = -1; ++i < qnt;)
 			uids[i] = DOMHandle.getUID(elements[i] = new Element(owner.window));
 		
-		DOMHandle.registerReturnByCommand(owner, uids, "@customMethod.querySelectorAll", selector, attrs, not);
+		DOMHandle.registerReturnByCommand(owner, uids, "@customMethod.querySelectorAll", selector, cssAttrs, not);
+		
+		return elements;
+	}
+	
+	public static Element querySelector(Element owner, String selector, String javascriptSyntax) {
+		Element e = new Element(owner.window);		
+		DOMHandle.registerElementByCommand(owner, e, "@customMethod.querySelector", selector, javascriptSyntax);		
+		return e;
+	}
+	
+	public static Element[] querySelectorAll(Element owner, String selector, String javascriptSyntax) {
+		final int qnt = DOMHandle.getVariableValueByPropertyNoCache(owner, "querySelectorAll.length", Integer.class, "@customMethod.querySelectorAll('"+selector+"', '"+javascriptSyntax+"').length");
+		
+		Element[] elements = new Element[qnt];
+		int[] uids = new int[qnt];
+		for (int i = -1; ++i < qnt;)
+			uids[i] = DOMHandle.getUID(elements[i] = new Element(owner.window));
+		
+		DOMHandle.registerReturnByCommand(owner, uids, "@customMethod.querySelectorAll", selector, javascriptSyntax);
 		
 		return elements;
 	}
