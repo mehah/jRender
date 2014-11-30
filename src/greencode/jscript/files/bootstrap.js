@@ -88,9 +88,10 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 	} else {
 		objectEvent.processing = true;
 
-		var _args = null;
+		var param = {}, form = null, formName = null;
+		
 		if(p.args != null) {
-			_args = [];
+			param._args = [];
 			for( var i in p.args) {
 				var o = p.args[i], arg = __arguments[i];
 				if(arg != null) {
@@ -110,20 +111,23 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 					});
 
 					_arg.fields = JSON.stringify(_arg.fields);
-					_args.push(JSON.stringify(_arg));
+					param._args.push(JSON.stringify(_arg));
 				}
 			}
 		}
 
-		var param = {}, form = null;
-
+		
 		if(p.formName != null) {
 			form = Greencode.crossbrowser.querySelector.call(mainElement, 'form[name="' + p.formName + '"]');
 			if(form == null && typeof console != 'undefined')
 				console.warn("Could not find the form with name " + p.formName + ".");
-		} else if(target.form != null)
+			else
+				formName = p.formName;
+		} else if(target.form != null) {
 			form = target.form;
-
+			formName = form.getAttribute("name");
+		}
+		
 		if(form != null) {
 			var names = p.formNameFields;
 			if(names == null) {
@@ -133,8 +137,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 					if(name)
 						names.push(name);
 				}
-
-				p.formName = target.form.getAttribute('name');
+				
 				p.formNameFields = names;
 			}
 
@@ -189,15 +192,12 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 					}
 				}
 			}
+			
+			param.__requestedForm = formName;
 		}
 
 		param.cid = p.cid;
 		param.viewId = p.viewId;
-		if(p.formName)
-			param.__requestedForm = p.formName;
-
-		if(_args != null)
-			param._args = _args;
 
 		param._buttonId = target.window == null ? target.id == null ? target.name : target.id : 'Window';
 
