@@ -67,16 +67,22 @@ public abstract class SelectElementPrototype extends Element {
 	
 	private OptionElementCollection options;
 	
-	public OptionElementCollection options() { return options(false); }
-	
-	public OptionElementCollection options(boolean eager) {
-		if(greencode.kernel.$GreenContext.isForcingSynchronization(GreenContext.getInstance(), "options"))
-			options = null;
-		
-		if(options == null)
+	public OptionElementCollection options() {
+		if(options == null) {
 			DOMHandle.registerReturnByProperty(this, DOMHandle.getUID(options = new OptionElementCollection(this.window)), "options");
+			options.list = new ArrayList<OptionElement>();
+		}
+		return options;
+	}
+	
+	/*
+	 * Synchronized Options 
+	 */
+	public OptionElementCollection options(final boolean fetchEager) {
+		options = null;		
+		options();
 		
-		if(eager && options.list == null) {
+		if(fetchEager) {
 			JsonArray res = DOMHandle.getJSONArrayByProperty(this, "__contentOptions", "options", "value", "text", "id", "index", "selected", "disabled", "defaultSelected");
 			DOMHandle.removeVariable(this, "__contentOptions");
 			
@@ -97,7 +103,7 @@ public abstract class SelectElementPrototype extends Element {
 					DOMHandle.registerElementByProperty(this, option, "options["+i+"]");
 				}
 			}
-		}else if(options.list == null)			
+		}else
 			options.length();
 		
 		return options;
