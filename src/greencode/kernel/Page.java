@@ -177,11 +177,10 @@ public final class Page {
 					}
 					
 					if(templateImported != null) {
+						ele.remove();
 						src.head().replaceWith(templateImported.head().clone());
 						src.body().replaceWith(templateImported.body().clone().append(src.body().html()));
 					}
-					
-					ele.remove();
 					
 					String title = ele.attr("title");
 					if(title != null && !title.isEmpty()) {
@@ -193,8 +192,10 @@ public final class Page {
 					
 					List<Element> elementsHead = src.getElementsByTag("template:head");
 					if(!elementsHead.isEmpty()) {
-						for (Element e : elementsHead)
+						for (Element e : elementsHead) {
 							src.head().append(e.html());
+							e.remove();
+						}
 					}
 					
 					List<Element> elementsDefine = src.getElementsByTag("template:define");
