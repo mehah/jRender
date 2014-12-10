@@ -135,7 +135,7 @@ Greencode.customMethod = {
 	},
 	getOrCreateElementByTagName: function(tagName) {
 		var list = this.getElementsByTagName(tagName);						
-		return list.length == 0 ? table.appendChild(document.createElement(tagName)) : list[0];
+		return list.length == 0 ? this.appendChild(document.createElement(tagName)) : list[0];
 	},
 	fillForm: function(a) {
 		for(var i in a) {
