@@ -226,7 +226,12 @@ public final class Page {
 							if(!GreenCodeConfig.View.bootable)
 								inserted.add(_page);
 							
-							element.after(_page.content).remove();
+							if(element.hasAttr("head"))
+								src.head().append(_page.content);
+							else
+								element.after(_page.content);
+							
+							element.remove();
 						} catch (IOException e) {
 							Console.error(LogMessage.getMessage("green-0020", attrSrc, "template:include", file.getName()));
 						}
