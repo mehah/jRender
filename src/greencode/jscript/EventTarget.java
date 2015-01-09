@@ -12,6 +12,9 @@ public abstract class EventTarget extends DOM {
 	public void addEventListener(String eventName, FunctionHandle handle)
 	{ DOMHandle.execCommand(this, "@crossbrowser.registerEvent", eventName, handle); }
 	
+	public void addEventListener(String eventName, FunctionHandle handle, Object... args)
+	{ DOMHandle.execCommand(this, "@crossbrowser.registerEvent", eventName, handle, args); }
+	
 	/**
 	 * No internet explorer irá usar fireEvent
 	 */

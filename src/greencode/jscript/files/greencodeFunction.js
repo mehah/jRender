@@ -244,7 +244,7 @@ Greencode.customEvent.scrollreachpercent = {
 			data: {}
 		};
 		
-		handleObj.data.percent = parseInt(data);
+		handleObj.data.percent = parseInt(data[0]);
 		handleObj.data.beginDown = handleObj.lastCcrollPercent > handleObj.data.percent;
 		handleObj.data.beginUp = handleObj.lastCcrollPercent < handleObj.data.percent;
 		
@@ -300,8 +300,11 @@ Greencode.customEvent.scrollreachbottom = {
 };
 
 Greencode.customEvent.keyuptime = {
-	add: function(callback) {
-		var handleObj = {};
+	add: function(callback, data) {
+		var handleObj = {
+			time: data && data[0] ? data[0] : 500
+		};			
+		
 		Greencode.crossbrowser.registerEvent.call(this, 'keyup', function(event) {
 			Greencode.customEvent.keyuptime.handle.call(this, callback, event, handleObj);				
 		});
@@ -322,7 +325,7 @@ Greencode.customEvent.keyuptime = {
 			
 			handleObj.lastTxt = value;
 			handleObj.eventClick = 0;
-		}, 500);	
+		}, handleObj.time);	
     }
 };
 
