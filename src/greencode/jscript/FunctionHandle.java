@@ -206,6 +206,12 @@ public final class FunctionHandle {
 		}
 	}
 	
+	public void addParameter(String parameter) {
+		if(formNameFields == null)
+			formNameFields = new ArrayList<String>();
+		formNameFields.add(parameter);
+	}
+	
 	private void setUrl(String url) {
 		this.url = (context != null ? context.getRequest().getContextPath(): "") +"/"+url;
 	}

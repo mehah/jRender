@@ -2,15 +2,15 @@ package greencode.http;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.http.HttpSession;
 
 public final class ViewSessionContext {
 	static final List<ViewSession> globalViewList = new ArrayList<ViewSession>();
 	
-	final Hashtable<Integer, ViewSession> views;
+	final ConcurrentHashMap<Integer, ViewSession> views;
 	
 	void addView(Integer id, ViewSession view) {
 		views.put(id, view);
@@ -22,9 +22,9 @@ public final class ViewSessionContext {
 	
 	@SuppressWarnings("unchecked")
 	ViewSessionContext(HttpSession session) {	
-		Hashtable<Integer, ViewSession> _views = (Hashtable<Integer, ViewSession>) session.getAttribute("VIEW_SESSIONS");
+		ConcurrentHashMap<Integer, ViewSession> _views = (ConcurrentHashMap<Integer, ViewSession>) session.getAttribute("VIEW_SESSIONS");
 		if(_views == null)
-			session.setAttribute("VIEW_SESSIONS", views = new Hashtable<Integer, ViewSession>());
+			session.setAttribute("VIEW_SESSIONS", views = new ConcurrentHashMap<Integer, ViewSession>());
 		else
 			views = _views;
 		
