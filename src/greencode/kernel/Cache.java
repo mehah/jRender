@@ -11,7 +11,8 @@ import java.io.File;
 import java.util.HashMap;
 
 class Cache {
-	static final File defaultTemplate = null;	
+	static final File defaultTemplate = null;
+	static final HashMap<String, File> templates = new HashMap<String, File>();
 	static final BootActionImplementation bootAction = null;
 	static final Class<? super DatabaseConnectionEvent> classDatabaseConnectionEvent = null;
 	static final PluginImplementation[] plugins = null;

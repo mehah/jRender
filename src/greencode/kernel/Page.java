@@ -157,20 +157,18 @@ public final class Page {
 	
 					Document templateImported = null;
 					
-					String strTemplate = ele.attr("src");
-					if(strTemplate != null && !strTemplate.isEmpty()) {
-						String caminho = file.getParentFile().getAbsolutePath()+"/"+strTemplate;
-						File f = new File(caminho);
-						try {
+					String templateName = ele.attr("name");
+					if(templateName != null && !templateName.isEmpty()) {
+						File f = Cache.templates.get(templateName);
+						if(f != null) {
 							Page template = loadStructure(f);
 							
 							if(!GreenCodeConfig.View.bootable)
 								inserted.add(template);
 							
-							templateImported = template.document;
-						} catch (IOException e) {
-							Console.error(LogMessage.getMessage("green-0020", strTemplate, "template:import", file.getName()));
-						}
+							templateImported = template.document;							
+						}else
+							Console.error(LogMessage.getMessage("green-0042", templateName));
 					} else {
 		 				Page template = loadStructure(Cache.defaultTemplate);
 						templateImported = template.document;

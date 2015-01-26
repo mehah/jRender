@@ -217,15 +217,16 @@ var Comet = function(url) {
 			} else if(o.getCometType() === Comet().STREAMING) {
 				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null;
 				
-				// Fix for Chrome
-				if(__isChrome) {
-					var posJsonContent = txt.indexOf('class="JSON_CONTENT"');
-					if(posJsonContent != -1 && txt.indexOf('</div j>', posJsonContent) == -1)
-						return;
-				}
-				
-				if(!isIframe)
+				if(!isIframe) {
+					// Fix for Chrome
+					if(__isChrome) {
+						var posJsonContent = txt.indexOf('class="JSON_CONTENT"');
+						if(posJsonContent != -1 && txt.indexOf('</div j>', posJsonContent) == -1)
+							return;
+					}
+					
 					txt = txt.substring(ultLength);
+				}
 				
 				if(jsonContentType) {
 					/*

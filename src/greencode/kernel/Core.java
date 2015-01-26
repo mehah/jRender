@@ -50,6 +50,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map.Entry;
 import java.util.Properties;
 
 import javax.servlet.Filter;
@@ -571,11 +572,25 @@ public final class Core implements Filter {
 			}
 			System.out.print(" [done]\n");
 			
-			if(GreenCodeConfig.View.templateFile != null) {
-				System.out.println(defaultLogMsg+"Caching Default Template: "+GreenCodeConfig.View.templateFile);
-				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", FileUtils.getFileInWebContent(GreenCodeConfig.View.templateFile));
-				if(!Cache.defaultTemplate.exists())
-					throw new IOException(LogMessage.getMessage("green-0002", GreenCodeConfig.View.templateFile));
+			if(GreenCodeConfig.View.templatePaths != null) {
+				System.out.println(defaultLogMsg+"Caching Template(s)...");
+				
+				if(GreenCodeConfig.View.templatePaths != null) {
+					for (Entry<String, String> entry : GreenCodeConfig.View.templatePaths.entrySet()) {
+						File f = FileUtils.getFileInWebContent(entry.getValue());
+						Cache.templates.put(entry.getKey(), f);
+						
+						if(!f.exists())
+							throw new IOException(LogMessage.getMessage("green-0002", entry.getValue()));
+						
+						String _default = "";
+						if(Cache.defaultTemplate == null && entry.getValue().equals(GreenCodeConfig.View.defaultTemplatePath)) {
+							GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", f);
+							_default = "(Default)";
+						}
+						System.out.println(defaultLogMsg+"Template"+_default+": "+entry.getValue());
+					}
+				}
 			}
 			
 			if(classDatabaseConnection != null) {

@@ -17,9 +17,11 @@
 		bootable=true
 		seek-change=false
 	 -->
-	<view bootable="false" seek-change="true" charset="utf-8">
-		<!-- <template-file>template/template.html</template-file> -->
-		<use-minified>false</use-minified>
+	<view bootable="false" seek-change="true" charset="utf-8" use-minified="false">
+		<!-- <templates>
+			<file name="template" path="template/template.html" default="default" />
+			<file name="templateAdm" path="template/templateAdm.html" />
+		</templates> -->	
 	</view>
 	
 	<viewSession maxInactiveInterval="1800" /> <!-- 60*30 = 1800 (30min) -->

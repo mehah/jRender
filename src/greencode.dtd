@@ -1,6 +1,6 @@
 <!-- Greencode DTD -->
 
-<!ELEMENT greencode-config (console, browser, multipart, response, view, viewSession, anti-flood, database?, internationalization?)>
+<!ELEMENT greencode-config (console, browser, multipart, response, view, viewSession, anti-flood, database?, internationalization?, plugins?)>
 <!ELEMENT console EMPTY>
 	<!ATTLIST console writeLog ( true | false ) "true" >
 	
@@ -14,12 +14,16 @@
 <!ELEMENT response EMPTY>
 	<!ATTLIST response gzip ( true | false ) "false" >
 	
-<!ELEMENT view (template-file?, use-minified?)>
+<!ELEMENT view (templates?)>
 	<!ATTLIST view bootable ( true | false ) "false" >
 	<!ATTLIST view seek-change ( true | false ) "true" >
+	<!ATTLIST view use-minified ( true | false ) "true" >	
 	<!ATTLIST view charset CDATA #REQUIRED>
-	<!ELEMENT template-file ANY>
-	<!ELEMENT use-minified ANY>
+	<!ELEMENT templates (file+)>
+		<!ELEMENT file EMPTY>
+			<!ATTLIST file name CDATA #REQUIRED>
+			<!ATTLIST file path CDATA #REQUIRED>
+			<!ATTLIST file default CDATA #FIXED "default">
 	
 <!ELEMENT viewSession EMPTY>
 	<!ATTLIST viewSession maxInactiveInterval CDATA #REQUIRED>

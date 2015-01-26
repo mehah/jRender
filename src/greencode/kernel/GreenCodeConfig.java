@@ -11,9 +11,11 @@ import java.net.URL;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.naming.ConfigurationException;
 
@@ -66,12 +68,25 @@ public final class GreenCodeConfig {
 				Element currentElement = listCurrentElement.get(0);
 				GenericReflection.NoThrow.setFinalStaticValue(View.class, "charset", currentElement.attr("charset"));
 				GenericReflection.NoThrow.setFinalStaticValue(View.class, "bootable", Boolean.parseBoolean(currentElement.attr("bootable")));
-				GenericReflection.NoThrow.setFinalStaticValue(View.class, "useMinified", Boolean.parseBoolean(currentElement.getElementsByTag("use-minified").get(0).text()));
+				GenericReflection.NoThrow.setFinalStaticValue(View.class, "useMinified", Boolean.parseBoolean(currentElement.attr("use-minified")));
 				GenericReflection.NoThrow.setFinalStaticValue(View.class, "seekChange", Boolean.parseBoolean(currentElement.attr("seek-change")));
 				
-				listCurrentElement = currentElement.getElementsByTag("template-file");					
-				if(!listCurrentElement.isEmpty() && !(value = listCurrentElement.get(0).text()).isEmpty())
-					GenericReflection.NoThrow.setFinalStaticValue(View.class, "templateFile", value);
+				listCurrentElement = currentElement.getElementsByTag("templates");
+				if(!listCurrentElement.isEmpty()) {
+					currentElement = listCurrentElement.get(0);
+					listCurrentElement = currentElement.getElementsByTag("file");
+					if(!listCurrentElement.isEmpty()) {
+						Map<String, String> list = new HashMap<String, String>();
+						
+						for (Element element : listCurrentElement) {
+							if(View.defaultTemplatePath == null && element.hasAttr("default"))
+								GenericReflection.NoThrow.setFinalStaticValue(View.class, "defaultTemplatePath", element.attr("path"));
+							list.put(element.attr("name"), element.attr("path"));
+						}
+						GenericReflection.NoThrow.setFinalStaticValue(View.class, "templatePaths", Collections.unmodifiableMap(list));
+					}
+				}
+					
 			}
 			
 			listCurrentElement = greencodeCofig.getElementsByTag("viewSession");
@@ -158,7 +173,8 @@ public final class GreenCodeConfig {
 	
 	public final static class View {
 		public final static Boolean bootable = false;
-		public final static String templateFile = null;
+		public final static String defaultTemplatePath = null;
+		public final static Map<String, String> templatePaths = null;
 		public final static Boolean useMinified = false;
 		public final static String charset = DEFAULT_CHARSET;
 		public final static Boolean seekChange = true;
