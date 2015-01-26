@@ -216,10 +216,17 @@ var Comet = function(url) {
 				}
 			} else if(o.getCometType() === Comet().STREAMING) {
 				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null;
-
+				
+				// Fix for Chrome
+				if(__isChrome) {
+					var posJsonContent = txt.indexOf('class="JSON_CONTENT"');
+					if(posJsonContent != -1 && txt.indexOf('</div j>', posJsonContent) == -1)
+						return;
+				}
+				
 				if(!isIframe)
 					txt = txt.substring(ultLength);
-
+				
 				if(jsonContentType) {
 					/*
 					 * Remover todas as ',' desnecessárias.
@@ -253,7 +260,7 @@ var Comet = function(url) {
 					}
 				} else
 					data = txt;
-
+				
 				if(this.readyState === DONE) {
 					if(this.status !== 200)
 						erroEvent();

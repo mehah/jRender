@@ -26,15 +26,13 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 	Bootstrap.init();
 
 	Greencode.crossbrowser.registerEvent.call(window, 'popstate', function(e) {
-		if(e.state != null && e.state.content != null) {
+		if(e.state != null && e.state.selector != null) {
 			var o = e.state.selector == 'body' ? document.body : Greencode.crossbrowser.querySelector.call(document.body, e.state.selector);
-			o.innerHTML = e.state.content;
-
+			Greencode.customMethod.empty.call(o);
+			
 			var tags = listTags[window.location.href];
-			for(var i = -1; ++i < o.children.length;) {
-				var child = o.children[i];
-				child.parentNode.replaceChild(tags[child.getAttribute('_uid')], child);
-			}
+			for(var i in tags)
+				o.appendChild(tags[i]);
 		}
 	});
 });

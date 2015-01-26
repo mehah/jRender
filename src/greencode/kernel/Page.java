@@ -1,5 +1,12 @@
 package greencode.kernel;
 
+import greencode.jscript.FunctionHandle;
+import greencode.jscript.Window;
+import greencode.util.FileUtils;
+import greencode.util.GenericReflection;
+import greencode.util.MergedFile;
+import greencode.util.StringUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -19,13 +26,6 @@ import org.jsoup.select.Elements;
 
 import com.google.gson.Gson;
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
-
-import greencode.jscript.FunctionHandle;
-import greencode.jscript.Window;
-import greencode.util.FileUtils;
-import greencode.util.GenericReflection;
-import greencode.util.MergedFile;
-import greencode.util.StringUtils;
 
 public final class Page {
 	final static HashMap<String, Page> pages = new HashMap<String, Page>();
@@ -89,13 +89,13 @@ public final class Page {
 	
 	private boolean changed() { return file != null && lastModified != file.lastModified(); }
 	
-	private void verifyChanges() { verifyChanges(this); }
+	private void verifyChanges() { verifyChanges(this, true); }
 	
-	private boolean verifyChanges(final Page page) {
+	private boolean verifyChanges(final Page page, boolean isPrincipal) {
 		boolean changed = false;
 		if(page.inserted != null) {
 			for (Page i : page.inserted) {
-				if(verifyChanges(i))
+				if(verifyChanges(i, false))
 					changed = true;
 			}
 		}
@@ -107,7 +107,10 @@ public final class Page {
 				page.selector = null;
 				page.ajaxSelector = null;
 				page.lastModified = 0;
-				Page.loadStructure(page.file);
+				if(isPrincipal)
+					Page.loadStructure(page.file, page, true);
+				else
+					Page.loadStructure(page.file);
 			} catch (IOException e) {
 				Console.error(e);
 			}
@@ -116,10 +119,10 @@ public final class Page {
 		return changed;
 	}
 	
-	private static Page loadStructure(File file) throws IOException { return loadStructure(file, null); }
+	private static Page loadStructure(File file) throws IOException { return loadStructure(file, null, false); }
 	
 	//TODO: Verificar futuramente para possíveis otimizações.
-	private static Page loadStructure(File file, Page page) throws IOException {
+	private static Page loadStructure(File file, Page page, boolean importCoreJS) throws IOException {
 		final String ext = FileUtils.getExtension(file.getName());
 		
 		final boolean
@@ -266,6 +269,9 @@ public final class Page {
 					e.removeAttr("join").removeAttr("file");
 				}
 				
+				if(importCoreJS)
+					src.head().prepend("<script type=\"text/javascript\" src=\""+Core.SRC_CORE_JS_FOR_SCRIPT_HTML+"\"></script>");
+							
 				content = src.html().replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
 			} else
 				content = FileUtils.getContentFile(file.toURI().toURL());
@@ -321,7 +327,7 @@ public final class Page {
 					mobilePage.file = file;
 					
 					if(GreenCodeConfig.View.bootable)
-						loadStructure(file, mobilePage);
+						loadStructure(file, mobilePage, true);
 					
 					pReference.mobilePage = mobilePage;
 				}else
@@ -369,7 +375,7 @@ public final class Page {
 				pages.put(page.URLName().isEmpty() ? page.path() : page.URLName(), pReference);
 				
 				if(GreenCodeConfig.View.bootable)
-					loadStructure(file, pReference);
+					loadStructure(file, pReference, true);
 			}else
 				Console.error(LogMessage.getMessage("green-0014", page.path()));
 		}
@@ -418,9 +424,9 @@ public final class Page {
 					:
 						"Applying (minified) in "+servletPath);
 		
-					page = loadStructure(file, page);
+					page = loadStructure(file, page, true);
 					if(page != null && page.mobilePage != null)
-						loadStructure(page.mobilePage.file, page.mobilePage);
+						loadStructure(page.mobilePage.file, page.mobilePage, true);
 					
 					requestsCached.add(servletPath);
 				}

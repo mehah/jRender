@@ -75,7 +75,7 @@ public final class Core implements Filter {
 			CONTEXT_PATH = null,
 			projectName = null,
 			defaultLogMsg = null;
-	private final static String SCRIPT_HTML_CORE_JS = null;
+	final static String SRC_CORE_JS_FOR_SCRIPT_HTML = null;
 	private final static Boolean hasError = true;
 	
 	private final static String[] jsFiles = {
@@ -263,9 +263,9 @@ public final class Core implements Filter {
 				if(context.request.isAjax())
 					content = page.pageAnnotation.ajaxSelector().isEmpty() ? page.getContent(context) : page.getAjaxSelectedContent(page.pageAnnotation.ajaxSelector(), context);
 				else if(!page.pageAnnotation.selector().isEmpty())
-						content = page.getSelectedContent(page.pageAnnotation.selector(), context);
+					content = page.getSelectedContent(page.pageAnnotation.selector(), context);
 				else 
-					content = SCRIPT_HTML_CORE_JS+page.getContent(context);
+					content = page.getContent(context);
 
 				context.getResponse().getWriter().write(content);
 			}
@@ -449,7 +449,7 @@ public final class Core implements Filter {
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "projectName", new File(fConfig.getServletContext().getRealPath("/")).getName());
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "defaultLogMsg", "["+Core.projectName+"] ");
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "CONTEXT_PATH", fConfig.getServletContext().getContextPath());
-		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "SCRIPT_HTML_CORE_JS", "<script type=\"text/javascript\" src=\""+Core.CONTEXT_PATH+"/jscript/greencode/core.js\"></script>");
+		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "SRC_CORE_JS_FOR_SCRIPT_HTML", Core.CONTEXT_PATH+"/jscript/greencode/core.js");
 		
 		System.out.println("\nLoading Project: ["+projectName+"]");
 		

@@ -56,7 +56,7 @@ public class ElementsScan {
 		} else {
 			str = new StringBuilder("<div class=\"JSON_CONTENT\" style=\"display: none;\">");
 			if(o != null) str.append(context.gsonInstance.toJson(o));
-			str.append("</div>");
+			str.append("</div j>");
 		}
 		
 		context.getResponse().getWriter().write(str.toString());

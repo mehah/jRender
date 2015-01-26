@@ -1,7 +1,8 @@
 var internationalization_msg = {},
 	Bootstrap = {},
 	__isFirefox = window.mozInnerScreenX != null,
-	__isIE8orLess = document.addEventListener == null;
+	__isIE8orLess = document.addEventListener == null,
+	__isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 
 Bootstrap.analizeJSON = function(mainElement, j, target) {
 	if(j == null || !Greencode.jQuery.isPlainObject(j) && !Greencode.jQuery.isArray(j))
@@ -348,24 +349,18 @@ Bootstrap.buttons = function(mainElement) {
 				cometReceber.setCometType(Comet().STREAMING);
 				cometReceber.reconnect(false);
 				cometReceber.setAsync(true);
-				cometReceber.forceConnectType(Comet().IframeHttpRequest);
 				cometReceber.jsonContentType(false);
 
 				var f = function(data) {
 					if(!first) {
 						first = true;
-						var _href = window.location.href, tags = {};
+						var _href = window.location.href, tags = new Array();
 
 						delete listTags[_href];
 						listTags[_href] = tags;
 
-						for(var ii = -1; ++ii < o.children.length;) {
-							var c = o.children[ii];
-							c.setAttribute('_uid', ++lastUniqueId);
-							tags[lastUniqueId] = c;
-						}
-
-						var oldHtml = o.innerHTML;
+						for(var ii = -1; ++ii < o.childNodes.length;)
+							tags.push(o.childNodes[ii]);
 
 						if(empty)
 							Greencode.customMethod.empty.call(o);
@@ -378,25 +373,20 @@ Bootstrap.buttons = function(mainElement) {
 								window.location.hash = "#!" + href;
 							else {
 								history.replaceState({
-									content : oldHtml,
 									selector : appendTo
 								}, null, location.href);
 								history.pushState({
-									content : o.innerHTML,
 									selector : appendTo
 								}, null, CONTEXT_PATH + '/' + href);
 
 								_href = window.location.href;
 
-								tags = {};
+								tags = new Array();
 								delete listTags[_href];
 								listTags[_href] = tags;
 
-								for(var ii = -1; ++ii < o.children.length;) {
-									var c = o.children[ii];
-									c.setAttribute('_uid', ++lastUniqueId);
-									tags[lastUniqueId] = c;
-								}
+								for(var ii = -1; ++ii < o.childNodes.length;)
+									tags.push(o.childNodes[ii]);
 							}
 						}
 
@@ -491,9 +481,13 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				var jsonDiv = jsons[i];
 
 				if(jsonDiv.parentNode)
-					jsonDiv.parentNode.removeChild(jsonDiv);
-
-				Bootstrap.init(mainElement, JSON.parse(Greencode.crossbrowser.text.call(jsonDiv)));
+					jsonDiv.parentNode.removeChild(jsonDiv);				
+				
+				try {
+					Bootstrap.init(mainElement, JSON.parse(Greencode.crossbrowser.text.call(jsonDiv)));
+				} catch (e) {
+					// TODO: handle exceptioncrossbrowser.text.call(jsonDiv)));
+				}
 			}
 
 			return;
