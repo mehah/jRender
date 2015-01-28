@@ -19,7 +19,7 @@ Html: index2.html
 Html: index3.html
 
 ```html
-<template:import src="template/template2.html" />
+<template:import name="template2" />
 
 <template:define name="content">
 	Leo
@@ -60,5 +60,8 @@ Html: template/template2.html
 ````
 XML: Add inside 'VIEW tag' in greencode.config.xml
 ```xml
-	<template-file>template/template1.html</template-file>
+	<templates>
+		<file name="template" path="template/template1.html" default="default" />
+		<file name="template2" path="template/template2.html" />
+	</templates>
 ```
