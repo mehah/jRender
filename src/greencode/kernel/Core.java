@@ -588,21 +588,23 @@ public final class Core implements Filter {
 							GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", f);
 							_default = "(Default)";
 						}
-						System.out.println(defaultLogMsg+"Template"+_default+": "+entry.getValue());
+						System.out.println(defaultLogMsg+"Template: "+entry.getValue()+" "+_default);
 					}
 				}
 			}
 			
 			if(classDatabaseConnection != null) {
-				System.out.print("Initializing Database Connection Event ...");
+				System.out.print(defaultLogMsg+"Initializing Database Connection Event ...");
 				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "classDatabaseConnectionEvent", classDatabaseConnection);
 				System.out.println(" [done]");
 			}else{
+				System.out.print(defaultLogMsg+"Testing Database Connection ...");
 				DatabaseConnection db = new DatabaseConnection();			
 				db.setConfig(GreenCodeConfig.DataBase.configs.get(GreenCodeConfig.DataBase.defaultConfigFile));
 				
 				if(db.getConfig() != null)			
 					db.start();
+				System.out.println(" [done]");
 			}
 			
 			if(classBootAction != null) {
