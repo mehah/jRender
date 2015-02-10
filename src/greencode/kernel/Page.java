@@ -107,10 +107,7 @@ public final class Page {
 				page.selector = null;
 				page.ajaxSelector = null;
 				page.lastModified = 0;
-				if(isPrincipal)
-					Page.loadStructure(page.file, null, true);
-				else
-					Page.loadStructure(page.file);
+				Page.loadStructure(page.file, null, isPrincipal);
 			} catch (IOException e) {
 				Console.error(e);
 			}
