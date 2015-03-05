@@ -1,5 +1,6 @@
 package greencode.kernel;
 
+import greencode.http.HttpRequest;
 import greencode.http.ViewSession;
 import greencode.jscript.DOM;
 import greencode.jscript.JSCommand;
@@ -8,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 public class ElementsScan {
@@ -49,16 +51,26 @@ public class ElementsScan {
 	}
 	
 	static void send(GreenContext context, Object o) throws IOException {
-		StringBuilder str;
-		if(!context.getRequest().isIFrameHttpRequest() && !greencode.http.$HttpRequest.contentIsHtml(context.getRequest())) {
-			str = new StringBuilder(",");
-			if(o != null) str.append(context.gsonInstance.toJson(o));
-		} else {
-			str = new StringBuilder("<div class=\"JSON_CONTENT\" style=\"display: none;\">");
-			if(o != null) str.append(context.gsonInstance.toJson(o));
-			str.append("</div j>");
+		send(context, o, context.gsonInstance);
+	}
+	
+	private static void send(GreenContext context, Object o, Gson gson) throws IOException {
+		final StringBuilder json = new StringBuilder();
+		if(o != null) {
+			try {
+				json.append(context.gsonInstance.toJson(o));
+			}catch(Exception e) { // java.util.ConcurrentModificationException || java.util.NoSuchElementException
+				send(context, o, context.getGsonInstance());
+				return;
+			}
 		}
+
+		final HttpRequest httpRequest = context.getRequest();
+		if(!httpRequest.isIFrameHttpRequest() && !greencode.http.$HttpRequest.contentIsHtml(httpRequest))
+			json.insert(0, ",");
+		else
+			json.insert(0, "<div class=\"JSON_CONTENT\" style=\"display: none;\">").append("</div j>");
 		
-		context.getResponse().getWriter().write(str.toString());
+		context.getResponse().getWriter().write(json.toString());
 	}
 }

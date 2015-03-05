@@ -94,7 +94,7 @@ public final class GreenContext {
 		return this.currentPageAnnotation;
 	}
 	
-	private Gson getGsonInstance() {
+	Gson getGsonInstance() {
 		GsonBuilder instance = new GsonBuilder()
 			.serializeNulls()
 			.registerTypeHierarchyAdapter(DOM.class, new DOMSerializer())
