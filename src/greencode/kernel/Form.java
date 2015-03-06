@@ -47,7 +47,7 @@ final class Form {
 						final Object[] values = (Object[]) Array.newInstance(f.getType().getComponentType(), valores.length);
 						
 						try {
-							for (int i = -1, l = valores.length; ++i < l;) {
+							for (int i = -1; ++i < valores.length;) {
 								Object _value = greencode.kernel.Form.getFieldValue(f, f.getType().getComponentType(), valores[i]);
 								
 								if(_value == null)

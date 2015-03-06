@@ -80,26 +80,35 @@ public class Element extends Node {
 	
 	public Element cloneNode() { return (Element) super.cloneNode(); }
 	
-	public void appendController(Class<? extends Window> controllerClass) {
-		appendController(controllerClass, null, null);
+	public void replaceWith(String html) {
+		innerHTML(html);
 	}
 	
-	public void appendController(Class<? extends Window> controllerClass, Conversation conversation) {
-		appendController(controllerClass, null, conversation);
+	public void replaceWith(Element e) {
+		DOMHandle.CustomMethod.call(this, "replaceWith", e);
 	}
 	
-	public void appendController(Class<? extends Window> controllerClass, String pageName) {
-		appendController(controllerClass, pageName, null);
+	public void replaceWith(Class<? extends Window> controllerClass) {
+		replaceWith(controllerClass, null, null);
 	}
 	
-	public void appendController(Class<? extends Window> controllerClass, String pageName, Conversation conversation) {
-		Page page = WindowHandle.getPageByName(controllerClass, pageName);
+	public void replaceWith(Class<? extends Window> controllerClass, Conversation conversation) {
+		replaceWith(controllerClass, null, conversation);
+	}
+	
+	public void replaceWith(Class<? extends Window> controllerClass, String pageName) {
+		replaceWith(controllerClass, pageName, null);
+	}
+	
+	public void replaceWith(Class<? extends Window> controllerClass, String pageName, Conversation conversation) {
+		final Page page = WindowHandle.getPageByName(controllerClass, pageName);
 		
-		String url = page.URLName().isEmpty() ? page.path() : page.URLName();
-		if(conversation == null)
-			conversation = GreenContext.getInstance().getRequest().getConversation();
-		
-		DOMHandle.CustomMethod.call(this, "appendController", url, conversation.getId());
+		DOMHandle.CustomMethod.call(
+			this,
+			"replaceWithController",
+			page.URLName().isEmpty() ? page.path() : page.URLName(),
+			(conversation == null ? GreenContext.getInstance().getRequest().getConversation() : conversation).getId()
+		);
 	}
 	
 	public void innerHTML(String html) { DOMHandle.setProperty(this, "innerHTML", html); }

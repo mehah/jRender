@@ -305,7 +305,7 @@ public final class Core implements Filter {
 						if(_class.equals(GreenContext.class)) {
 							hasContextClass = true;
 							listArgs[i] = context;
-						}else {
+						} else {
 							DOM dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);
 							eArg.args[hasContextClass ? i-1 : i] = DOMHandle.getUID(dom);
 							listArgs[i] = dom;

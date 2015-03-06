@@ -54,7 +54,7 @@ public final class MergedFile extends File {
 	
 	public void merge() throws IOException {
 		StringBuilder joinContent = new StringBuilder();
-		for (int i = -1, s = files.length; ++i < s;) {
+		for (int i = -1; ++i < files.length;) {
 			File f = files[i];
 			lastModifications[i] = f.lastModified();
 			joinContent.append(FileUtils.getContentFile(f.toURI().toURL()));

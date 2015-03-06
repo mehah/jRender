@@ -92,10 +92,7 @@ public final class FunctionHandle {
 				json.add("fields", fieldsName);
 				
 				int iC = -1;
-				while(true) {
-					if(Class.equals(DOM.class))
-						break;
-					
+				while(!Class.equals(DOM.class)) {					
 					Field[] fields = GenericReflection.getDeclaredFields(Class);
 					
 					for (Field f : fields) {

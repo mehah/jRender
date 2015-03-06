@@ -91,7 +91,11 @@ Greencode.crossbrowser = {
 };
 
 Greencode.customMethod = {
-	appendController: function(url, cid) {
+	replaceWith: function(e) {
+		this.parentNode.replaceChild(e, this);
+		return this;
+	},
+	replaceWithController: function(url, cid) {
 		var This = this,
 			cometReceber = new Comet(url),
 			first = false;
@@ -117,6 +121,7 @@ Greencode.customMethod = {
 		
 		delete cometReceber;
 		cometReceber = null;
+		return this;
 	},
 	resetForm: function() {
 		try {
@@ -124,6 +129,7 @@ Greencode.customMethod = {
 		}catch(e) {
 			this.reset.click();
 		}
+		return this;
 	},
 	empty: function() {
 		for (var ii = -1; ++ii < this.childNodes.length;) {

@@ -43,10 +43,11 @@ public final class DOMHandle {
 	{ ElementsScan.registerCommand(owner, uid+"*ref."+name, parameters); }
 	
 	public static void registerReturnByCommand(DOM owner, int[] uids, String name, Object... parameters) {
-		StringBuilder _uids = new StringBuilder("[");
-		for (int i = -1; ++i < uids.length;) {
-			if(i > 0) _uids.append(',');
-			_uids.append(uids[i]);
+		assert(uids.length < 1);
+		
+		StringBuilder _uids = new StringBuilder("[").append(uids[0]);
+		for (int i = 0; ++i < uids.length;) {
+			_uids.append(',').append(uids[i]);
 		}
 		_uids.append(']');
 		ElementsScan.registerCommand(owner, _uids+"*ref."+name, parameters);

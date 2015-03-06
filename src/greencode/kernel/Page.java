@@ -247,7 +247,7 @@ public final class Page {
 					String[] filesName = e.attr("join").split(",");
 					
 					File[] files = new File[filesName.length];
-					for (int i = -1, s = filesName.length; ++i < s;) {
+					for (int i = -1; ++i < filesName.length;) {
 						String name = filesName[i].trim();
 						File f = FileUtils.getFileInWebContent(name);
 						if(!f.exists()) {
