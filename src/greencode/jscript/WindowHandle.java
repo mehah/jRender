@@ -12,6 +12,11 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 
 public final class WindowHandle {
+	
+	public static Window getInstance(Element e) {
+		return e.window;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public static <A extends Window> A getInstance(Class<A> actionClass, Conversation conversation) {			
 		HashMap<Class<? extends Window>, Window> list = $Window.getMap(conversation);

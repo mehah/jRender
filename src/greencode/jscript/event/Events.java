@@ -32,5 +32,6 @@ public abstract class Events {
 		SCROLL_REACH_PERCENT = "scrollreachpercent",
 		SCROLL_REACH_TOP = "scrollreachtop",
 		SCROLL_REACH_BOTTOM = "scrollreachbottom",
-		KEY_UP_TIME = "keyuptime";
+		KEY_UP_TIME = "keyuptime",
+		ENTER = "enter";
 };

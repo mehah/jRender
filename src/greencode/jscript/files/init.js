@@ -35,4 +35,28 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 				o.appendChild(tags[i]);
 		}
 	});
+	
+	var _data = {mainElement: document.body}
+	Greencode.executeEvent('pageLoad', _data);
+});
+
+Greencode.registerEvent('pageLoad', function(data) {
+	var listRepeat = Greencode.crossbrowser.querySelectorAll.call(data.mainElement, "repeat");
+	for(var i = -1; ++i < listRepeat.length;) {
+		var e = listRepeat[i];
+		var nameRepeat = e.getAttribute('name');
+		var list = Greencode.crossbrowser.querySelectorAll.call(e, "input, select, textarea, datalist");
+		for(var b = -1; ++b < list.length;) {
+			var input = list[b];
+			var name = input.getAttribute('name');
+			if(name) {
+				var pos = name.lastIndexOf('>');
+				if(pos > 0)
+					name = name.substring(0, pos+1)+nameRepeat+name.substring(pos);
+				else
+					name = nameRepeat+">"+name;
+				input.setAttribute('name', name);
+			}
+		}
+	}
 });

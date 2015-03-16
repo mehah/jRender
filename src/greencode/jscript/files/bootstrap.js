@@ -95,7 +95,10 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 			param._args = [];
 			for( var i in p.args) {
 				var o = p.args[i], arg = __arguments[i];
-				if(arg != null) {
+				
+				if(o.className.indexOf("GreenContext") > 0) {
+					param._args.push(JSON.stringify(o));
+				}else if(arg != null) {
 					var _arg = {
 						className : o.className,
 						fields : {}
@@ -116,7 +119,6 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 				}
 			}
 		}
-
 		
 		if(p.formName != null) {
 			form = Greencode.crossbrowser.querySelector.call(mainElement, 'form[name="' + p.formName + '"]');
@@ -202,32 +204,43 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 
 		param._buttonId = target.window == null ? target.id == null ? target.name : target.id : 'Window';
 
-		var cometReceber = new Comet(p.url);
-		cometReceber.setMethodRequest(p.requestMethod);
-		cometReceber.setCometType(Comet().STREAMING);
-		cometReceber.reconnect(false);
-		cometReceber.setAsync(p.async);
-		cometReceber.forceConnectType(Comet().IframeHttpRequest);
-
-		cometReceber.send(param, function(data) {
-			Bootstrap.init(mainElement, data, __arguments);
-		}, function(data) {
-			Bootstrap.init(mainElement, data, __arguments);
-
-			objectEvent.processing = false;
-
-			if(event.onComplete != null) {
-				event.onComplete();
-			}
-
-			if(objectEvent.methods.length > 0) {
-				objectEvent.methods[0]();
-				objectEvent.methods.splice(0, 1);
-			}
-		});
-
-		delete cometReceber;
-		cometReceber = null;
+		var _data = {
+			mainElement: mainElement,
+			args: __arguments,
+			paramenters: param
+		};
+		
+		if(Greencode.executeEvent('beforeEvent', _data)) {
+			var cometReceber = new Comet(p.url);
+			cometReceber.setMethodRequest(p.requestMethod);
+			cometReceber.setCometType(Comet().STREAMING);
+			cometReceber.reconnect(false);
+			cometReceber.setAsync(p.async);
+			cometReceber.forceConnectType(Comet().IframeHttpRequest);
+	
+			cometReceber.send(param, function(data) {
+				Bootstrap.init(mainElement, data, __arguments);
+			}, function(data) {
+				Bootstrap.init(mainElement, data, __arguments);
+	
+				objectEvent.processing = false;
+	
+				if(event.onComplete != null) {
+					event.onComplete();
+				}
+	
+				if(objectEvent.methods.length > 0) {
+					objectEvent.methods[0]();
+					objectEvent.methods.splice(0, 1);
+				}
+				
+				_data.serverCallback = data;
+				Greencode.executeEvent('afterEvent', _data);
+			});
+	
+			delete cometReceber;
+			cometReceber = null;
+		}
 
 		if(!DEBUG_MODE) {
 			delete param;
@@ -351,6 +364,17 @@ Bootstrap.buttons = function(mainElement) {
 				cometReceber.setAsync(true);
 				cometReceber.jsonContentType(false);
 
+				var _data = {
+					mainElement: o,
+					target: this,
+					appendToSelector: appendTo,
+					appendToElement: o,
+					empty: empty,
+					changeURL: changeURL,
+					keepViewId: keepViewId,
+					href: href
+				};
+				
 				var f = function(data) {
 					if(!first) {
 						first = true;
@@ -399,7 +423,12 @@ Bootstrap.buttons = function(mainElement) {
 					}
 				};
 
-				cometReceber.send(data, f, f);
+				if(Greencode.executeEvent('beforePageRequest', _data))
+					cometReceber.send(data, f, function(data) {
+						f(data);
+						Greencode.executeEvent('afterPageRequest', _data);
+						Greencode.executeEvent('pageLoad', _data);
+					});
 
 				delete cometReceber;
 				cometReceber = null;
@@ -485,6 +514,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				
 				try {
 					Bootstrap.init(mainElement, JSON.parse(Greencode.crossbrowser.text.call(jsonDiv)));
+					Greencode.executeEvent('init');
 				} catch (e) {
 					// TODO: handle exceptioncrossbrowser.text.call(jsonDiv)));
 				}

@@ -14,7 +14,7 @@ import com.google.gson.JsonObject;
 
 public class ElementsScan {
 	private final List<JSCommand> comm = new ArrayList<JSCommand>(); /* commands */
-	private JsonObject sync;
+	JsonObject sync;
 	Integer[] args;
 	
 	private ElementsScan() {}
@@ -42,12 +42,10 @@ public class ElementsScan {
 	public static void sendElements(GreenContext context) throws IOException {
 		ElementsScan elements = ElementsScan.getElements(context.getRequest().getViewSession());
 		
-		if(elements.comm.size() > 0 || elements.args != null || elements.sync != null) {
-			send(context, elements);		
-			elements.comm.clear();
-			elements.args = null;
-			elements.sync = null;
-		}
+		send(context, elements);			
+		elements.comm.clear();
+		elements.args = null;
+		elements.sync = null;
 	}
 	
 	static void send(GreenContext context, Object o) throws IOException {

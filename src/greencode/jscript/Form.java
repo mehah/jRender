@@ -30,18 +30,18 @@ public abstract class Form extends Element {
 		public boolean init(Field arg0) { return ClassUtils.isParent(arg0.getType(), Element.class) && arg0.isAnnotationPresent(QuerySelector.class); }
 	};
 	
-	public Form() { this(GreenContext.getInstance()); }
+	public Form() { this(GreenContext.getInstance().currentWindow()); }
 	
-	public Form(GreenContext context) {
-		super(context.currentWindow());
+	public Form(Window window) {
+		super(window, "form");
 		String name = getClass().getAnnotation(Name.class).value();
 		
 		Visible visibleAnnotation = getClass().getAnnotation(Visible.class);
 		
 		if(visibleAnnotation == null)
-			DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "@crossbrowser.querySelector", "form[name=\""+name+"\"]");
+			DOMHandle.registerElementByCommand(window.principalElement(), this, "@crossbrowser.querySelector", "form[name=\""+name+"\"]");
 		else
-			DOMHandle.registerElementByCommand(context.currentWindow().principalElement(), this, "@customMethod.querySelector", "form[name=\""+name+"\"]", "return (this.offsetHeight "+(visibleAnnotation.value() ? "!" : "=")+"== 0);");
+			DOMHandle.registerElementByCommand(window.principalElement(), this, "@customMethod.querySelector", "form[name=\""+name+"\"]", "return (this.offsetHeight "+(visibleAnnotation.value() ? "!" : "=")+"== 0);");
 	}
 	
 	void processAnnotation() {

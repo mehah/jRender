@@ -91,19 +91,21 @@ public final class FunctionHandle {
 				json.addProperty("className", Class.getName());
 				json.add("fields", fieldsName);
 				
-				int iC = -1;
-				while(!Class.equals(DOM.class)) {					
-					Field[] fields = GenericReflection.getDeclaredFields(Class);
-					
-					for (Field f : fields) {
-						if(!Modifier.isTransient(f.getModifiers()))
-							fieldsName.add(context.gsonInstance.toJsonTree(f.getName()));						
-					}	
-					
-					if(++iC == classes.length)
-						break;
-					
-					Class = classes[i];
+				if(!Class.equals(GreenContext.class)) {
+					int iC = -1;
+					while(!Class.equals(DOM.class)) {					
+						Field[] fields = GenericReflection.getDeclaredFields(Class);
+						
+						for (Field f : fields) {
+							if(!Modifier.isTransient(f.getModifiers()))
+								fieldsName.add(context.gsonInstance.toJsonTree(f.getName()));						
+						}	
+						
+						if(++iC == classes.length)
+							break;
+						
+						Class = classes[i];
+					}
 				}
 				
 				this.args[i] = json;

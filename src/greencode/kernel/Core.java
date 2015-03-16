@@ -87,6 +87,7 @@ public final class Core implements Filter {
 		"json3.js",
 		"greencode.js",
 		"greencodeFunction.js",
+		"greencodeEvents.js",
 		"iframeHttpRequest.js",
 		"comet.js",
 		"greenCodeStyle.js",
@@ -177,14 +178,6 @@ public final class Core implements Filter {
 			return;
 		}
 		
-		final String controllerName, methodName;
-		final Page page;
-		
-		Class<? extends HttpAction> requestClass = null;
-		HttpAction requestController = null;
-		
-		Integer hashcodeRequestMethod = null;
-		
 		if(GreenCodeConfig.Response.gzipSupport) {
 			if (acceptsGZipEncoding((HttpServletRequest)request)) {
 				final HttpServletResponse httpResponse = (HttpServletResponse) response;		
@@ -192,6 +185,19 @@ public final class Core implements Filter {
 				response = new GZipServletResponseWrapper(httpResponse);
 			}
 		}
+		
+		final boolean hasBootaction = Cache.bootAction != null;
+		
+		if(hasBootaction)
+			Cache.bootAction.onRequest((HttpServletRequest)request, (HttpServletResponse)response);
+		
+		final String controllerName, methodName;
+		final Page page;
+		
+		Class<? extends HttpAction> requestClass = null;
+		HttpAction requestController = null;
+		
+		Integer hashcodeRequestMethod = null;
 		
 		if(servletPath.indexOf('$') > -1) {
 			page = null;
@@ -335,19 +341,17 @@ public final class Core implements Filter {
 			
 			greencode.kernel.Form.processRequestedForm(context);
 			
-			final boolean hasBootaction = Cache.bootAction != null;
 			if(hasBootaction) {
 				classNameBootAction = Cache.bootAction.getClass().getSimpleName();
 				
 				BeforeAction a = requestMethod.getAnnotation(BeforeAction.class);
-				if(a != null && !a.disable()) {
+				if(a == null || !a.disable()) {
 					Console.log("Calling BeforeAction: ["+classNameBootAction+"]");
 					context.executeAction = Cache.bootAction.beforeAction(context, requestMethod);
 				}
 			}
 			
-			if(context.executeAction)
-			{
+			if(context.executeAction) {
 				Console.log("Calling Action: ["+controllerName+":"+methodName+"]");
 				
 				try {
@@ -388,12 +392,13 @@ public final class Core implements Filter {
 				if(hasBootaction) {
 					AfterAction a = requestMethod.getAnnotation(AfterAction.class);
 					
-					if(a != null && !a.disable()) {
+					if(a == null || !a.disable()) {
 						Console.log("Calling AfterAction: ["+classNameBootAction+"]");
 						Cache.bootAction.afterAction(context, requestMethod);
 					}
 				}
-			}
+			}else
+				Console.warning(Character.toUpperCase(methodName.charAt(0))+methodName.substring(1)+" method will not run.");
 			
 			if(context.userLocaleChanged) {
 				DOMHandle.execCommand(
@@ -544,7 +549,7 @@ public final class Core implements Filter {
 				Page.pages.put("jscript/greencode/msg_"+v.locale.toString()+".js", p);
 			}
 			
-			System.out.println(" [done]");
+			System.out.println(" [done]");			
 			
 			System.out.print(defaultLogMsg+"Caching Classes...");
 			List<Class<?>> classesTeste = PackageUtils.getClasses("/", true);
@@ -570,8 +575,9 @@ public final class Core implements Filter {
 					Cache.registeredWindows.put(Class.getSimpleName(), (java.lang.Class<? extends Window>) Class);
 				}
 			}
+			classesTeste.clear();
 			System.out.print(" [done]\n");
-			
+						
 			if(GreenCodeConfig.View.templatePaths != null) {
 				System.out.println(defaultLogMsg+"Caching Template(s)...");
 				

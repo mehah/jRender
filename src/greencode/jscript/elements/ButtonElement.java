@@ -6,7 +6,7 @@ import greencode.jscript.ElementHandle;
 import greencode.jscript.Form;
 import greencode.jscript.Window;
 
-public abstract class ButtonElement extends Element {
+public class ButtonElement extends Element {
 		
 	protected ButtonElement(Window window) { super(window, "button"); }
 

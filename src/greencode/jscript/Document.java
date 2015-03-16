@@ -51,7 +51,12 @@ public class Document extends Node {
 	
 	public<E extends Element> E createElement(Class<E> element) {
 		try {
-			E e = GenericReflection.NoThrow.getDeclaredConstrutor(element, Window.class).newInstance(this.window);
+			E e;
+			try {
+				e = GenericReflection.NoThrow.getDeclaredConstrutor(element, Window.class).newInstance(this.window);
+			} catch(Exception ex) {
+				e = GenericReflection.NoThrow.getDeclaredConstrutor(element).newInstance();
+			}
 			DOMHandle.registerElementByCommand(this, e, "createElement", DOMHandle.getVariableValue(e, "tagName", String.class));
 			
 			if(DOMHandle.containVariableKey(e, "type"))
