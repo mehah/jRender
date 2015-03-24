@@ -169,16 +169,21 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 							}
 							
 							for(var i2 = -1; ++i2 < res.length;) {
-								var o = buildParam({}, res[i2]);
-								var hasAttr = false;
-								for(var a in o){ hasAttr = true; break; }
-								if(hasAttr)
-									value.push(o);
+								var e = res[i2];
+								var uid = e.__container.getAttribute('uid');
+								if(!uid) {
+									uid = Greencode.cache.generateUID();
+									e.__container.setAttribute('uid', uid)
+									Greencode.cache.register(uid, e.__container);
+									uid = uid+"";
+								}
+								
+								var o = buildParam({__uid: uid}, e);
+								value.push(o);
 							}							
 							
-							if(first && value.length) {
+							if(first)
 								param[name] = value;
-							}
 							
 							continue;
 						}

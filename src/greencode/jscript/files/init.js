@@ -24,7 +24,7 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 	}
 	
 	{ /* Bloco para as tags customizadas antes de processar o JSON */		
-		var listRepeat = Greencode.crossbrowser.querySelectorAll.call(document.body, "container");
+		var listRepeat = Greencode.customMethod.getClosestChildrenByTagName.call(document.body, "container");
 		for(var i = -1; ++i < listRepeat.length;) {
 			var e = listRepeat[i], nameRepeat = e.getAttribute('name');
 			
@@ -39,65 +39,81 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 				return this.clones[this.clones.length-1]
 			};
 			
-			e.repeat = function(original) {				
-				var clone = (original ? this.original : this).cloneNode(true);
+			e.remove = function() {			
+				var index = this.clones.indexOf(this);
+				if(index > -1) {
+					this.clones.splice(index, 1);
+					this.parentNode.removeChild(this);
+				}
+			};
+			
+			e.repeat = function(useOriginal, notExecuteEvent) {				
+				var clone = (useOriginal ? this.original : this).cloneNode(true);
 				
 				clone.clones = this.clones;				
 				clone.firstClone = this.firstClone;				
 				clone.lastClone = this.lastClone;
 				clone.repeat = this.repeat;
 				clone.original = this.original;
+				clone.remove = this.remove;
 
 				var elementToInsertAfter = (this.lastClone() || this);
 				elementToInsertAfter.parentNode.insertBefore(clone, elementToInsertAfter.nextSibling);
 				
 				this.clones.push(clone);
 				
-				var containers = Greencode.crossbrowser.querySelectorAll.call(clone, "container");
+				var containers = Greencode.customMethod.getClosestChildrenByTagName.call(clone, "container");
 				for(var i = -1; ++i < containers.length;) {
 					var container = containers[i];
 					container.clones = new Array();				
 					container.firstClone = this.firstClone;				
 					container.lastClone = this.lastClone;
 					container.repeat = this.repeat;
+					container.remove = this.remove;
 					container.original = container;
 					
 					var old = container;
 					container.original = old;
 					
-					container = container.repeat(original);
+					var repeat = container.getAttribute('repeat');
+					if(repeat) {
+						container.removeAttribute('repeat');
+						for(; --repeat >= 0;)
+							container.repeat(useOriginal, true);
+					}else
+						container.repeat(useOriginal, true);
+					
 					old.parentNode.removeChild(old);
 				}
 				
 				if(this.onRepeat)
 					this.onRepeat.call(this, clone);
 				
-				Greencode.executeEvent('containerCloned', {mainElement: clone});
+				if(notExecuteEvent !== true)
+					Greencode.executeEvent('containerCloned', {mainElement: clone});
 				
 				return clone;
 			};
 		}
-	}
-	
-	Bootstrap.init();
-	
-	{ /* Bloco para as tags customizadas depois de processar o JSON */	
+		
 		for(var i = -1; ++i < listRepeat.length;) {
 			var original = listRepeat[i];
 			if(i > 0 && listRepeat[i-1] == Greencode.customMethod.getParentByTagName.call(original, 'container'))
 				break;
 			
-			var e = original.repeat(true), repeat = e.getAttribute('repeat') || 0;
+			var e = original.repeat(true, true), repeat = e.getAttribute('repeat') || 0;
 			
 			original.parentNode.removeChild(original);
 			
 			if(repeat) {
 				e.removeAttribute('repeat');
 				for(; --repeat >= 0;)
-					e.repeat(true);
+					e.repeat(true, true);
 			}
-		}		
+		}
 	}
+	
+	Bootstrap.init();
 
 	Greencode.crossbrowser.registerEvent.call(window, 'popstate', function(e) {
 		if(e.state != null && e.state.selector != null) {

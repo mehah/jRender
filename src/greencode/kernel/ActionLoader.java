@@ -1,11 +1,5 @@
 package greencode.kernel;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.SQLException;
-
 import greencode.database.annotation.Connection;
 import greencode.database.implementation.DatabaseConnectionEvent;
 import greencode.http.Conversation;
@@ -23,6 +17,12 @@ import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
 import greencode.util.GenericReflection.Condition;
 import greencode.util.StringUtils;
+
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.SQLException;
 
 final class ActionLoader {	
 	private final static Condition<Field> conditionAnnotationField = new GenericReflection.Condition<Field>() {
@@ -85,7 +85,7 @@ final class ActionLoader {
 		}
 		
 		if(requestMethod.isAnnotationPresent(Validate.class))
-			greencode.kernel.Validate.validate(context, requestMethod, context.requestedForm);
+			greencode.kernel.Validate.validate(context, requestMethod, context.requestedForm, null);
 	}
 	
 	public static DatabaseConnectionEvent connection(GreenContext context, Method requestMethod) throws SQLException, InstantiationException, IllegalAccessException {

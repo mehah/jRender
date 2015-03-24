@@ -287,7 +287,7 @@ Greencode.customMethod = {
 						param[tag.getAttribute('name')] = p;
 					}
 					
-					var _lastParam = {}
+					var _lastParam = {__container: tag};
 					p.push(_lastParam);
 					
 					lastParam = _lastParam;

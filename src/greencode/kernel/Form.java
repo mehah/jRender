@@ -69,17 +69,22 @@ final class Form {
 						ContainerElement containerElement = (ContainerElement) GenericReflection.NoThrow.newInstance(clazz, new Class<?>[]{Window.class}, context.currentWindow);
 						containers[i] = containerElement;
 						
-						processElements(context, containerElement, METHOD_TYPE_IS_GET, list.get(i));
+						Map<String, Object> containerMap = list.get(i);						
+						greencode.jscript.$DOMHandle.setUID(containerElement, Integer.parseInt((String)containerMap.get("__uid")));
+						
+						processElements(context, containerElement, METHOD_TYPE_IS_GET, containerMap);
 					}
 					_value = containers;
 				} else {
 					ContainerElement containerElement = (ContainerElement) GenericReflection.NoThrow.newInstance(f.getType(), new Class<?>[]{Window.class}, context.currentWindow);
 					_value = containerElement;
-					processElements(context, containerElement, METHOD_TYPE_IS_GET, list.get(0));
+					
+					Map<String, Object> containerMap = list.get(0);						
+					greencode.jscript.$DOMHandle.setUID(containerElement, Integer.parseInt((String)containerMap.get("__uid")));
+					
+					processElements(context, containerElement, METHOD_TYPE_IS_GET, containerMap);
 				}
 				f.set(container, _value);
-								
-				//processElements(context, parametro, containerElement, METHOD_TYPE_IS_GET);
 			}else if (f.getType().equals(Part.class)) {
 				f.set(container, GreenContext.getInstance().getRequest().getPart(parametro));
 			} else if (f.getType().isArray()) {
@@ -149,7 +154,7 @@ final class Form {
 			if (Float.class.equals(instanceClass))
 				return Float.parseFloat(valor);
 			if (Boolean.class.equals(instanceClass))
-				return valor.equals("true");
+				return valor.equals("true") || valor.equals("1");
 			if (Character.class.equals(instanceClass))
 				return valor.charAt(0);
 			if (Byte.class.equals(instanceClass))
