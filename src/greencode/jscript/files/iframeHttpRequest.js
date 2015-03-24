@@ -51,7 +51,7 @@ var IframeHttpRequest = function() {
 	};
 
 	var append = function(form, inputs, returnPosition) {
-		for(i in inputs) {
+		for(var i in inputs) {
 			var o = inputs[i], e = o.e;
 
 			if(!o.appended) {

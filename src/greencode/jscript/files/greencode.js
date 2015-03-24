@@ -1,40 +1,32 @@
 var MAIN_ELEMENT_ID = 1, WINDOW_ID = 2, DOCUMENT_ID = 3, HEAD_ID = 4, BODY_ID = 5;
 
-function removeRegisteredReturn(uid) { delete Greencode.tag.references[uid + ""]; }
-
 var Greencode = {
-	ready : null,
-
-	comets : new Array(),
-	modules : {},
-	tag : {
+	cache : {
+		lastUID: 0,
 		references : {},
+		generateUID: function() {
+			while(Greencode.cache.references[++Greencode.cache.lastUID]);		
+			return Greencode.cache.lastUID;
+		},
 		getById : function(id, mainElement) {
-			var tag;
 			if (id === MAIN_ELEMENT_ID)
-				tag = mainElement;
+				return mainElement;
 			else if (id === WINDOW_ID)
-				tag = window;
+				return window;
 			else if (id === DOCUMENT_ID)
-				tag = document;
+				return document;
 			else if (id === HEAD_ID)
-				tag = document.head;
+				return document.head;
 			else if (id === BODY_ID)
-				tag = document.body;
-			else if ((tag = Greencode.tag.references[id + ""]) != null) {
-				/*
-				 * Remover a tag da memória, caso não esteja vinculada no html.
-				 */
-				/*
-				 * if(tag.parents('body').length === 0) { delete
-				 * Greencode.tag.references[id+""]; return null; }
-				 */
-			}
-
-			return tag;
-		}/*
-		 * , set: function(ref, tag) { Greencode.tag.references[ref+""] =
-		 * tag; }
-		 */
+				return document.body;
+			
+			return Greencode.cache.references[id];
+		},		
+		register: function(id, o) {
+			return Greencode.cache.references[id] = o;
+		},
+		remove: function() {
+			delete Greencode.cache.references[uid];
+		}
 	}
 };

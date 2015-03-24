@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 
 import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.annotation.QuerySelector;
+import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.jscript.form.annotation.ElementValue;
 import greencode.jscript.form.annotation.Event;
 import greencode.jscript.form.annotation.Name;
@@ -19,8 +20,8 @@ import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
 import greencode.util.GenericReflection.Condition;
 
-public abstract class Form extends Element {
-	final Field[] elementFields = $Form.processFields(getClass());
+public abstract class Form extends Element implements ContainerElementImplementation {
+	final Field[] elementFields = $Container.processFields(getClass());
 	
 	private static Condition<Field> fieldsWithRegisterEvent = new Condition<Field>() {		
 		public boolean init(Field arg0) { return arg0.isAnnotationPresent(RegisterEvent.class) && ClassUtils.isParent(arg0.getType(), EventTarget.class); }

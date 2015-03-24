@@ -4,7 +4,8 @@ Greencode.events = {
 	beforePageRequest: [],
 	afterPageRequest: [],
 	init: [],
-	pageLoad: []
+	pageLoad: [],
+	containerCloned: []
 };
 
 Greencode.registerEvent = function(name, callback) {
@@ -14,7 +15,7 @@ Greencode.registerEvent = function(name, callback) {
 Greencode.executeEvent = function(name, data) {
 	var callbacks = Greencode.events[name];
 	if(callbacks && callbacks.length > 0) {
-		for(i in callbacks) {
+		for(var i in callbacks) {
 			if(callbacks[i](data) === false)
 				return false;
 		}

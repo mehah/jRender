@@ -63,7 +63,7 @@ public final class DOMHandle {
 	
 	public static String getDefaultIdToRegisterReturn(int uid) { return uid+"*ref"; }
 	
-	public static void removeRegisteredReturn(Window window, int uid) { DOMHandle.execCommand(window, "removeRegisteredReturn", uid); }
+	public static void removeRegisteredReturn(Window window, int uid) { DOMHandle.execCommand(window, "Greencode.cache.remove", uid); }
 	
 	@SuppressWarnings("unchecked")
 	public static<C> C getVariableValue(DOM owner, String varName, Class<C> cast) { return (C) owner.variables.get(varName); }

@@ -1,20 +1,7 @@
 package greencode.jscript;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
 import greencode.exception.OperationNotAllowedException;
 import greencode.http.enumeration.RequestMethod;
-import greencode.jscript.form.annotation.ElementValue;
 import greencode.jscript.form.annotation.Name;
 import greencode.jscript.function.implementation.Function;
 import greencode.jscript.window.annotation.Form;
@@ -22,6 +9,16 @@ import greencode.kernel.GreenContext;
 import greencode.kernel.LogMessage;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.HashMap;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 public final class FunctionHandle {
 	private final transient GreenContext context = GreenContext.getInstance();
@@ -44,8 +41,6 @@ public final class FunctionHandle {
 	private JsonObject[] args;
 	
 	private boolean async = true;
-	
-	private List<String> formNameFields;
 	
 	public FunctionHandle(String commandName, Object... parameters) {
 		this.url = '#'+commandName;
@@ -192,23 +187,11 @@ public final class FunctionHandle {
 		if(this.method.isAnnotationPresent(Form.class)) {
 			Class<? extends greencode.jscript.Form> form = this.method.getAnnotation(Form.class).value();
 			
-			Field[] fields = greencode.jscript.$Form.processFields(form);
+			Field[] fields = greencode.jscript.$Container.processFields(form);
 			if(fields != null && fields.length > 0) {
 				this.formName = form.getAnnotation(Name.class).value();
-				this.formNameFields = new ArrayList<String>();
-				
-				for (Field f : fields) {
-					String name = f.getAnnotation(ElementValue.class).name();
-					formNameFields.add(name.isEmpty() ? f.getName() : name);
-				}
 			}
 		}
-	}
-	
-	public void addParameter(String parameter) {
-		if(formNameFields == null)
-			formNameFields = new ArrayList<String>();
-		formNameFields.add(parameter);
 	}
 	
 	private void setUrl(String url) {

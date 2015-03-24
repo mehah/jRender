@@ -35,7 +35,7 @@ Bootstrap.analizeParameters = function(parameters, variableName, mainElement) {
 				methodParameters += ',';
 
 			var o = parameters[i];
-			methodParameters += typeof o === 'string' && o.indexOf('*ref') != -1 ? 'Greencode.tag.getById(' + o.split('*ref')[0] + ', mainElement)' : variableName + '[' + i + ']';
+			methodParameters += typeof o === 'string' && o.indexOf('*ref') != -1 ? 'Greencode.cache.getById(' + o.split('*ref')[0] + ', mainElement)' : variableName + '[' + i + ']';
 		}
 	}
 
@@ -132,68 +132,89 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 		}
 		
 		if(form != null) {
-			var names = p.formNameFields;
-			if(names == null) {
-				var elements = Greencode.crossbrowser.querySelectorAll.call(form, 'input, select, textarea'), names = new Array();
-				for(var i = -1; ++i < elements.length;) {
-					var name = elements[i].name;
-					if(name)
-						names.push(name);
-				}
-				
-				p.formNameFields = names;
-			}
+			var buildParam = function(param, list) {
+				for(var i in list) {
+					var res = list[i], value = null, name = null;
+					
+					if(res instanceof Array) {
+						var eFirst = res[0];
+						
+						if(eFirst instanceof Node) {
+							name = eFirst.name;
+							var isCheckBox = eFirst.type === "checkbox", values = null;
+							if(isCheckBox)
+								values = new Array();
 
-			if(p.formNameFields != null && p.formNameFields.length > 0) {
-				for( var i in p.formNameFields) {
-					var name = p.formNameFields[i], res = Greencode.crossbrowser.querySelectorAll.call(form, 'input[name="' + name + '"], select[name="' + name + '"], textarea[name="' + name + '"]');
-
-					if(res != null && res.length > 0) {
-						var value = null;
-						if(res.length === 1) {
-							var e = res[0], isInput = e.tagName === "INPUT";
-							if(isInput || e.tagName === "TEXTAREA")
-								value = isInput && (e.type === "checkbox" || e.type === "radio") ? e.checked ? e.value : null : e.type === "file" ? e : e.value;
-							else if(e.tagName === "SELECT") {
-								if(e.multiple) {
-									var values = new Array();
-									for(var i2 = -1; ++i2 < e.options.length;) {
-										var option = e.options[i2];
-										if(option.selected)
-											values.push(option.value);
-									}
-									value = values.length > 0 ? values : null;
-								} else
-									value = e.selectedIndex === -1 ? "" : e.options[e.selectedIndex].value;
-							}
-						} else {
-							var eFirst = res[0], isInput = eFirst.tagName === "INPUT";
-
-							if(isInput) {
-								var isCheckBox = eFirst.type === "checkbox", values = null;
-								if(isCheckBox)
-									values = new Array();
-								else if(eFirst.type !== "radio")
-									continue;
-
-								for(var i2 = -1; ++i2 < res.length;) {
-									var e = res[i2];
-
-									if(isCheckBox && e.checked)
+							for(var i2 = -1; ++i2 < res.length;) {
+								var e = res[i2];
+								if(e.checked) {
+									if(isCheckBox)
 										values.push(e.value);
-									else if(e.checked) {
+									else {
 										values = e.value;
 										break;
-									}
+									}									
 								}
-
-								value = values != null && values.length > 0 ? values : null;
 							}
-						}
 
-						param[name] = value;
+							value = values != null && values.length > 0 ? values : null;
+						} else {
+							name = i;
+							value = param[name];
+							
+							var first = false;
+							if(!value) {
+								value = new Array();
+								first = true;
+							}
+							
+							for(var i2 = -1; ++i2 < res.length;) {
+								var o = buildParam({}, res[i2]);
+								var hasAttr = false;
+								for(var a in o){ hasAttr = true; break; }
+								if(hasAttr)
+									value.push(o);
+							}							
+							
+							if(first && value.length) {
+								param[name] = value;
+							}
+							
+							continue;
+						}
+					} else {
+						var eFirst = res;
+						name = eFirst.name;
+						
+						if(eFirst.tagName === "SELECT") {
+							if(eFirst.multiple) {
+								var values = new Array();
+								for(var i2 = -1; ++i2 < eFirst.options.length;) {
+									var option = eFirst.options[i2];
+									if(option.selected)
+										values.push(option.value);
+								}
+								value = values.length > 0 ? values : null;
+							} else
+								value = eFirst.selectedIndex === -1 ? "" : eFirst.options[eFirst.selectedIndex].value;
+						} else
+							value = eFirst.tagName === "INPUT" && eFirst.type === "file" ? eFirst : eFirst.value;
 					}
+
+					if(value)
+						param[name] = value;
 				}
+				
+				return param;
+			}
+			
+			var list = Greencode.customMethod.getAllDataElements.call(form);
+			buildParam(param, list);
+			
+			for(var i in param) {					
+				var v = param[i];
+				if(v instanceof Object)
+					param[i] = JSON.stringify(v);
 			}
 			
 			param.__requestedForm = formName;
@@ -262,15 +283,15 @@ Bootstrap.toGreencodeCommand = function(commandName) {
 
 Bootstrap.adaptiveCommand = function(commandName, parameters) {
 	return Bootstrap.isGreencodeCommand(commandName) ?
-			'Greencode.' + commandName.substring(1) + '.call(e'+(parameters ? ','+parameters : '')+');'
-		  : 'e.' + commandName + '('	+ parameters + ');';
+			'Greencode.' + commandName.substring(1) + '.call(e'+(parameters ? ','+parameters : '')+')'
+		  : 'e.' + commandName + '('	+ parameters + ')';
 };
 
 Bootstrap.readCommand = function(mainElement) {
 	if(this == null)
 		return;
 
-	var e = Greencode.tag.getById(this.uid, mainElement);
+	var e = Greencode.cache.getById(this.uid, mainElement);
 
 	if(e == null)
 		return;
@@ -289,15 +310,15 @@ Bootstrap.readCommand = function(mainElement) {
 			var uids = JSON.parse(split[0]), res = __isFirefox ? new Function('var e = arguments[0]; var mainElement = arguments[1]; return ' + Bootstrap.adaptiveCommand(split[1], parameters)).call(this, e, mainElement) : eval(Bootstrap.adaptiveCommand(split[1], parameters));
 
 			for(var i = -1; ++i < res.length;)
-				Greencode.tag.references[uids[i] + ""] = res[i];
+				Greencode.cache.register(uids[i], res[i]);
 		} else
-			strEval = 'Greencode.tag.references[' + split[0] + '+""] = ' + Bootstrap.adaptiveCommand(split[1], parameters);
+			strEval = 'Greencode.cache.register(' + split[0] + ', ' + Bootstrap.adaptiveCommand(split[1], parameters)+');';
 	} else if(this.name.indexOf('*prop.') != -1) {
 		var split = this.name.split('*prop.');
-		strEval = 'Greencode.tag.references[' + split[0] + '+""] = e.' + split[1];
+		strEval = 'Greencode.cache.register(' + split[0] + ', e.' + split[1]+');';
 	} else if(this.name.indexOf('*vector.') != -1) {
 		var split = this.name.split('*vector.');
-		strEval = 'Greencode.tag.references[' + split[0] + '+""] = e[' + split[1] + ']';
+		strEval = 'Greencode.cache.register(' + split[0] + ', e[' + split[1] + ']'+');';
 	} else if(this.name.indexOf('#') === 0)
 		strEval = 'e.' + this.name.substring(1) + '=' + parameters + ';';
 	else
@@ -498,9 +519,6 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 	if(mainElement == null)
 		mainElement = document.body;
 
-	if(Greencode.ready != null)
-		Greencode.ready.call(mainElement);
-
 	Bootstrap.buttons(mainElement);
 
 	if(jsonObject == null) {
@@ -516,7 +534,6 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 					Bootstrap.init(mainElement, JSON.parse(Greencode.crossbrowser.text.call(jsonDiv)));
 					Greencode.executeEvent('init');
 				} catch (e) {
-					// TODO: handle exceptioncrossbrowser.text.call(jsonDiv)));
 				}
 			}
 
@@ -528,7 +545,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 		if(!Greencode.jQuery.isArray(__jsonObject))
 			__jsonObject = [ __jsonObject ];
 
-		for(i in __jsonObject) {
+		for(var i in __jsonObject) {
 			var jsonObject = __jsonObject[i];
 
 			if(DEBUG_MODE) {
@@ -537,9 +554,10 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				console.warn('JSON Object: ', jsonObject);
 			}
 
-			if(argsEvent != null && argsEvent.length > 0 && jsonObject.args != null && jsonObject.args.length > 0) {
+			var hasArgsEvent = argsEvent != null && argsEvent.length > 0 && jsonObject.args != null && jsonObject.args.length > 0;
+			if(hasArgsEvent) {
 				for(var i = -1; ++i < jsonObject.args.length;)
-					Greencode.tag.references[jsonObject.args[i]] = argsEvent[i];
+					Greencode.cache.register(jsonObject.args[i], argsEvent[i]);
 			}
 
 			if(jsonObject.comm != null && jsonObject.comm.length > 0) {
@@ -551,9 +569,14 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				if(!DEBUG_MODE)
 					delete jsonObject.comm;
 			}
+			
+			if(hasArgsEvent) {
+				for(var i = -1; ++i < jsonObject.args.length;)
+					Greencode.cache.remove(jsonObject.args[i]);
+			}
 
 			if(jsonObject.sync != null) {
-				var sync = jsonObject.sync, e = Greencode.tag.getById(sync.uid, mainElement), cometReceber = new Comet(CONTEXT_PATH + '/$synchronize');
+				var sync = jsonObject.sync, e = Greencode.cache.getById(sync.uid, mainElement), cometReceber = new Comet(CONTEXT_PATH + '/$synchronize');
 
 				cometReceber.setMethodRequest("post");
 				cometReceber.setCometType(Comet().LONG_POLLING);
@@ -628,22 +651,22 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				var divGreenCodeModalErro = document.createElement("div"), spanTitulo = document.createElement("span"), spanBotaoFechar = document.createElement("span"), topBar = document.createElement("div"), contentModalError = document.createElement("div");
 
 				divGreenCodeModalErro.setAttribute('id', 'GreenCodemodalErro');
-				for(i in GreencodeStyle.modalErro.style)
+				for(var i in GreencodeStyle.modalErro.style)
 					divGreenCodeModalErro.style[i] = GreencodeStyle.modalErro.style[i];
 
 				spanTitulo.appendChild(document.createTextNode('Exception:'));
-				for(i in GreencodeStyle.modalErro.topBar.title.style)
+				for(var i in GreencodeStyle.modalErro.topBar.title.style)
 					spanTitulo.style[i] = GreencodeStyle.modalErro.topBar.title.style[i];
 
 				spanBotaoFechar.appendChild(document.createTextNode('X'));
-				for(i in GreencodeStyle.modalErro.topBar.closeButton.style)
+				for(var i in GreencodeStyle.modalErro.topBar.closeButton.style)
 					spanBotaoFechar.style[i] = GreencodeStyle.modalErro.topBar.closeButton.style[i];
 
 				Greencode.crossbrowser.registerEvent.call(spanBotaoFechar, 'click', function() {
 					divGreenCodeModalErro.parentNode.removeChild(divGreenCodeModalErro);
 				});
 
-				for(i in GreencodeStyle.modalErro.topBar.style)
+				for(var i in GreencodeStyle.modalErro.topBar.style)
 					topBar.style[i] = GreencodeStyle.modalErro.topBar.style[i];
 
 				topBar.appendChild(spanTitulo);
@@ -652,7 +675,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				divGreenCodeModalErro.appendChild(topBar);
 
 				contentModalError.setAttribute('class', 'content');
-				for(i in GreencodeStyle.modalErro.content.style)
+				for(var i in GreencodeStyle.modalErro.content.style)
 					contentModalError.style[i] = GreencodeStyle.modalErro.content.style[i];
 
 				divGreenCodeModalErro.appendChild(contentModalError);

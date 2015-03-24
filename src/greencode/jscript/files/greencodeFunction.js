@@ -143,6 +143,15 @@ Greencode.customMethod = {
 		var list = this.getElementsByTagName(tagName);						
 		return list.length == 0 ? this.appendChild(document.createElement(tagName)) : list[0];
 	},
+	getParentByTagName: function(tagName) {
+		var parent = this;
+		while((parent = parent.parentNode) && parent != document) {
+			if(parent.tagName == tagName.toUpperCase())
+				return parent;
+		}
+		
+		return null;
+	},
 	fillForm: function(a) {
 		for(var i in a) {
 			var o = a[i];
@@ -238,6 +247,57 @@ Greencode.customMethod = {
 		}
 		
 		return newList;
+	},
+	getClosestChildrenByTagName: function(tagName) {
+		var list = new Array();
+		var search = function(e) {
+			for(var i = -1; ++i < e.children.length;) {
+				var child = e.children[i];
+				if(child.tagName == tagName.toUpperCase()) {
+					list.push(child);
+				}else
+					search(child);
+			}
+		}
+		search(this);
+		return list;
+	},
+	getAllDataElements: function(param, lastParam) {
+		if(!param)
+			param = {};
+		for(var i = -1; ++i < this.children.length;) {
+			var tag = this.children[i];
+			if(['INPUT', 'SELECT', 'TEXTAREA', 'DATALIST'].indexOf(tag.tagName) > -1) {
+				var target = lastParam != null ? lastParam : param;
+				var res;
+				if(tag.tagName === 'INPUT' && tag.type === 'radio' || tag.type === 'checkbox') {
+					var list = target[tag.name];
+					if(!list) {
+						list = new Array();
+						target[tag.name] =  list;
+					}
+					list.push(tag);
+				}else
+					target[tag.name] = tag;
+			} else {
+				if(tag.tagName === 'CONTAINER') {
+					var p = param[tag.getAttribute('name')];
+					if(!p) {
+						p = new Array();
+						param[tag.getAttribute('name')] = p;
+					}
+					
+					var _lastParam = {}
+					p.push(_lastParam);
+					
+					lastParam = _lastParam;
+					Greencode.customMethod.getAllDataElements.call(tag, lastParam, param);
+				}else
+					Greencode.customMethod.getAllDataElements.call(tag, param, null);							
+			}
+		}
+		
+		return param;
 	}
 };
 

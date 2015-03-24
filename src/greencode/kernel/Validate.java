@@ -13,7 +13,7 @@ final class Validate {
 	private Validate() {}
 	
 	static void validate(GreenContext context, Method requestMethod, Form form) {
-		final Field[] fields = greencode.jscript.$Form.getElementFields(context.requestedForm);
+		final Field[] fields = greencode.jscript.$Container.getElementFields(context.requestedForm);
 		if(fields == null)
 			return;
 		

@@ -1,6 +1,8 @@
 package greencode.jscript;
 
 import greencode.exception.OperationNotAllowedException;
+import greencode.jscript.elements.custom.ContainerElement;
+import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.kernel.LogMessage;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
@@ -12,11 +14,16 @@ import java.util.List;
 
 import javax.servlet.http.Part;
 
-public final class $Form {
-	private $Form() {}
+public final class $Container {
+	private $Container() {}
 	
-	public static Field[] getElementFields(Form form) {
-		return form.elementFields;
+	public static Field[] getElementFields(ContainerElementImplementation e) {
+		if(e instanceof Form)
+			return ((Form) e).elementFields;
+		else if(e instanceof ContainerElement)
+			return greencode.jscript.elements.custom.$Container.getElementFields((ContainerElement) e);
+		
+		return null;
 	}
 	
 	private static boolean registerFields(Class<?> Class, List<Field> fieldList) {
@@ -29,7 +36,7 @@ public final class $Form {
 				if(type.isArray())
 					type = type.getComponentType();
 				
-				if(!type.equals(Date.class) && !ClassUtils.isPrimitiveOrWrapper(type) && !type.equals(Part.class))
+				if(!(type.equals(Date.class) || ClassUtils.isPrimitiveOrWrapper(type) || type.equals(Part.class) || ClassUtils.isParent(type, ContainerElement.class)))
 					throw new OperationNotAllowedException(LogMessage.getMessage("green-0028", field.getName(), Class.getSimpleName()));
 					
 				fieldList.add(field);
@@ -39,9 +46,9 @@ public final class $Form {
 		return true;
 	}
 	
-	static Field[] processFields(Class<? extends Form> currentClass)
+	public static Field[] processFields(Class<? extends ContainerElementImplementation> currentClass)
 	{
-		Field[] fields = GenericReflection.getDeclaredFieldsByConditionId(currentClass, "form:elements");
+		Field[] fields = GenericReflection.getDeclaredFieldsByConditionId(currentClass, "container:elements");
 		if(fields == null) {			
 			List<Field> fieldList = new ArrayList<Field>();
 			
@@ -54,7 +61,7 @@ public final class $Form {
 			
 			fields = fieldList.toArray(new Field[fieldList.size()]);
 			
-			GenericReflection.registerDeclaredFields(currentClass, "form:elements", fields);
+			GenericReflection.registerDeclaredFields(currentClass, "container:elements", fields);
 		}
 		
 		return fields;

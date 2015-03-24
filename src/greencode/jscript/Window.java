@@ -5,7 +5,6 @@ import greencode.http.HttpAction;
 import greencode.http.HttpRequest;
 import greencode.jscript.function.implementation.Function;
 import greencode.jscript.function.implementation.SimpleFunction;
-import greencode.kernel.ElementsScan;
 import greencode.kernel.GreenContext;
 
 import java.io.IOException;
