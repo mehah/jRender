@@ -93,19 +93,37 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 		
 		if(p.args != null) {
 			param._args = [];
+			
 			for( var i in p.args) {
-				var o = p.args[i], arg = __arguments[i];
-				
+				var o = p.args[i];
 				if(o.className.indexOf("GreenContext") > 0) {
 					param._args.push(JSON.stringify(o));
-				}else if(arg != null) {
+				}else if(o.className.indexOf("ContainerEventObject") > 0) {
+					var uid;
+					
+					if(target.tagName === 'CONTAINER') {
+						for(var i2 in __arguments) {
+							if((uid = __arguments[i2].__containerUID) != null)
+								break;
+						}
+					} else {
+						var c = Greencode.customMethod.getParentByTagName.call(target, "container");
+						uid = c ? c.getAttribute('uid') : null;
+					}
+					
+					param._args.push(JSON.stringify({
+						className : o.className,
+						uid : uid
+					}));
+				} else {
 					var _arg = {
 						className : o.className,
 						fields : {}
 					};
+					
+					var arg = __arguments[i-param._args.length];
 					Greencode.jQuery.each(o.fields, function() {
 						var value = arg[this];
-
 						if(Greencode.util.isElement(value))
 							_arg.fields[this] = {
 								create : false
@@ -116,7 +134,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 
 					_arg.fields = JSON.stringify(_arg.fields);
 					param._args.push(JSON.stringify(_arg));
-				}
+				}		
 			}
 		}
 		
@@ -126,8 +144,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 				console.warn("Could not find the form with name " + p.formName + ".");
 			else
 				formName = p.formName;
-		} else if(target.form != null) {
-			form = target.form;
+		} else if((form = target.form) != null || (form = Greencode.customMethod.getParentByTagName.call(target, "form")) != null) {
 			formName = form.getAttribute("name");
 		}
 		
@@ -169,16 +186,8 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 							}
 							
 							for(var i2 = -1; ++i2 < res.length;) {
-								var e = res[i2];
-								var uid = e.__container.getAttribute('uid');
-								if(!uid) {
-									uid = Greencode.cache.generateUID();
-									e.__container.setAttribute('uid', uid)
-									Greencode.cache.register(uid, e.__container);
-									uid = uid+"";
-								}
-								
-								var o = buildParam({__uid: uid}, e);
+								var e = res[i2];								
+								var o = buildParam({__uid: e.__container.getAttribute('uid')}, e);
 								value.push(o);
 							}							
 							
@@ -216,7 +225,10 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 			var list = Greencode.customMethod.getAllDataElements.call(form);
 			buildParam(param, list);
 			
-			for(var i in param) {					
+			for(var i in param) {	
+				if(i === '_args')
+					continue;
+				
 				var v = param[i];
 				if(v instanceof Object)
 					param[i] = JSON.stringify(v);
@@ -235,7 +247,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 			args: __arguments,
 			paramenters: param
 		};
-		
+				
 		if(Greencode.executeEvent('beforeEvent', _data)) {
 			var cometReceber = new Comet(p.url);
 			cometReceber.setMethodRequest(p.requestMethod);
@@ -344,7 +356,6 @@ Bootstrap.readCommand = function(mainElement) {
 				console.warn("Code: " + strEval + "\n[Reference]\n", e, this.parameters);
 			}
 		}
-
 	}
 };
 
@@ -524,6 +535,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 	if(mainElement == null)
 		mainElement = document.body;
 
+	Greencode.tags.process();
 	Bootstrap.buttons(mainElement);
 
 	if(jsonObject == null) {

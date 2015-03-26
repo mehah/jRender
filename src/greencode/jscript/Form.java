@@ -1,6 +1,7 @@
 package greencode.jscript;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -8,6 +9,7 @@ import com.google.gson.JsonObject;
 
 import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.annotation.QuerySelector;
+import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.jscript.form.annotation.ElementValue;
 import greencode.jscript.form.annotation.Event;
@@ -22,6 +24,7 @@ import greencode.util.GenericReflection.Condition;
 
 public abstract class Form extends Element implements ContainerElementImplementation {
 	final Field[] elementFields = $Container.processFields(getClass());
+	HashMap<Integer, ContainerElement<?>> containers;
 	
 	private static Condition<Field> fieldsWithRegisterEvent = new Condition<Field>() {		
 		public boolean init(Field arg0) { return arg0.isAnnotationPresent(RegisterEvent.class) && ClassUtils.isParent(arg0.getType(), EventTarget.class); }

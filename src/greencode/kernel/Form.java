@@ -36,61 +36,67 @@ final class Form {
 
 			final boolean METHOD_TYPE_IS_GET = context.getRequest().isMethod(RequestMethod.GET);
 			
-			processElements(context, context.requestedForm, METHOD_TYPE_IS_GET, null);
+			processElements(context, context.requestedForm, METHOD_TYPE_IS_GET, null, null);
 		}
 	}
 	
-	private static void processElements(final GreenContext context, final ContainerElementImplementation container, final boolean METHOD_TYPE_IS_GET, Map<String, Object> map) throws IllegalArgumentException, IllegalStateException, IllegalAccessException, IOException, ServletException {
+	private static void processElements(final GreenContext context, final ContainerElementImplementation container, final boolean METHOD_TYPE_IS_GET, Map<String, Object> map, HashMap<Integer, ContainerElement<?>> containersForm) throws IllegalArgumentException, IllegalStateException, IllegalAccessException, IOException, ServletException {
 		Field[] fields = greencode.jscript.$Container.getElementFields(container);
 		for (Field f : fields) {
 			greencode.jscript.form.annotation.ElementValue element = f.getAnnotation(greencode.jscript.form.annotation.ElementValue.class);
 
 			final String parametro = !element.name().isEmpty() ? element.name() : f.getName();
 			
-			Object valor = null;
+			Object valor;
 
 			if(f.getType().isArray() && ClassUtils.isParent(f.getType().getComponentType(), ContainerElement.class) || ClassUtils.isParent(f.getType(), ContainerElement.class)) {
 				Object json = map == null ? context.request.getParameter(parametro) : map.get(parametro);
 				if(json == null)
 					continue;
 				
-				List<HashMap<String, Object>> list;
-				if(json instanceof String)
-					list = context.gsonInstance.fromJson(context.request.getParameter(parametro), (new ArrayList<HashMap<String, Object>>()).getClass());
-				else
-					list = (List<HashMap<String, Object>>) json;
-				
-				Object _value;
+				final List<HashMap<String, Object>> list = json instanceof String ? context.gsonInstance.fromJson(context.request.getParameter(parametro), (new ArrayList<HashMap<String, Object>>()).getClass()) : (List<HashMap<String, Object>>) json;
+								
+				if(containersForm == null) {
+					containersForm = greencode.jscript.$Container.getContainers(context.requestedForm);
+					containersForm.clear();
+				}
 				
 				if(f.getType().isArray()) {
-					Class<? extends ContainerElement> clazz = (Class<? extends ContainerElement>) f.getType().getComponentType();
-					ContainerElement[] containers = (ContainerElement[]) Array.newInstance(clazz, list.size());
+					Class<? extends ContainerElement<?>> clazz = (Class<? extends ContainerElement<?>>) f.getType().getComponentType();
+					ContainerElement<?>[] containers = (ContainerElement[]) Array.newInstance(clazz, list.size());
 					for (int i = -1; ++i < containers.length;) {
-						ContainerElement containerElement = (ContainerElement) GenericReflection.NoThrow.newInstance(clazz, new Class<?>[]{Window.class}, context.currentWindow);
+						ContainerElement<?> containerElement = (ContainerElement<?>) GenericReflection.NoThrow.newInstance(clazz, new Class<?>[]{Window.class}, context.currentWindow);
 						containers[i] = containerElement;
 						
-						Map<String, Object> containerMap = list.get(i);						
-						greencode.jscript.$DOMHandle.setUID(containerElement, Integer.parseInt((String)containerMap.get("__uid")));
+						Map<String, Object> containerMap = list.get(i);
 						
-						processElements(context, containerElement, METHOD_TYPE_IS_GET, containerMap);
+						Integer uid = Integer.parseInt((String)containerMap.get("__uid"));
+						greencode.jscript.$DOMHandle.setUID(containerElement, uid);					
+						
+						containersForm.put(uid, containerElement);
+						
+						processElements(context, containerElement, METHOD_TYPE_IS_GET, containerMap, containersForm);
 					}
-					_value = containers;
+					valor = containers;
 				} else {
-					ContainerElement containerElement = (ContainerElement) GenericReflection.NoThrow.newInstance(f.getType(), new Class<?>[]{Window.class}, context.currentWindow);
-					_value = containerElement;
+					ContainerElement<?> containerElement = (ContainerElement<?>) GenericReflection.NoThrow.newInstance(f.getType(), new Class<?>[]{Window.class}, context.currentWindow);
+					valor = containerElement;
 					
-					Map<String, Object> containerMap = list.get(0);						
-					greencode.jscript.$DOMHandle.setUID(containerElement, Integer.parseInt((String)containerMap.get("__uid")));
+					Map<String, Object> containerMap = list.get(0);
 					
-					processElements(context, containerElement, METHOD_TYPE_IS_GET, containerMap);
+					Integer uid = Integer.parseInt((String)containerMap.get("__uid"));
+					
+					greencode.jscript.$DOMHandle.setUID(containerElement, uid);					
+					
+					containersForm.put(uid, containerElement);
+					
+					processElements(context, containerElement, METHOD_TYPE_IS_GET, containerMap, containersForm);
 				}
-				f.set(container, _value);
+				f.set(container, valor);
 			}else if (f.getType().equals(Part.class)) {
 				f.set(container, GreenContext.getInstance().getRequest().getPart(parametro));
 			} else if (f.getType().isArray()) {
-				valor = map == null ? context.request.getParameterValues(parametro + "[]") : map.get(parametro);
-
-				final String[] valores = (String[]) valor;
+				final String[] valores = (String[])(map == null ? context.request.getParameterValues(parametro + "[]") : map.get(parametro));
 				if (valores != null) {
 					final Object[] values = (Object[]) Array.newInstance(f.getType().getComponentType(), valores.length);
 
@@ -112,7 +118,7 @@ final class Form {
 							values[i] = _value;
 						}
 
-						f.set(container, valor);
+						f.set(container, values);
 					} catch (UnknownFormatConversionException e) {
 						Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
 					}

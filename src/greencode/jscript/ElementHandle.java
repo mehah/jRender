@@ -98,4 +98,12 @@ public final class ElementHandle {
 		
 		return elements;
 	}
+	
+	public static void addClass(Element e, String className) {
+		DOMHandle.CustomMethod.call(e, "addClass", className);
+	}
+	
+	public static void removeClass(Element e, String className) {
+		DOMHandle.CustomMethod.call(e, "removeClass", className);
+	}
 }

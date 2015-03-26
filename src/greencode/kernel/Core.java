@@ -14,6 +14,7 @@ import greencode.jscript.Form;
 import greencode.jscript.Window;
 import greencode.jscript.WindowHandle;
 import greencode.jscript.event.EventObject;
+import greencode.jscript.event.custom.ContainerEventObject;
 import greencode.jscript.form.annotation.Name;
 import greencode.jscript.function.implementation.EventFunction;
 import greencode.jscript.function.implementation.SimpleFunction;
@@ -88,6 +89,7 @@ public final class Core implements Filter {
 		"greencode.js",
 		"greencodeFunction.js",
 		"greencodeEvents.js",
+		"greencodeTags.js",
 		"iframeHttpRequest.js",
 		"comet.js",
 		"greenCodeStyle.js",
@@ -289,6 +291,8 @@ public final class Core implements Filter {
 			Object[] listArgs = null;
 			Method requestMethod = null;
 			
+			greencode.kernel.Form.processRequestedForm(context);
+			
 			try {
 				Class<?>[] listArgsClass = null;
 				String[] _args = context.request.getParameterValues("_args[]");
@@ -301,7 +305,7 @@ public final class Core implements Filter {
 					listArgs = new Object[_argsSize];
 					listArgsClass = new Class<?>[_argsSize];
 					
-					boolean hasContextClass = false;
+					int cntSkip = 0;
 					for (int i = -1; ++i < _argsSize;) {
 						HashMap<String, String> j = context.gsonInstance.fromJson(_args[i], (new HashMap<String, String>()).getClass());
 						
@@ -309,11 +313,17 @@ public final class Core implements Filter {
 						listArgsClass[i] = _class;
 						
 						if(_class.equals(GreenContext.class)) {
-							hasContextClass = true;
+							++cntSkip;
 							listArgs[i] = context;
 						} else {
-							DOM dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);
-							eArg.args[hasContextClass ? i-1 : i] = DOMHandle.getUID(dom);
+							DOM dom;
+							if(_class.equals(ContainerEventObject.class)) {
+								dom = new ContainerEventObject(context, Integer.parseInt(j.get("uid")));
+								++cntSkip;
+							} else {
+								dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);
+								eArg.args[i-cntSkip] = DOMHandle.getUID(dom);
+							}
 							listArgs[i] = dom;
 						}
 					}
@@ -337,9 +347,7 @@ public final class Core implements Filter {
 				context.listAttrSync = fs.value();
 				if(fs.onlyOnce())
 					context.listAttrSyncCache = new HashSet<String>();
-			}			
-			
-			greencode.kernel.Form.processRequestedForm(context);
+			}
 			
 			if(hasBootaction) {
 				classNameBootAction = Cache.bootAction.getClass().getSimpleName();

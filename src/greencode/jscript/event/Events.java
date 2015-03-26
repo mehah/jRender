@@ -34,4 +34,15 @@ public abstract class Events {
 		SCROLL_REACH_BOTTOM = "scrollreachbottom",
 		KEY_UP_TIME = "keyuptime",
 		ENTER = "enter";
+	
+	public static class Greencode {
+		public static final String
+			AFTER_EVENT = "afterEvent",
+			BEFORE_EVENT = "beforeEvent",
+			BEFORE_PAGE_REQUEST = "beforePageRequest",
+			AFTER_PAGE_REQUEST = "afterPageRequest",
+			INIT = "init",
+			PAGE_LOAD = "pageLoad",
+			CONTAINER_CLONED = "containerCloned";
+	}
 };

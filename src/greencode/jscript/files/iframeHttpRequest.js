@@ -148,7 +148,7 @@ var IframeHttpRequest = function() {
 			key : "isAjax",
 			value : true
 		});
-
+		
 		if(files.length > 0) {
 			append(form, files, false);
 			form.setAttribute("method", "POST");

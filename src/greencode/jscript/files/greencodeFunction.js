@@ -1,6 +1,8 @@
 Greencode.crossbrowser = {
 	registerEvent: function(eventName, func, data) {
-		if(Greencode.customEvent[eventName] != null)
+		if(Greencode.events[eventName] != null)			
+			Greencode.registerEvent(eventName, func, this);
+		else if(Greencode.customEvent[eventName] != null)
 			Greencode.customEvent[eventName].add.call(this, func, data);
 		else if(this.addEventListener)
 		    this.addEventListener(eventName, func, false);
@@ -91,6 +93,18 @@ Greencode.crossbrowser = {
 };
 
 Greencode.customMethod = {
+	hasClass: function(className) {
+		return this.className.match(new RegExp('(\\s|^)'+className+'(\\s|$)'));
+	},
+	addClass: function(className) {
+		if (!Greencode.customMethod.hasClass.call(this, className)) this.className += " "+className;
+		return this;
+	},
+	removeClass: function(className) {
+		if (Greencode.customMethod.hasClass.call(this, className))
+			this.className = this.className.replace(new RegExp('(\\s|^)'+cls+'(\\s|$)'), ' ');
+		return this;
+	},
 	replaceWith: function(e) {
 		this.parentNode.replaceChild(e, this);
 		return this;
@@ -248,15 +262,29 @@ Greencode.customMethod = {
 		
 		return newList;
 	},
-	getClosestChildrenByTagName: function(tagName) {
+	getClosestChildrenByTagName: function(tagName, attrFilter) {
 		var list = new Array();
 		var search = function(e) {
 			for(var i = -1; ++i < e.children.length;) {
 				var child = e.children[i];
 				if(child.tagName == tagName.toUpperCase()) {
-					list.push(child);
-				}else
-					search(child);
+					var push = true;
+					if(attrFilter != null){
+						for(var attr in attrFilter) {
+							var value = attrFilter[attr];
+							if(!((value === true || value === false) && Greencode.crossbrowser.hasAttribute.call(child, attr) == value || child.getAttribute(attr) == value)) {
+								push = false
+								break
+							}
+						}
+					}
+					if(push){
+						list.push(child);						
+						continue;
+					}
+				}
+				
+				search(child);
 			}
 		}
 		search(this);
@@ -267,7 +295,7 @@ Greencode.customMethod = {
 			param = {};
 		for(var i = -1; ++i < this.children.length;) {
 			var tag = this.children[i];
-			if(['INPUT', 'SELECT', 'TEXTAREA', 'DATALIST'].indexOf(tag.tagName) > -1) {
+			if(['INPUT', 'SELECT', 'TEXTAREA'].indexOf(tag.tagName) > -1) {
 				var target = lastParam != null ? lastParam : param;
 				var res;
 				if(tag.tagName === 'INPUT' && tag.type === 'radio' || tag.type === 'checkbox') {

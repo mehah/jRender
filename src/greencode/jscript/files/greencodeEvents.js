@@ -8,15 +8,16 @@ Greencode.events = {
 	containerCloned: []
 };
 
-Greencode.registerEvent = function(name, callback) {
-	Greencode.events[name].push(callback);
+Greencode.registerEvent = function(name, callback, ref) {
+	Greencode.events[name].push({ref: ref || window, callback: callback});
 };
 
-Greencode.executeEvent = function(name, data) {
-	var callbacks = Greencode.events[name];
-	if(callbacks && callbacks.length > 0) {
-		for(var i in callbacks) {
-			if(callbacks[i](data) === false)
+Greencode.executeEvent = function(name, data, ref) {
+	var obj = Greencode.events[name], ref = ref || window;
+	if(obj && obj.length > 0) {
+		for(var i in obj) {
+			var o = obj[i];
+			if((ref instanceof Array && ref.indexOf(o.ref) > -1 || o.ref == ref) && o.callback(data) === false)
 				return false;
 		}
 	}

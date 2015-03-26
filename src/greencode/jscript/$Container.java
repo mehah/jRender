@@ -10,6 +10,7 @@ import greencode.util.GenericReflection;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.Part;
@@ -65,5 +66,12 @@ public final class $Container {
 		}
 		
 		return fields;
+	}
+	
+	public static HashMap<Integer, ContainerElement<?>> getContainers(Form form) {
+		if(form.containers == null)
+			form.containers = new HashMap<Integer, ContainerElement<?>>();
+		
+		return form.containers;
 	}
 }

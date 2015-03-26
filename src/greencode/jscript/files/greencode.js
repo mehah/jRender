@@ -24,7 +24,7 @@ var Greencode = {
 		register: function(id, o) {
 			return Greencode.cache.references[id] = o;
 		},
-		remove: function() {
+		remove: function(uid) {
 			delete Greencode.cache.references[uid];
 		}
 	}
