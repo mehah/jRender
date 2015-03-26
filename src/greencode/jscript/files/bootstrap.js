@@ -96,11 +96,10 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 			
 			for( var i in p.args) {
 				var o = p.args[i];
-				if(o.className.indexOf("GreenContext") > 0) {
+				if(o.className == Greencode.className.greenContext) {
 					param._args.push(JSON.stringify(o));
-				}else if(o.className.indexOf("ContainerEventObject") > 0) {
+				}else if(o.className == Greencode.className.containerElement || o.className == Greencode.className.containerEventObject) {
 					var uid;
-					
 					if(target.tagName === 'CONTAINER') {
 						for(var i2 in __arguments) {
 							if((uid = __arguments[i2].__containerUID) != null)
@@ -114,6 +113,12 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 					param._args.push(JSON.stringify({
 						className : o.className,
 						uid : uid
+					}));
+				}else if(o.className == Greencode.className.element) {
+					param._args.push(JSON.stringify({
+						className : o.className,
+						castTo : o.castTo,
+						uid : Greencode.cache.register(target)+''
 					}));
 				} else {
 					var _arg = {
@@ -280,7 +285,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 			cometReceber = null;
 		}
 
-		if(!DEBUG_MODE) {
+		if(!Greencode.DEBUG_MODE) {
 			delete param;
 			delete tagEventObject;
 		}
@@ -345,7 +350,7 @@ Bootstrap.readCommand = function(mainElement) {
 		try {
 			var res = __isFirefox ? new Function('var e = arguments[0]; var mainElement = arguments[1]; return ' + strEval).call(this, e, mainElement) : eval(strEval);
 
-			if(DEBUG_MODE) {
+			if(Greencode.DEBUG_MODE) {
 				console.warn(e);
 				console.warn("Code: " + strEval + "\n[Reference]\n", e, this.parameters);
 				console.warn("Result: ", res);
@@ -438,7 +443,7 @@ Bootstrap.buttons = function(mainElement) {
 								}, null, location.href);
 								history.pushState({
 									selector : appendTo
-								}, null, CONTEXT_PATH + '/' + href);
+								}, null, Greencode.CONTEXT_PATH + '/' + href);
 
 								_href = window.location.href;
 
@@ -565,7 +570,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 		for(var i in __jsonObject) {
 			var jsonObject = __jsonObject[i];
 
-			if(DEBUG_MODE) {
+			if(Greencode.DEBUG_MODE) {
 				console.warn('-----------------------');
 				console.warn('MainElement: ', mainElement);
 				console.warn('JSON Object: ', jsonObject);
@@ -583,7 +588,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 					Bootstrap.readCommand.call(_this, mainElement);
 				}
 
-				if(!DEBUG_MODE)
+				if(!Greencode.DEBUG_MODE)
 					delete jsonObject.comm;
 			}
 			
@@ -593,7 +598,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 			}
 
 			if(jsonObject.sync != null) {
-				var sync = jsonObject.sync, e = Greencode.cache.getById(sync.uid, mainElement), cometReceber = new Comet(CONTEXT_PATH + '/$synchronize');
+				var sync = jsonObject.sync, e = Greencode.cache.getById(sync.uid, mainElement), cometReceber = new Comet(Greencode.CONTEXT_PATH + '/$synchronize');
 
 				cometReceber.setMethodRequest("post");
 				cometReceber.setCometType(Comet().LONG_POLLING);
@@ -660,7 +665,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				delete cometReceber;
 				cometReceber = null;
 
-				if(!DEBUG_MODE)
+				if(!Greencode.DEBUG_MODE)
 					jsonObject.sync
 			}
 
@@ -668,23 +673,23 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				var divGreenCodeModalErro = document.createElement("div"), spanTitulo = document.createElement("span"), spanBotaoFechar = document.createElement("span"), topBar = document.createElement("div"), contentModalError = document.createElement("div");
 
 				divGreenCodeModalErro.setAttribute('id', 'GreenCodemodalErro');
-				for(var i in GreencodeStyle.modalErro.style)
-					divGreenCodeModalErro.style[i] = GreencodeStyle.modalErro.style[i];
+				for(var i in Greencode.modalErro.style)
+					divGreenCodeModalErro.style[i] = Greencode.modalErro.style[i];
 
 				spanTitulo.appendChild(document.createTextNode('Exception:'));
-				for(var i in GreencodeStyle.modalErro.topBar.title.style)
-					spanTitulo.style[i] = GreencodeStyle.modalErro.topBar.title.style[i];
+				for(var i in Greencode.modalErro.topBar.title.style)
+					spanTitulo.style[i] = Greencode.modalErro.topBar.title.style[i];
 
 				spanBotaoFechar.appendChild(document.createTextNode('X'));
-				for(var i in GreencodeStyle.modalErro.topBar.closeButton.style)
-					spanBotaoFechar.style[i] = GreencodeStyle.modalErro.topBar.closeButton.style[i];
+				for(var i in Greencode.modalErro.topBar.closeButton.style)
+					spanBotaoFechar.style[i] = Greencode.modalErro.topBar.closeButton.style[i];
 
 				Greencode.crossbrowser.registerEvent.call(spanBotaoFechar, 'click', function() {
 					divGreenCodeModalErro.parentNode.removeChild(divGreenCodeModalErro);
 				});
 
-				for(var i in GreencodeStyle.modalErro.topBar.style)
-					topBar.style[i] = GreencodeStyle.modalErro.topBar.style[i];
+				for(var i in Greencode.modalErro.topBar.style)
+					topBar.style[i] = Greencode.modalErro.topBar.style[i];
 
 				topBar.appendChild(spanTitulo);
 				topBar.appendChild(spanBotaoFechar);
@@ -692,8 +697,8 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				divGreenCodeModalErro.appendChild(topBar);
 
 				contentModalError.setAttribute('class', 'content');
-				for(var i in GreencodeStyle.modalErro.content.style)
-					contentModalError.style[i] = GreencodeStyle.modalErro.content.style[i];
+				for(var i in Greencode.modalErro.content.style)
+					contentModalError.style[i] = Greencode.modalErro.content.style[i];
 
 				divGreenCodeModalErro.appendChild(contentModalError);
 
@@ -702,8 +707,8 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				for( var i in jsonObject.errors) {
 					var error = jsonObject.errors[i], title = error.className + ": " + error.message, divTitle = document.createElement("div");
 
-					for(i in GreencodeStyle.modalErro.content.title.style)
-						divTitle.style[i] = GreencodeStyle.modalErro.content.title.style[i];
+					for(i in Greencode.modalErro.content.title.style)
+						divTitle.style[i] = Greencode.modalErro.content.title.style[i];
 
 					divTitle.appendChild(document.createTextNode(title));
 
@@ -718,11 +723,11 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 							lineDiv.appendChild(document.createTextNode(msg));
 
 							if(st.possibleError) {
-								for( var i3 in GreencodeStyle.modalErro.content.possibleErro.style)
-									lineDiv.style[i3] = GreencodeStyle.modalErro.content.possibleErro.style[i3];
+								for( var i3 in Greencode.modalErro.content.possibleErro.style)
+									lineDiv.style[i3] = Greencode.modalErro.content.possibleErro.style[i3];
 							} else {
-								for( var i3 in GreencodeStyle.modalErro.content.lineClass.style)
-									lineDiv.style[i3] = GreencodeStyle.modalErro.content.lineClass.style[i3];
+								for( var i3 in Greencode.modalErro.content.lineClass.style)
+									lineDiv.style[i3] = Greencode.modalErro.content.lineClass.style[i3];
 							}
 
 							contentModalError.appendChild(lineDiv);
@@ -731,11 +736,11 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				}
 				;
 
-				if(!DEBUG_MODE)
+				if(!Greencode.DEBUG_MODE)
 					delete jsonObject.errors;
 			}
 
-			if(!DEBUG_MODE)
+			if(!Greencode.DEBUG_MODE)
 				delete jsonObject;
 
 			jsonObject = null;

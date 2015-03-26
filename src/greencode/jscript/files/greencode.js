@@ -21,8 +21,18 @@ var Greencode = {
 			
 			return Greencode.cache.references[id];
 		},		
-		register: function(id, o) {
-			return Greencode.cache.references[id] = o;
+		register: function(uid, o) {
+			if(uid instanceof Node) {
+				o = uid
+				if(uid = o.getAttribute('uid'))
+					return parseInt(uid)
+				
+				uid = Greencode.cache.generateUID();
+				o.setAttribute('uid', uid)
+			}
+			
+			Greencode.cache.references[uid] = o;			
+			return uid;
 		},
 		remove: function(uid) {
 			delete Greencode.cache.references[uid];

@@ -2,6 +2,7 @@ package greencode.jscript;
 
 import greencode.exception.OperationNotAllowedException;
 import greencode.http.enumeration.RequestMethod;
+import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.form.annotation.Name;
 import greencode.jscript.function.implementation.Function;
 import greencode.jscript.window.annotation.Form;
@@ -28,10 +29,7 @@ public final class FunctionHandle {
 		   cid = context == null ? null : context.getRequest().getConversationId();
 		
 	boolean isFunction = true;
-	
-	private transient Function dynamicEventHandler;
-	private transient Method method;
-	
+		
 	private String url, formName;
 	
 	private JsonElement methodParameters;
@@ -75,34 +73,37 @@ public final class FunctionHandle {
 			
 			this.args = new JsonObject[args.length];
 			for (int i = -1; ++i < args.length;) {
-				Class<?> Class = args[i];
-				if(!Class.equals(GreenContext.class) && !ClassUtils.isParent(Class, DOM.class))
-					throw new RuntimeException(LogMessage.getMessage("green-0035", Class.getSimpleName()));
-					
-				Class<?>[] classes = ClassUtils.getParents(Class);
-				JsonArray fieldsName = new JsonArray();
-				
+				Class<?> clazz = args[i];
+				if(!clazz.equals(GreenContext.class) && !ClassUtils.isParent(clazz, DOM.class))
+					throw new RuntimeException(LogMessage.getMessage("green-0035", clazz.getSimpleName()));
+								
 				JsonObject json = new JsonObject();				
-				json.addProperty("className", Class.getName());
-				json.add("fields", fieldsName);
 				
-				if(!Class.equals(GreenContext.class)) {
-					int iC = -1;
-					while(!Class.equals(DOM.class)) {					
-						Field[] fields = GenericReflection.getDeclaredFields(Class);
+				if(!clazz.equals(GreenContext.class)) {
+					if(ClassUtils.isParent(clazz, ContainerElement.class))
+						clazz = ContainerElement.class;
+					else if(ClassUtils.isParent(clazz, Element.class)) {
+						json.addProperty("castTo", clazz.getName());
+						clazz = Element.class;
+					} else {
+						JsonArray fieldsName = new JsonArray();
+						json.add("fields", fieldsName);
 						
-						for (Field f : fields) {
-							if(!Modifier.isTransient(f.getModifiers()))
-								fieldsName.add(context.gsonInstance.toJsonTree(f.getName()));						
-						}	
-						
-						if(++iC == classes.length)
-							break;
-						
-						Class = classes[i];
+						final Class<?>[] classes = ClassUtils.getParents(clazz, DOM.class);
+						Class<?> parent = clazz;
+						for (int j = -1; ++j < classes.length;) {
+							Field[] fields = GenericReflection.getDeclaredFields(parent);							
+							for (Field f : fields) {
+								if(!Modifier.isTransient(f.getModifiers()))
+									fieldsName.add(context.gsonInstance.toJsonTree(f.getName()));						
+							}
+							
+							parent = classes[i];
+						}
 					}
 				}
 				
+				json.addProperty("className", clazz.getName());				
 				this.args[i] = json;
 			}
 			
@@ -131,23 +132,23 @@ public final class FunctionHandle {
 		
 		Class<?> _class = o.getClass();
 		
-		if((this.method = methodsInitCached.get(_class)) != null)
-			setArguments(this.method.getParameterTypes());
+		Method method;
+		
+		if((method = methodsInitCached.get(_class)) != null)
+			setArguments(method.getParameterTypes());
 		else
 		{		
 			Method[] methods = _class.getMethods();
 			for (Method m : methods) {
 				if(m.getName().equals("init")) {
-					methodsInitCached.put(_class, this.method = m);
+					methodsInitCached.put(_class, method = m);
 					setArguments(m.getParameterTypes());					
 					break;
 				}
 			}
 		}
 		
-		checkMethodAnnotation();
-		
-		dynamicEventHandler = o;
+		checkMethodAnnotation(method);
 				
 		int hashcode = o.hashCode();
 		
@@ -156,36 +157,35 @@ public final class FunctionHandle {
 		this.setUrl(context.currentWindow().getClass().getSimpleName()+"$"+hashcode);
 	}
 	
-	private void setUrl(Class<? extends Window> windowClass, String method, Class<? extends DOM>... args) {
-		dynamicEventHandler = null;
-		
+	private void setUrl(Class<? extends Window> windowClass, String methodName, Class<? extends DOM>... args) {
 		try {
+			Method method;
 			Class<?>[] _args;
 			try {
 				_args = args;
-				this.method = GenericReflection.getMethod(windowClass, method, _args);
+				method = GenericReflection.getMethod(windowClass, methodName, _args);
 			} catch (Exception e) {
 				_args = new Class<?>[args.length+1];
 				_args[0] = GreenContext.class;
 				for (int i = 0; ++i < _args.length;)
 					_args[i] = args[i-1];
 				
-				this.method = GenericReflection.getMethod(windowClass, method, _args);
+				method = GenericReflection.getMethod(windowClass, methodName, _args);
 			}
 			
 			setArguments(_args);
 			
-			checkMethodAnnotation();
+			checkMethodAnnotation(method);
 			
-			this.setUrl(windowClass.getSimpleName()+"@"+method);
+			this.setUrl(windowClass.getSimpleName()+"@"+methodName);
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 	
-	private void checkMethodAnnotation() {
-		if(this.method.isAnnotationPresent(Form.class)) {
-			Class<? extends greencode.jscript.Form> form = this.method.getAnnotation(Form.class).value();
+	private void checkMethodAnnotation(Method method) {
+		if(method.isAnnotationPresent(Form.class)) {
+			Class<? extends greencode.jscript.Form> form = method.getAnnotation(Form.class).value();
 			
 			Field[] fields = greencode.jscript.$Container.processFields(form);
 			if(fields != null && fields.length > 0) {
@@ -196,12 +196,5 @@ public final class FunctionHandle {
 	
 	private void setUrl(String url) {
 		this.url = (context != null ? context.getRequest().getContextPath(): "") +"/"+url;
-	}
-
-	public static class CONTEXT {
-		public static void replaceDOM(DOM dom, FunctionHandle func) {
-			if(func.dynamicEventHandler != null)
-				DOMHandle.replaceReference((DOM) func.dynamicEventHandler, dom);
-		}
 	}
 }

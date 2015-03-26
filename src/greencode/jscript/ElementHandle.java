@@ -10,7 +10,10 @@ import greencode.kernel.LogMessage;
 import greencode.util.GenericReflection;
 
 public final class ElementHandle {
-	public static Element getInstance(Window window) { return new Element(window); }	
+	public static Element getInstance(Window window) { return new Element(window); }
+	public static<E extends Element> E getInstance(Class<E> clazz, Window window) {
+		return GenericReflection.NoThrow.newInstance(clazz, new Class<?>[]{Window.class}, window);
+	}
 	
 	public static void dataTransfer(Element of, Element to) {		
 		greencode.jscript.$DOMHandle.setUID(to, DOMHandle.getUID(of));
@@ -29,7 +32,7 @@ public final class ElementHandle {
 			if(Modifier.isAbstract(castTo.getModifiers()))
 				throw new RuntimeException(LogMessage.getMessage("green-0037", castTo.getSimpleName()));
 			
-			E e = GenericReflection.NoThrow.getDeclaredConstrutor(castTo, Window.class).newInstance(element.window);
+			E e = getInstance(castTo, element.window);;
 		
 			dataTransfer(element, e);
 			

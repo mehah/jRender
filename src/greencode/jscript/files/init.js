@@ -1,25 +1,22 @@
-var lastUniqueId = 0,
-	listTags = {},
-	viewId,
-	_intervalId = null;
+var listTags = {},
+	viewId;
 
 if(__isIE8orLess)
-	Greencode.util.loadScript(CONTEXT_PATH + "/jscript/greencode/sizzle.js", false);
+	Greencode.util.loadScript(Greencode.CONTEXT_PATH + "/jscript/greencode/sizzle.js", false);
 
 var startInterval = function() {
-	_intervalId = setTimeout(function() {
+	setTimeout(function() {
 		Bootstrap.init(document);
-		startInterval();
+		if(startInterval)
+			startInterval();
 	}, 15);
-};
-
-startInterval();
+}();
 
 Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
-	clearInterval(_intervalId);
+	delete window.startInterval;
 
 	if(window.location.hash.indexOf('#!') === 0) {
-		window.location.href = CONTEXT_PATH + '/' + window.location.hash.substring(2);
+		window.location.href = Greencode.CONTEXT_PATH + '/' + window.location.hash.substring(2);
 		return;
 	}
 	

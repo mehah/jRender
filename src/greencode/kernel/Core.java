@@ -10,9 +10,12 @@ import greencode.http.HttpRequest;
 import greencode.http.gzip.GZipServletResponseWrapper;
 import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
+import greencode.jscript.Element;
+import greencode.jscript.ElementHandle;
 import greencode.jscript.Form;
 import greencode.jscript.Window;
 import greencode.jscript.WindowHandle;
+import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.event.EventObject;
 import greencode.jscript.event.custom.ContainerEventObject;
 import greencode.jscript.form.annotation.Name;
@@ -90,9 +93,9 @@ public final class Core implements Filter {
 		"greencodeFunction.js",
 		"greencodeEvents.js",
 		"greencodeTags.js",
+		"greenCodeStyle.js",
 		"iframeHttpRequest.js",
 		"comet.js",
-		"greenCodeStyle.js",
 		"bootstrap.js",
 		"init.js"
 	};
@@ -320,6 +323,16 @@ public final class Core implements Filter {
 							if(_class.equals(ContainerEventObject.class)) {
 								dom = new ContainerEventObject(context, Integer.parseInt(j.get("uid")));
 								++cntSkip;
+							}else if(_class.equals(ContainerElement.class)) {
+								dom = greencode.jscript.$Container.getContainers(context.requestedForm).get(Integer.parseInt(j.get("uid")));
+								listArgsClass[i] = dom.getClass();
+								++cntSkip;
+							}else if(_class.equals(Element.class)) {
+								Class<? extends Element> castoTo = (Class<? extends Element>) Class.forName(j.get("castTo"));
+								dom = ElementHandle.getInstance(castoTo, context.currentWindow);
+								greencode.jscript.$DOMHandle.setUID(dom, Integer.parseInt(j.get("uid")));
+								listArgsClass[i] = castoTo;
+								++cntSkip;
 							} else {
 								dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);
 								eArg.args[i-cntSkip] = DOMHandle.getUID(dom);
@@ -517,14 +530,22 @@ public final class Core implements Filter {
 			if(!greencodeFolder.exists())
 				greencodeFolder.mkdir();
 			
-			StringBuilder greencodeCore = new StringBuilder("var CONTEXT_PATH = '"+fConfig.getServletContext().getContextPath()+"', DEBUG_MODE = "+Browser.consoleDebug+";");
-			
 			final String greencodePath = greencodeFolder.getPath();
 			
-			final CoreFileJS coreFileJS = new CoreFileJS(greencodeCore, greencodePath);
+			final CoreFileJS coreFileJS = new CoreFileJS(greencodePath);
 			
 			for (String fileName : coreJSFiles)
 				coreFileJS.append(classLoader.getResource("greencode/jscript/files/"+fileName));
+			
+			coreFileJS
+				.append("Greencode.className = {")
+					.append("greenContext: '"+GreenContext.class.getName()+"',")
+					.append("containerElement: '"+ContainerElement.class.getName()+"',")
+					.append("containerEventObject: '"+ContainerEventObject.class.getName()+"',")
+					.append("element: '"+Element.class.getName()+"'")
+				.append("};")
+				.append("Greencode.CONTEXT_PATH = '"+fConfig.getServletContext().getContextPath()+"';")
+				.append("Greencode.DEBUG_MODE = "+Browser.consoleDebug+";");
 			
 			coreFileJS.save();
 			

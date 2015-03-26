@@ -22,7 +22,7 @@ public final class $Container {
 		if(e instanceof Form)
 			return ((Form) e).elementFields;
 		else if(e instanceof ContainerElement)
-			return greencode.jscript.elements.custom.$Container.getElementFields((ContainerElement) e);
+			return greencode.jscript.elements.custom.$Container.getElementFields((ContainerElement<?>) e);
 		
 		return null;
 	}

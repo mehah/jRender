@@ -11,6 +11,11 @@ public final class CoreFileJS {
 	private final StringBuilder core;
 	private final String greencodePath;
 	
+	CoreFileJS(String greencodePath) {
+		this.core = new StringBuilder();
+		this.greencodePath = greencodePath;
+	}
+	
 	CoreFileJS(StringBuilder jsCore, String greencodePath) {
 		this.core = jsCore;
 		this.greencodePath = greencodePath;

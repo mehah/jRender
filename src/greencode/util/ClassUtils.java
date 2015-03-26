@@ -118,25 +118,25 @@ public final class ClassUtils {
 	
 	public static Class<?>[] getParents(final Class<?> Class) { return getParents(Class, null); }
 	
-	public static Class<?>[] getParents(final Class<?> Class, Class<?> delimiter) {
+	public static Class<?>[] getParents(final Class<?> clazz, Class<?> delimiter) {
 		HashMap<Class<?>, Class<?>[]> classHash;
 		final Class<?> index;
 		if(delimiter != null) {
-			if((classHash = cachedClassWithDelimiter.get(Class)) == null)
-				cachedClassWithDelimiter.put(Class, classHash = new HashMap<Class<?>, Class<?>[]>());
+			if((classHash = cachedClassWithDelimiter.get(clazz)) == null)
+				cachedClassWithDelimiter.put(clazz, classHash = new HashMap<Class<?>, Class<?>[]>());
 			
 			index = delimiter;
 		}else {
 			classHash = cachedClass;
 			delimiter = Object.class;
-			index = Class;
+			index = clazz;
 		}
 		
 		Class<?>[] classes;
 		if((classes = classHash.get(index)) == null) {
 			final List<Class<?>> _classes = new ArrayList<Class<?>>();
 			
-			Class<?> parent = Class;
+			Class<?> parent = clazz;
 			while((parent = parent.getSuperclass()) != delimiter && parent != null)
 				_classes.add(parent);
 			
