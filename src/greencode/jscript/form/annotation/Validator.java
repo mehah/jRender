@@ -8,6 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Validator {
-	public Class<? extends greencode.jscript.form.Validator> value();
+	public Class<? extends greencode.validator.Validator> value();
 	public String[] labels() default "";
 }

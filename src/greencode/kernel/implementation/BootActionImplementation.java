@@ -1,6 +1,7 @@
 package greencode.kernel.implementation;
 
 import greencode.kernel.GreenContext;
+import greencode.validator.DataValidation;
 
 import java.lang.reflect.Method;
 
@@ -12,8 +13,11 @@ public abstract interface BootActionImplementation extends PluginImplementation 
 
 	public void afterAction(GreenContext context, Method requestMethod);
 
-	public void onRequest(HttpServletRequest request,
-			HttpServletResponse response);
+	public void beforeValidation(DataValidation dataValidation);
+
+	public void afterValidation(DataValidation dataValidation);
+
+	public void onRequest(HttpServletRequest request, HttpServletResponse response);
 
 	public void initUserContext(GreenContext context);
 }

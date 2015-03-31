@@ -1,4 +1,4 @@
-package greencode.jscript.form;
+package greencode.validator;
 
 import greencode.http.ViewSession;
 

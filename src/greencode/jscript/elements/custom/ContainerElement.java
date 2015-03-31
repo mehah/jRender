@@ -17,13 +17,15 @@ public abstract class ContainerElement<E extends ContainerElement<E>> extends El
 
 	public void name(String name) { DOMHandle.setProperty(this, "name", name); }
 	public String name() { return DOMHandle.getVariableValueByProperty(this, "name", String.class, "name"); }
-	
+
 	public E getOriginal() {
 		if(this.original == null)
 			DOMHandle.registerElementByProperty(this, this.original = (E) GenericReflection.NoThrow.newInstance(getClass(), new Class<?>[]{Window.class}, this.window), "original");
-		
+
 		return this.original;
 	}
-	
-	public static ContainerElement cast(Element e) { return ElementHandle.cast(e, ContainerElement.class); }
+
+	public static ContainerElement<?> cast(Element e) {
+		return ElementHandle.cast(e, ContainerElement.class);
+	}
 }

@@ -112,7 +112,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 					
 					param._args.push(JSON.stringify({
 						className : o.className,
-						uid : uid
+						uid : uid+''
 					}));
 				}else if(o.className == Greencode.className.element) {
 					param._args.push(JSON.stringify({

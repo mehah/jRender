@@ -77,7 +77,7 @@ Greencode.tags = {
 					this.onRepeat.call(this, clone);
 				
 				if(notExecuteEvent !== true)
-					Greencode.executeEvent('containerCloned', {__containerUID: uid, mainElement: clone}, [window, clone.original, clone]);
+					Greencode.executeEvent('containerCloned', {__containerUID: uid, mainElement: clone}, [window, clone.original, clone, this]);
 				
 				return clone;
 			};

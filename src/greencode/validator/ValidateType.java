@@ -1,4 +1,4 @@
-package greencode.jscript.window.enumeration;
+package greencode.validator;
 
 public enum ValidateType {
 	PARTIAL, TOTAL

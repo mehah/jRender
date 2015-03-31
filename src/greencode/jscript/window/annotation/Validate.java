@@ -1,6 +1,6 @@
 package greencode.jscript.window.annotation;
 
-import greencode.jscript.window.enumeration.ValidateType;
+import greencode.validator.ValidateType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
