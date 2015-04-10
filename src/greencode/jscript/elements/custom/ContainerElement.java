@@ -28,4 +28,8 @@ public abstract class ContainerElement<E extends ContainerElement<E>> extends El
 	public static ContainerElement<?> cast(Element e) {
 		return ElementHandle.cast(e, ContainerElement.class);
 	}
+	
+	public void fill() {
+		greencode.jscript.$Container.fill(this, elementFields);
+	}
 }

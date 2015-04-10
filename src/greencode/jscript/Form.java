@@ -161,24 +161,6 @@ public abstract class Form extends Element implements ContainerElementImplementa
 	public void submit() { DOMHandle.execCommand(this, "submit"); }
 	
 	public void fill() {
-		Gson g = new Gson();
-		JsonArray fields = new JsonArray();
-		for (Field field : elementFields) {
-			Object value = GenericReflection.NoThrow.getValue(field, this);
-			if(value != null) {
-				ElementValue annotation = field.getAnnotation(ElementValue.class);
-				String name = annotation.name();
-				if(name.isEmpty())
-					name = field.getName();
-				
-				JsonObject o = new JsonObject();
-				o.addProperty("name", name);
-				o.add("values", g.toJsonTree(value));
-				fields.add(o);
-			}
-		}
-		
-		if(fields.size() > 0)
-			DOMHandle.CustomMethod.call(this, "fillForm", fields);
+		greencode.jscript.$Container.fill(this, elementFields);
 	}
 }

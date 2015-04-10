@@ -28,13 +28,12 @@ public final class Location {
 	public void href(String href) { DOMHandle.setProperty(window, "location.href", href); }
 	
 	public void href(Class<? extends Window> loc) {	
-		Page page = WindowHandle.getPage(loc);
-		DOMHandle.setProperty(window, "location.href", page.URLName().isEmpty() ? page.path() : page.URLName());
+		href(loc, null);
 	}
 	
 	public void href(Class<? extends Window> loc, String name) {	
 		Page page = WindowHandle.getPageByName(loc, name);
-		DOMHandle.setProperty(window, "location.href", page.URLName().isEmpty() ? page.path() : page.URLName());
+		DOMHandle.setProperty(window, "location.href", greencode.kernel.$GreenContext.getContextPath()+"/"+(page.URLName().isEmpty() ? page.path() : page.URLName()));
 	}
 	
 	public void reload(boolean forceGet) { DOMHandle.execCommand(window, "location.reload", forceGet); }

@@ -178,6 +178,11 @@ Greencode.customMethod = {
 				o.values = [o.values];
 			
 			var first = elements[0];
+			
+			var container = Greencode.customMethod.getParentByTagName.call(first, 'container');
+			if(container != null && container != this)
+				continue;
+			
 			if(first.tagName == 'TEXTAREA')
 				first.value = o.values;
 			else if(first.tagName == 'SELECT') {
@@ -200,6 +205,10 @@ Greencode.customMethod = {
 				if(isRadio || first.type == 'checkbox') {
 					for(var i2 in elements) {
 						var e = elements[i2];
+						container = Greencode.customMethod.getParentByTagName.call(e, 'container');
+						if(container != null && container != this)
+							continue;					
+						
 						var achou = false;
 						for(var i3 in o.values) {
 							if(e.value == o.values[i3]) {

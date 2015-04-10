@@ -3,6 +3,7 @@ package greencode.jscript;
 import greencode.exception.OperationNotAllowedException;
 import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
+import greencode.jscript.form.annotation.ElementValue;
 import greencode.kernel.LogMessage;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
@@ -14,6 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.http.Part;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 public final class $Container {
 	private $Container() {
@@ -69,5 +74,27 @@ public final class $Container {
 			form.containers = new HashMap<Integer, ContainerElement<?>>();
 
 		return form.containers;
+	}
+	
+	public static void fill(Element e, Field[] elementFields) {
+		Gson g = new Gson();
+		JsonArray fields = new JsonArray();
+		for (Field field : elementFields) {
+			Object value = GenericReflection.NoThrow.getValue(field, e);
+			if(value != null) {
+				ElementValue annotation = field.getAnnotation(ElementValue.class);
+				String name = annotation.name();
+				if(name.isEmpty())
+					name = field.getName();
+				
+				JsonObject o = new JsonObject();
+				o.addProperty("name", name);
+				o.add("values", g.toJsonTree(value));
+				fields.add(o);
+			}
+		}
+		
+		if(fields.size() > 0)
+			DOMHandle.CustomMethod.call(e, "fillForm", fields);
 	}
 }
