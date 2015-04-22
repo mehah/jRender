@@ -5,7 +5,9 @@ Greencode.events = {
 	afterPageRequest: [],
 	init: [],
 	pageLoad: [],
-	containerCloned: []
+	containerCloned: [],
+	beforePopstate: [],
+	afterPopstate: []
 };
 
 Greencode.registerEvent = function(name, callback, ref) {

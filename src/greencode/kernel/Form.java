@@ -47,9 +47,11 @@ final class Form {
 
 			final String parametro = !element.name().isEmpty() ? element.name() : f.getName();
 			
+			final Class<?> fieldType = f.getType(); 
+			
 			Object valor;
 
-			if(f.getType().isArray() && ClassUtils.isParent(f.getType().getComponentType(), ContainerElement.class) || ClassUtils.isParent(f.getType(), ContainerElement.class)) {
+			if(fieldType.isArray() && ClassUtils.isParent(fieldType.getComponentType(), ContainerElement.class) || ClassUtils.isParent(fieldType, ContainerElement.class)) {
 				Object json = map == null ? context.request.getParameter(parametro) : map.get(parametro);
 				if(json == null)
 					continue;
@@ -61,8 +63,8 @@ final class Form {
 					containersForm.clear();
 				}
 				
-				if(f.getType().isArray()) {
-					Class<? extends ContainerElement<?>> clazz = (Class<? extends ContainerElement<?>>) f.getType().getComponentType();
+				if(fieldType.isArray()) {
+					Class<? extends ContainerElement<?>> clazz = (Class<? extends ContainerElement<?>>) fieldType.getComponentType();
 					ContainerElement<?>[] containers = (ContainerElement[]) Array.newInstance(clazz, list.size());
 					for (int i = -1; ++i < containers.length;) {
 						ContainerElement<?> containerElement = (ContainerElement<?>) GenericReflection.NoThrow.newInstance(clazz, new Class<?>[]{Window.class}, context.currentWindow);
@@ -79,7 +81,7 @@ final class Form {
 					}
 					valor = containers;
 				} else {
-					ContainerElement<?> containerElement = (ContainerElement<?>) GenericReflection.NoThrow.newInstance(f.getType(), new Class<?>[]{Window.class}, context.currentWindow);
+					ContainerElement<?> containerElement = (ContainerElement<?>) GenericReflection.NoThrow.newInstance(fieldType, new Class<?>[]{Window.class}, context.currentWindow);
 					valor = containerElement;
 					
 					Map<String, Object> containerMap = list.get(0);
@@ -93,16 +95,16 @@ final class Form {
 					processElements(context, containerElement, METHOD_TYPE_IS_GET, containerMap, containersForm);
 				}
 				f.set(container, valor);
-			}else if (f.getType().equals(Part.class)) {
+			}else if (fieldType.equals(Part.class)) {
 				f.set(container, GreenContext.getInstance().getRequest().getPart(parametro));
-			} else if (f.getType().isArray()) {
+			} else if (fieldType.isArray()) {
 				final String[] valores = (String[])(map == null ? context.request.getParameterValues(parametro + "[]") : map.get(parametro));
 				if (valores != null) {
-					final Object[] values = (Object[]) Array.newInstance(f.getType().getComponentType(), valores.length);
+					final Object[] values = (Object[]) Array.newInstance(fieldType.getComponentType(), valores.length);
 
 					try {
 						for (int i = -1; ++i < valores.length;) {
-							Object _value = greencode.kernel.Form.getFieldValue(f, f.getType().getComponentType(), valores[i]);
+							Object _value = greencode.kernel.Form.getFieldValue(f, fieldType.getComponentType(), valores[i]);
 
 							if (_value == null)
 								Console.error(LogMessage.getMessage("green-0019", f.getName(), f.getDeclaringClass().getSimpleName()));
@@ -122,12 +124,15 @@ final class Form {
 					} catch (UnknownFormatConversionException e) {
 						Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
 					}
-				}
+				}else
+					f.set(container, null);
 			} else {
-				boolean containKey = map == null ? context.request.getParameterMap().containsKey(parametro) : map.containsKey(parametro);
-				if (containKey) {
-					try {
-						valor = greencode.kernel.Form.getFieldValue(f, f.getType(), (map == null ? context.request.getParameter(parametro) : map.get(parametro)).toString());
+				try {
+					Object result = (map == null ? context.request.getParameter(parametro) : map.get(parametro));
+					if(result == null)
+						valor = ClassUtils.isPrimitiveType(fieldType) ? ClassUtils.getDefaultValue(fieldType) : null;
+					else {
+						valor = greencode.kernel.Form.getFieldValue(f, fieldType, result.toString());
 
 						if (valor instanceof String) {
 							if (element.trim())
@@ -136,11 +141,11 @@ final class Form {
 							if (METHOD_TYPE_IS_GET)
 								valor = StringUtils.toCharset((String) valor, GreenCodeConfig.View.charset);
 						}
+					}					
 
-						f.set(container, valor);
-					} catch (UnknownFormatConversionException e) {
-						Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
-					}
+					f.set(container, valor);
+				} catch (UnknownFormatConversionException e) {
+					Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
 				}
 			}
 		}

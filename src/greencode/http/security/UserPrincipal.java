@@ -1,10 +1,11 @@
 package greencode.http.security;
 
+import java.io.Serializable;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public abstract class UserPrincipal implements Principal {
+public abstract class UserPrincipal implements Principal, Serializable {
 	private final HashSet<String> rules = new HashSet<String>();
 	
 	protected final void addRule(String rule) { this.rules.add(rule); }

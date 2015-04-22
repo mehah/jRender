@@ -43,6 +43,8 @@ public abstract class Events {
 			AFTER_PAGE_REQUEST = "afterPageRequest",
 			INIT = "init",
 			PAGE_LOAD = "pageLoad",
-			CONTAINER_CLONED = "containerCloned";
+			CONTAINER_CLONED = "containerCloned",
+			BEFORE_POPSTATE = "beforePopstate",
+			AFTER_POPSTATE = "beforePopstate";
 	}
 };

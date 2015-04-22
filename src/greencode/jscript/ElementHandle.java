@@ -109,4 +109,9 @@ public final class ElementHandle {
 	public static void removeClass(Element e, String className) {
 		DOMHandle.CustomMethod.call(e, "removeClass", className);
 	}
+	
+	public static Node prepend(Element e, Node node) {
+		DOMHandle.CustomMethod.call(e, "prepend", node);
+		return node;
+	}
 }

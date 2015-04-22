@@ -1,47 +1,41 @@
 Greencode.tags = {
-	process: function(ref) {
-		if(!ref)
-			ref = document.body;
-		
-		if(!ref)
-			return;
-		
-		var listRepeat = Greencode.customMethod.getClosestChildrenByTagName.call(ref, "container", {uid: false});
-		for(var i = -1; ++i < listRepeat.length;) {
+	process : function(ref) {
+		var listRepeat = Greencode.customMethod.getClosestChildrenByTagName.call(ref, "container", {uid : false});
+		for (var i = -1; ++i < listRepeat.length;) {
 			var e = listRepeat[i], nameRepeat = e.getAttribute('name');
-			
+
 			e.original = e;
 			e.clones = new Array();
-			
+
 			e.firstClone = function() {
 				return this.clones[0];
 			};
-			
+
 			e.lastClone = function() {
-				return this.clones[this.clones.length-1]
+				return this.clones[this.clones.length - 1]
 			};
-			
-			e.remove = function() {			
+
+			e.remove = function() {
 				var index = this.clones.indexOf(this);
-				if(index > -1) {
+				if (index > -1) {
 					this.clones.splice(index, 1);
 					this.parentNode.removeChild(this);
 					this.form = null;
 				}
 			};
-			
+
 			e.form = Greencode.customMethod.getParentByTagName.call(e, "form");
-			
-			e.repeat = function(useOriginal, notExecuteEvent) {				
+
+			e.repeat = function(useOriginal, notExecuteEvent) {
 				var clone = (useOriginal ? this.original : this).cloneNode(true);
-				
-				clone.clones = this.clones;				
-				clone.firstClone = this.firstClone;				
+
+				clone.clones = this.clones;
+				clone.firstClone = this.firstClone;
 				clone.lastClone = this.lastClone;
 				clone.repeat = this.repeat;
 				clone.original = this.original;
 				clone.remove = this.remove;
-				
+
 				var uid = Greencode.cache.generateUID();
 				clone.setAttribute('uid', uid)
 				Greencode.cache.register(uid, clone);
@@ -49,63 +43,63 @@ Greencode.tags = {
 				var elementToInsertAfter = (this.lastClone() || this);
 				elementToInsertAfter.parentNode.insertBefore(clone, elementToInsertAfter.nextSibling);
 				clone.form = Greencode.customMethod.getParentByTagName.call(clone, "form");
-				
+
 				this.clones.push(clone);
-				
+
 				var containers = Greencode.customMethod.getClosestChildrenByTagName.call(clone, "container");
-				for(var i = -1; ++i < containers.length;) {
+				for (var i = -1; ++i < containers.length;) {
 					var container = containers[i];
-					container.clones = new Array();				
-					container.firstClone = this.firstClone;				
+					container.clones = new Array();
+					container.firstClone = this.firstClone;
 					container.lastClone = this.lastClone;
 					container.repeat = this.repeat;
 					container.remove = this.remove;
 					container.original = container;
-					
+
 					var old = container;
 					container.original = old;
-					
+
 					var repeat = container.getAttribute('repeat');
-					if(repeat) {
+					if (repeat) {
 						container.removeAttribute('repeat');
-						for(; --repeat >= 0;)
+						for (; --repeat >= 0;)
 							container.repeat(useOriginal, true);
-					}else
+					} else
 						container.repeat(useOriginal, true);
-					
+
 					old.parentNode.removeChild(old);
 				}
-				
-				if(this.onRepeat)
+
+				if (this.onRepeat)
 					this.onRepeat.call(this, clone);
-				
-				if(notExecuteEvent !== true)
-					Greencode.executeEvent('containerCloned', {__containerUID: uid, mainElement: clone}, [window, clone.original, clone, this]);
-				
+
+				if (notExecuteEvent !== true)
+					Greencode.executeEvent('containerCloned', {__containerUID : uid, mainElement : clone}, [ window, clone.original, clone, this ]);
+
 				return clone;
 			};
 		}
-		
-		for(var i = -1; ++i < listRepeat.length;) {
+
+		for (var i = -1; ++i < listRepeat.length;) {
 			var original = listRepeat[i];
-			
+
 			var e = original.repeat(true, true), repeat = e.getAttribute('repeat') || 0;
-			
+
 			original.parentNode.removeChild(original);
-			
-			if(repeat) {
+
+			if (repeat) {
 				e.removeAttribute('repeat');
-				for(; --repeat >= 0;)
+				for (; --repeat >= 0;)
 					e.repeat(true, true);
 			}
 		}
-		
+
 		Greencode.tags.buttons(ref);
 	},
-	buttons: function(mainElement) {
+	buttons : function(mainElement) {
 		var elements = Greencode.crossbrowser.querySelectorAll.call(mainElement, 'input[type="redirect"]:not([swept]), button[type="redirect"]:not([swept])');
 
-		for(var i = -1; ++i < elements.length;) {
+		for (var i = -1; ++i < elements.length;) {
 			var element = elements[i];
 			element.setAttribute('swept', null);
 
@@ -114,28 +108,31 @@ Greencode.tags = {
 
 				var action = this.getAttribute('action');
 
-				if(action != null)
+				if (action != null)
 					window.location.href = action;
 			});
 		}
 
 		elements = Greencode.crossbrowser.querySelectorAll.call(mainElement, '[appendTo]:not([swept])');
 
-		for(var i = -1; ++i < elements.length;) {
+		for (var i = -1; ++i < elements.length;) {
 			var element = elements[i], appendTo = element.getAttribute('appendTo').toLowerCase(), o = appendTo == "body" ? document.body : Greencode.crossbrowser.querySelector.call(mainElement, appendTo);
 
 			element.setAttribute('swept', 'swept');
 
-			if(o != null) {
+			if (o != null) {
 				Greencode.crossbrowser.registerEvent.call(element, 'click', function(e) {
 					e.preventDefault();
 
-					var appendTo = this.getAttribute('appendTo'), empty = Greencode.crossbrowser.hasAttribute.call(this, 'empty'), changeURL = Greencode.crossbrowser.hasAttribute.call(this, 'changeURL'), keepViewId = Greencode.crossbrowser.hasAttribute.call(this, 'keepViewId'), href = this
-							.getAttribute('href'), data = {
-						__contentIsHtml : true
-					}, first = false, cometReceber = new Comet(this.getAttribute('href'));
+					var appendTo = this.getAttribute('appendTo'),
+						empty = Greencode.crossbrowser.hasAttribute.call(this, 'empty'),
+						changeURL = Greencode.crossbrowser.hasAttribute.call(this, 'changeURL'),
+						keepViewId = Greencode.crossbrowser.hasAttribute.call(this, 'keepViewId'),
+						href = this.getAttribute('href'),
+						data = {__contentIsHtml : true},
+						cometReceber = new Comet(this.getAttribute('href'));
 
-					if(keepViewId)
+					if (keepViewId)
 						data.viewId = viewId;
 
 					cometReceber.setMethodRequest('GET');
@@ -145,72 +142,59 @@ Greencode.tags = {
 					cometReceber.jsonContentType(false);
 
 					var _data = {
-						mainElement: o,
-						target: this,
-						appendToSelector: appendTo,
-						appendToElement: o,
-						empty: empty,
-						changeURL: changeURL,
-						keepViewId: keepViewId,
-						href: href
-					};
-					
-					var f = function(data) {
-						if(!first) {
-							
-						} else {
-							o.insertAdjacentHTML('beforeEnd', data);
-							Bootstrap.init(o);
-						}
+						mainElement : o,
+						target : this,
+						appendToSelector : appendTo,
+						appendToElement : o,
+						empty : empty,
+						changeURL : changeURL,
+						keepViewId : keepViewId,
+						href : href
 					};
 
-					if(Greencode.executeEvent('beforePageRequest', _data))
+					if (Greencode.executeEvent('beforePageRequest', _data))
 						var dataComplete = "";
-						cometReceber.send(data, function(data) {
-							dataComplete += data;
-						}, function(data) {
-							var _href = window.location.href, tags = new Array();
+					cometReceber.send(data, function(data) {
+						dataComplete += data;
+					}, function(data) {
+						var tags = new Array();
 
-							delete listTags[_href];
-							listTags[_href] = tags;
+						delete listTags[window.location.href];
+						listTags[window.location.href] = tags;
 
-							for(var ii = -1; ++ii < o.childNodes.length;)
-								tags.push(o.childNodes[ii]);
+						for (var ii = -1; ++ii < o.childNodes.length;)
+							tags.push(o.childNodes[ii]);
 
-							if(empty)
-								Greencode.customMethod.empty.call(o);
+						if (empty)
+							Greencode.customMethod.empty.call(o);
 
-							dataComplete += data;
-							o.insertAdjacentHTML('beforeEnd', dataComplete);
-							var scripts = Greencode.crossbrowser.querySelectorAll.call(o, 'script');
-							for(var s = -1; ++s < scripts.length;)
-								window.eval(Greencode.crossbrowser.text.call(scripts[s]));
-							
-							Bootstrap.init(o);
+						dataComplete += data;
+						o.insertAdjacentHTML('beforeEnd', dataComplete);
+						var scripts = Greencode.crossbrowser.querySelectorAll.call(o, 'script');
+						for (var s = -1; ++s < scripts.length;)
+							window.eval(Greencode.crossbrowser.text.call(scripts[s]));
 
-							if(changeURL) {
-								if(history.pushState == null)
-									window.location.hash = "#!" + href;
-								else {
-									history.replaceState({
-										selector : appendTo
-									}, null, location.href);
-									history.pushState({
-										selector : appendTo
-									}, null, href);
-									
-									tags = new Array();
-									delete listTags[_href];
-									listTags[_href] = tags;
+						Bootstrap.init(o);
 
-									for(var ii = -1; ++ii < o.childNodes.length;)
-										tags.push(o.childNodes[ii]);
-								}
+						if (changeURL) {
+							if (history.pushState == null)
+								window.location.hash = "#!" + href;
+							else {
+								history.replaceState({selector : appendTo}, null, location.href);
+								history.pushState({selector : appendTo}, null, href);
+
+								tags = new Array();
+								delete listTags[window.location.href];
+								listTags[window.location.href] = tags;
+
+								for (var ii = -1; ++ii < o.childNodes.length;)
+									tags.push(o.childNodes[ii]);
 							}
-							
-							Greencode.executeEvent('afterPageRequest', _data);
-							Greencode.executeEvent('pageLoad', _data);
-						});
+						}
+
+						Greencode.executeEvent('afterPageRequest', _data);
+						Greencode.executeEvent('pageLoad', _data);
+					});
 
 					delete cometReceber;
 					cometReceber = null;
@@ -222,7 +206,7 @@ Greencode.tags = {
 
 		elements = Greencode.crossbrowser.querySelectorAll.call(mainElement, 'input[type="ajax"]:not([swept]), button[type="ajax"]:not([swept])');
 
-		for(var i = -1; ++i < elements.length;) {
+		for (var i = -1; ++i < elements.length;) {
 			var element = elements[i];
 			element.setAttribute('swept', null);
 
@@ -231,8 +215,8 @@ Greencode.tags = {
 			Greencode.crossbrowser.registerEvent.call(element, 'click', function() {
 				var data = {}, form = this.form, _es = Greencode.crossbrowser.querySelectorAll.call(form, 'input, textarea, select'), cometReceber = new Comet(this.getAttribute('action'));
 
-				if(_es != null) {
-					for( var e in _es)
+				if (_es != null) {
+					for ( var e in _es)
 						data[this.id || this.name] = this.value;
 				}
 
@@ -244,11 +228,11 @@ Greencode.tags = {
 
 				cometReceber.send(data, function(data) {
 				}, function(data) {
-					if(element.getAttribute('appendTo') != null) {
+					if (element.getAttribute('appendTo') != null) {
 						var o = Greencode.crossbrowser.querySelector.call(mainElement, element.getAttribute('appendTo'));
 
-						if(element.getAttribute('empty') != null && element.getAttribute('empty').toLowerCase() === 'true') {
-							for(var ii = -1; ++ii < element.children.length;) {
+						if (element.getAttribute('empty') != null && element.getAttribute('empty').toLowerCase() === 'true') {
+							for (var ii = -1; ++ii < element.children.length;) {
 								var c = element.children[ii];
 								c.parentNode.removeChild(c);
 							}
@@ -256,7 +240,7 @@ Greencode.tags = {
 
 						element.insertAdjacentHTML('beforeEnd', data);
 						Bootstrap.init(element);
-					} else if(data != null && data != "")
+					} else if (data != null && data != "")
 						Bootstrap.init(form, JSON.parse(data));
 				});
 
@@ -267,12 +251,12 @@ Greencode.tags = {
 
 		elements = Greencode.crossbrowser.querySelectorAll.call(mainElement, 'input[type="submit"]:not([swept]), button[type="submit"]:not([swept])');
 
-		for(var i = -1; ++i < elements.length;) {
+		for (var i = -1; ++i < elements.length;) {
 			var element = elements[i];
 			element.setAttribute('swept', null);
 
-			if(element.getAttribute('action') != null)
+			if (element.getAttribute('action') != null)
 				element.form.setAttribute('action', element.getAttribute('action'));
 		}
-	}	
+	}
 };

@@ -299,42 +299,37 @@ Greencode.customMethod = {
 		search(this);
 		return list;
 	},
-	getAllDataElements: function(param, lastParam) {
+	getAllDataElements: function(param) {
 		if(!param)
 			param = {};
 		for(var i = -1; ++i < this.children.length;) {
-			var tag = this.children[i];
+			var tag = this.children[i], lastParam = param;
 			if(['INPUT', 'SELECT', 'TEXTAREA'].indexOf(tag.tagName) > -1) {
-				var target = lastParam != null ? lastParam : param;
-				var res;
 				if(tag.tagName === 'INPUT' && tag.type === 'radio' || tag.type === 'checkbox') {
-					var list = target[tag.name];
+					var list = param[tag.name];
 					if(!list) {
 						list = new Array();
-						target[tag.name] =  list;
+						param[tag.name] =  list;
 					}
 					list.push(tag);
 				}else
-					target[tag.name] = tag;
-			} else {
-				if(tag.tagName === 'CONTAINER') {
-					var p = param[tag.getAttribute('name')];
-					if(!p) {
-						p = new Array();
-						param[tag.getAttribute('name')] = p;
-					}
-					
-					var _lastParam = {__container: tag};
-					p.push(_lastParam);
-					
-					lastParam = _lastParam;
-					Greencode.customMethod.getAllDataElements.call(tag, lastParam, param);
-				}else
-					Greencode.customMethod.getAllDataElements.call(tag, param, null);							
+					param[tag.name] = tag;
+			} else if(tag.tagName === 'CONTAINER') {
+				var p = param[tag.getAttribute('name')];
+				if(!p) {
+					p = new Array();
+					param[tag.getAttribute('name')] = p;
+				}
+				p.push(lastParam = {__container: tag});
 			}
+			Greencode.customMethod.getAllDataElements.call(tag, lastParam);
 		}
 		
 		return param;
+	},
+	prepend: function(node) {
+		this.insertBefore(node, this.firstChild);
+		return node;
 	}
 };
 

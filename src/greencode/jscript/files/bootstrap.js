@@ -19,8 +19,8 @@ Bootstrap.analizeJSON = function(mainElement, j, target) {
 					event = {
 						type : p.url || 'undefined'
 					};
-
-				Bootstrap.callRequestMethod(mainElement, target, event, p, arguments);
+				
+				Bootstrap.callRequestMethod(mainElement, event.target || target, event, p, arguments);
 			};
 		} else
 			Bootstrap.analizeJSON(mainElement, p, target);
@@ -187,6 +187,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 							var first = false;
 							if(!value) {
 								value = new Array();
+								value.isContainer = true;
 								first = true;
 							}
 							
@@ -235,7 +236,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 					continue;
 				
 				var v = param[i];
-				if(v instanceof Object)
+				if(v.isContainer)
 					param[i] = JSON.stringify(v);
 			}
 			

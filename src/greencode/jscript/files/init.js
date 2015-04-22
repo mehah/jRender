@@ -24,12 +24,13 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 
 	Greencode.crossbrowser.registerEvent.call(window, 'popstate', function(e) {
 		if(e.state != null && e.state.selector != null) {
+			Greencode.executeEvent('beforePopstate');
 			var o = e.state.selector == 'body' ? document.body : Greencode.crossbrowser.querySelector.call(document.body, e.state.selector);
 			Greencode.customMethod.empty.call(o);
-			
 			var tags = listTags[window.location.href];
 			for(var i in tags)
 				o.appendChild(tags[i]);
+			Greencode.executeEvent('afterPopstate');
 		}
 	});
 	
