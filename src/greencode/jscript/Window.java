@@ -95,12 +95,12 @@ public abstract class Window extends EventTarget implements HttpAction {
 	
 	public void clearInterval(int uid) {
 		DOMHandle.execCommand(this, "clearInterval", DOMHandle.getDefaultIdToRegisterReturn(uid));
-		DOMHandle.removeRegisteredReturn(this, uid);
+		DOMHandle.deleteReference(this, uid);
 	}
 	
 	public void clearTimeout(int uid) {
 		DOMHandle.execCommand(this, "clearTimeout", DOMHandle.getDefaultIdToRegisterReturn(uid));
-		DOMHandle.removeRegisteredReturn(this, uid);
+		DOMHandle.deleteReference(this, uid);
 	}
 	
 	public void close() { DOMHandle.execCommand(this, "close"); }

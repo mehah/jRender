@@ -12,10 +12,18 @@ Greencode.crossbrowser = {
 	removeEvent: function(eventName, func) {
 		if(Greencode.customEvent[eventName] != null)
 			Greencode.customEvent[eventName].remove.call(this, func);
-		else if(this.removeEventListener)
-		    this.removeEventListener(eventName, func, false);
-		else
-			this.detachEven('on'+event, func);
+		else if(this.removeEventListener) {
+			if(func == null)
+				this.removeEventListener(eventName);
+			else
+				this.removeEventListener(eventName, func, false);
+		}		    
+		else {
+			if(func == null)
+				this.detachEvent('on'+event);
+			else
+				this.detachEvent('on'+event, func);
+		}	
 	},
 	shootEvent: function(eventName) {
 		if (document.createEventObject){
