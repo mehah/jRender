@@ -55,6 +55,11 @@ public final class WindowHandle {
 		HashMap<Class<? extends Window>, Window> list = $Window.getMap(conversation);		
 		
 		A w = (A) list.remove(actionClass);
+		if(w.functions != null) {
+			w.functions.clear();
+			w.functions = null;
+		}
+		
 		if(w instanceof WindowDestroyListener)
 			((WindowDestroyListener) w).onDestroy();
 		

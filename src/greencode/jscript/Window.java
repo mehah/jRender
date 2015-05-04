@@ -27,7 +27,7 @@ public abstract class Window extends EventTarget implements HttpAction {
 		super(context.getRequest().getViewSession());
 		
 		if(context.currentWindow() == null)
-			greencode.kernel.$GreenContext.setCurrentWindow(context, window);
+			greencode.kernel.$GreenContext.setCurrentWindow(context, this);
 		
 		uid = 2; // WINDOW ID
 		

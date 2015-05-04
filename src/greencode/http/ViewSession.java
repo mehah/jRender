@@ -1,12 +1,17 @@
 package greencode.http;
 
+import greencode.jscript.$Window;
+import greencode.jscript.Window;
+import greencode.jscript.WindowHandle;
 import greencode.kernel.GreenCodeConfig;
 import greencode.util.GenericReflection;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -85,6 +90,15 @@ public final class ViewSession implements Serializable {
 	public String[] getValueNames() { return (String[]) attributes.keySet().toArray(); }
 
 	public void invalidate() {
+		Map<Integer, HashMap<String, Object>> conversationMap = Conversation.getConverstionMap(this);		
+		for(Integer key: conversationMap.keySet()) {
+			final Conversation conversation = new Conversation(this, key);
+			HashMap<Class<? extends Window>, Window> list = $Window.getMap(conversation);
+			for(Class<? extends Window> clazz: list.keySet()) {
+				WindowHandle.removeInstance(clazz, conversation);
+			}
+		}
+		
 		attributes.clear();
 		context.removeViewSession(id);
 		

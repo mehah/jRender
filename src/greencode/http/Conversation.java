@@ -33,7 +33,7 @@ public class Conversation {
 		this.map = getMap(viewSession, id);
 	}
 
-	private static HashMap<Integer, HashMap<String, Object>> getConverstionMap(ViewSession view) {
+	static HashMap<Integer, HashMap<String, Object>> getConverstionMap(ViewSession view) {
 		@SuppressWarnings("unchecked")
 		HashMap<Integer, HashMap<String, Object>> conversations = (HashMap<Integer, HashMap<String, Object>>) view.getAttribute("CONVERSATION_LIST");
 		if(conversations == null)

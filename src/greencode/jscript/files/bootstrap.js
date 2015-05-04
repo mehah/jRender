@@ -245,6 +245,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 
 		param.cid = p.cid;
 		param.viewId = p.viewId;
+		param.eventType = event.type;
 
 		param._buttonId = target.window == null ? target.id == null ? target.name : target.id : 'Window';
 
