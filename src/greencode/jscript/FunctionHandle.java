@@ -197,4 +197,8 @@ public final class FunctionHandle {
 	private void setUrl(String url) {
 		this.url = (context != null ? context.getRequest().getContextPath(): "") +"/"+url;
 	}
+	
+	public static void destroy(Window window, Function anonymousClass) {
+		window.functions.remove(anonymousClass.hashCode());
+	}
 }
