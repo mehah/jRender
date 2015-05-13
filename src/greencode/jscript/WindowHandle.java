@@ -9,7 +9,7 @@ import greencode.util.GenericReflection;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
+import java.util.Map;
 
 public final class WindowHandle {
 	
@@ -19,7 +19,7 @@ public final class WindowHandle {
 	
 	@SuppressWarnings("unchecked")
 	public static <A extends Window> A getInstance(Class<A> actionClass, Conversation conversation) {			
-		HashMap<Class<? extends Window>, Window> list = $Window.getMap(conversation);
+		Map<Class<? extends Window>, Window> list = $Window.getMap(conversation);
 		
 		Window action = list.get(actionClass);
 		
@@ -52,7 +52,7 @@ public final class WindowHandle {
 	
 	@SuppressWarnings("unchecked")
 	public static <A extends Window> A removeInstance(Class<A> actionClass, Conversation conversation) {			
-		HashMap<Class<? extends Window>, Window> list = $Window.getMap(conversation);		
+		Map<Class<? extends Window>, Window> list = $Window.getMap(conversation);		
 		
 		A w = (A) list.remove(actionClass);
 		if(w.functions != null) {

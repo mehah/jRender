@@ -82,9 +82,23 @@ public final class Core implements Filter {
 	final static String SRC_CORE_JS_FOR_SCRIPT_HTML = null;
 	private final static Boolean hasError = true;
 
-	private final static String[] jsFiles = {"sizzle.js"};
+	private final static String[] jsFiles = {
+		"sizzle.js"
+	};
 
-	private final static String[] coreJSFiles = {"json3.js", "greencode.js", "greencodeFunction.js", "greencodeEvents.js", "greencodeTags.js", "greenCodeStyle.js", "iframeHttpRequest.js", "comet.js", "bootstrap.js", "init.js"};
+	private final static String[] coreJSFiles = {
+		"json3.js",
+		"greencode.js",
+		"greencodeFunction.js",
+		"greencodeEvents.js",
+		"greencodeTags.js",
+		"greenCodeStyle.js",
+		"iframeHttpRequest.js",
+		"comet.js",
+		"bootstrap.js",
+		"init.js"
+	};
+	
 
 	public void destroy() {
 		if(Cache.bootAction != null) {

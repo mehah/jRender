@@ -51,7 +51,7 @@ public abstract class Form extends Element implements ContainerElementImplementa
 	void processAnnotation() {
 		Field[] fields = GenericReflection.getDeclaredFieldsByConditionId(getClass(), "form:fieldsWithFindElement");
 		if(fields == null)
-			fields = GenericReflection.getDeclaredFieldsByCondition(getClass(), "form:fieldsWithFindElement", fieldsWithFindElement);
+			fields = GenericReflection.getDeclaredFieldsByCondition(getClass(), "form:fieldsWithFindElement", fieldsWithFindElement, true);
 		
 		for (Field f : fields) {
 			if(GenericReflection.NoThrow.getValue(f, this) != null)
@@ -157,7 +157,18 @@ public abstract class Form extends Element implements ContainerElementImplementa
 		return DOMHandle.getVariableValueByProperty(this, "target", String.class, "target");
 	}
 	
-	public void reset() { DOMHandle.CustomMethod.call(this, "resetForm"); }
+	public void reset() {
+		Field[] fields = greencode.jscript.$Container.getElementFields(this);
+		try {
+			for(Field field: fields) {
+				field.set(this, ClassUtils.getDefaultValue(field.getType()));
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		DOMHandle.CustomMethod.call(this, "resetForm");
+	}
 	public void submit() { DOMHandle.execCommand(this, "submit"); }
 	
 	public void fill() {

@@ -93,7 +93,7 @@ public final class ViewSession implements Serializable {
 		Map<Integer, HashMap<String, Object>> conversationMap = Conversation.getConverstionMap(this);		
 		for(Integer key: conversationMap.keySet()) {
 			final Conversation conversation = new Conversation(this, key);
-			HashMap<Class<? extends Window>, Window> list = $Window.getMap(conversation);
+			Map<Class<? extends Window>, Window> list = $Window.getMap(conversation);
 			for(Class<? extends Window> clazz: list.keySet()) {
 				WindowHandle.removeInstance(clazz, conversation);
 			}

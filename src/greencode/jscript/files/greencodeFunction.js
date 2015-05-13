@@ -139,7 +139,11 @@ Greencode.customMethod = {
 			}
 		};
 		
-		cometReceber.send({cid: cid, viewId: viewId}, f, f);
+		cometReceber.send({cid: cid, viewId: viewId}, f, function(data) {
+			f(data);
+			var _data = {mainElement: This}
+			Greencode.executeEvent('pageLoad', _data);
+		});
 		
 		delete cometReceber;
 		cometReceber = null;
