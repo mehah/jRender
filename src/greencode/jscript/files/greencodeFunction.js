@@ -198,7 +198,7 @@ Greencode.customMethod = {
 			if(first.tagName == 'TEXTAREA')
 				first.value = o.values;
 			else if(first.tagName == 'SELECT') {
-				for(var i2 in first.options) {
+				for(var i2 = -1; ++i2 < first.options.length;) {
 					var option = first.options[i2];
 					if(first.multiple) {
 						for(var i3 in o.values) {
@@ -215,7 +215,7 @@ Greencode.customMethod = {
 			}else if(first.tagName == 'INPUT') {
 				var isRadio = first.type == 'radio';
 				if(isRadio || first.type == 'checkbox') {
-					for(var i2 in elements) {
+					for(var i2 = -1; ++i2 < elements.length;) {
 						var e = elements[i2];
 						container = Greencode.customMethod.getParentByTagName.call(e, 'container');
 						if(container != null && container != this)
@@ -223,7 +223,7 @@ Greencode.customMethod = {
 						
 						var achou = false;
 						for(var i3 in o.values) {
-							if(e.value == o.values[i3]) {
+							if(e.value == o.values[i3]+"") {
 								e.checked = true;
 								if(isRadio) {
 									achou = true;

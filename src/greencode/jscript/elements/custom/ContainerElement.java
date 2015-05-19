@@ -25,6 +25,17 @@ public abstract class ContainerElement<E extends ContainerElement<E>> extends El
 		return this.original;
 	}
 
+	public E repeat() {
+		return repeat(true);
+	}
+	
+	public E repeat(boolean useOriginal) {
+		Element e = GenericReflection.NoThrow.newInstance(getClass(), new Class[]{Window.class}, window);		
+		DOMHandle.registerElementByCommand(this, e, "repeat", useOriginal);
+		
+		return (E) e;
+	}
+
 	public static ContainerElement<?> cast(Element e) {
 		return ElementHandle.cast(e, ContainerElement.class);
 	}

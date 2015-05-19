@@ -35,7 +35,8 @@ final class Rule {
 		}
 		
 		if(!hasAccess) {
-			context.response.sendError(HttpServletResponse.SC_UNAUTHORIZED, LogMessage.getMessage("green-0040"));
+			if(Cache.bootAction == null || !Cache.bootAction.whenUnauthorized(context))
+				context.response.sendError(HttpServletResponse.SC_UNAUTHORIZED, LogMessage.getMessage("green-0040"));
 			throw new StopProcess();
 		}
 	}

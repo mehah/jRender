@@ -20,4 +20,6 @@ public abstract interface BootActionImplementation extends PluginImplementation 
 	public void onRequest(HttpServletRequest request, HttpServletResponse response);
 
 	public void initUserContext(GreenContext context);
+	
+	public boolean whenUnauthorized(GreenContext context);
 }
