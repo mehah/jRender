@@ -2,6 +2,7 @@ package greencode.jscript;
 
 import greencode.http.Conversation;
 import greencode.jscript.function.implementation.Function;
+import greencode.jscript.window.annotation.Page;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,5 +22,13 @@ public class $Window {
 	
 	public static HashMap<Integer, Function> getRegisteredFunctions(Window window) {
 		return window.functions == null ? window.functions = new HashMap<Integer, Function>() : window.functions;
+	}
+	
+	public static Page getCurrentPageAnnotation(Window window) {
+		return window.currentPageAnnotation;
+	}
+	
+	public static void setCurrentPageAnnotation(Window window, Page page) {
+		window.currentPageAnnotation = page;
 	}
 }

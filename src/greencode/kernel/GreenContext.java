@@ -35,13 +35,13 @@ public final class GreenContext {
 	final HttpRequest request;
 	final HttpServletResponse response;
 	final public Gson gsonInstance = getGsonInstance();
-	final greencode.jscript.window.annotation.Page currentPageAnnotation;
 	
 	boolean userLocaleChanged = false;	
 	Locale userLocale;
 	Properties currentMessagePropertie;
 
-	Window currentWindow;	
+	Window currentWindow;
+	greencode.jscript.window.annotation.Page currentPageAnnotation;
 	Form requestedForm;
 	
 	private DatabaseConnection databaseConnection;
@@ -91,7 +91,7 @@ public final class GreenContext {
 	public greencode.jscript.window.annotation.Page currentPageAnnotation() {
 		exceptionCheck();
 		
-		return this.currentPageAnnotation;
+		return this.currentPageAnnotation == null ? greencode.jscript.$Window.getCurrentPageAnnotation(currentWindow()) : this.currentPageAnnotation;
 	}
 	
 	Gson getGsonInstance() {

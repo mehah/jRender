@@ -179,7 +179,13 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 								}
 							}
 
-							value = values != null && values.length > 0 ? values : null;
+							if(values != null) {
+								if(values.length > 1)
+									value = values;
+								else
+									value = values[0];
+							}else
+								value = null;
 						} else {
 							name = i;
 							value = param[name];

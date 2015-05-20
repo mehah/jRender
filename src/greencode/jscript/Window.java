@@ -5,6 +5,7 @@ import greencode.http.HttpAction;
 import greencode.http.HttpRequest;
 import greencode.jscript.function.implementation.Function;
 import greencode.jscript.function.implementation.SimpleFunction;
+import greencode.jscript.window.annotation.Page;
 import greencode.kernel.GreenContext;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ public abstract class Window extends EventTarget implements HttpAction {
 	public final Location location;
 	public final History history;
 	public final Navigator navigator;
+	Page currentPageAnnotation;
 	
 	private final Element principalElement; 
 	
@@ -26,8 +28,10 @@ public abstract class Window extends EventTarget implements HttpAction {
 	private Window(GreenContext context) {
 		super(context.getRequest().getViewSession());
 		
-		if(context.currentWindow() == null)
+		if(context.currentWindow() == null) {
 			greencode.kernel.$GreenContext.setCurrentWindow(context, this);
+			this.currentPageAnnotation = context.currentPageAnnotation();
+		}
 		
 		uid = 2; // WINDOW ID
 		

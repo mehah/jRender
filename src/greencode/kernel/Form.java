@@ -5,6 +5,7 @@ import greencode.jscript.Window;
 import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.jscript.form.annotation.ConvertDateTime;
+import greencode.util.ArrayUtils;
 import greencode.util.ClassUtils;
 import greencode.util.DateUtils;
 import greencode.util.GenericReflection;
@@ -98,9 +99,16 @@ final class Form {
 			}else if (fieldType.equals(Part.class)) {
 				f.set(container, GreenContext.getInstance().getRequest().getPart(parametro));
 			} else if (fieldType.isArray()) {
-				final String[] valores = (String[])(map == null ? context.request.getParameterValues(parametro + "[]") : map.get(parametro));
+				final String[] valores;
+				if(map == null) {
+					valores = context.request.getParameterValues(parametro + "[]");
+				} else {
+					List<Object> list = (List<Object>) map.get(parametro);
+					valores = list == null ? null : list.toArray(new String[list.size()]);
+				}
+				
 				if (valores != null) {
-					final Object[] values = (Object[]) Array.newInstance(fieldType.getComponentType(), valores.length);
+					final Object[] values = (Object[]) Array.newInstance(ClassUtils.toWrapperClass(fieldType.getComponentType()), valores.length);
 
 					try {
 						for (int i = -1; ++i < valores.length;) {
@@ -120,7 +128,7 @@ final class Form {
 							values[i] = _value;
 						}
 
-						f.set(container, values);
+						f.set(container, ClassUtils.isPrimitiveType(fieldType.getComponentType()) ? ArrayUtils.wrapperToPrimitive(values) : values);						
 					} catch (UnknownFormatConversionException e) {
 						Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
 					}
