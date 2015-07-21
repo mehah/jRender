@@ -5,6 +5,7 @@ import greencode.jscript.Window;
 import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.jscript.form.annotation.ConvertDateTime;
+import greencode.jscript.form.convert.Converter;
 import greencode.util.ArrayUtils;
 import greencode.util.ClassUtils;
 import greencode.util.DateUtils;
@@ -101,7 +102,12 @@ final class Form {
 			} else if (fieldType.isArray()) {
 				final String[] valores;
 				if(map == null) {
-					valores = context.request.getParameterValues(parametro + "[]");
+					String[] _valores = context.request.getParameterValues(parametro + "[]");
+					if(_valores == null) {
+						valor = context.request.getParameter(parametro);
+						valores = valor != null ? new String[]{(String) valor} : null;
+					}else
+						valores = _valores;
 				} else {
 					List<Object> list = (List<Object>) map.get(parametro);
 					valores = list == null ? null : list.toArray(new String[list.size()]);
@@ -112,7 +118,7 @@ final class Form {
 
 					try {
 						for (int i = -1; ++i < valores.length;) {
-							Object _value = greencode.kernel.Form.getFieldValue(f, fieldType.getComponentType(), valores[i]);
+							Object _value = greencode.kernel.Form.getFieldValue(context, f, fieldType.getComponentType(), valores[i], element);
 
 							if (_value == null)
 								Console.error(LogMessage.getMessage("green-0019", f.getName(), f.getDeclaringClass().getSimpleName()));
@@ -140,7 +146,7 @@ final class Form {
 					if(result == null)
 						valor = ClassUtils.isPrimitiveType(fieldType) ? ClassUtils.getDefaultValue(fieldType) : null;
 					else {
-						valor = greencode.kernel.Form.getFieldValue(f, fieldType, result.toString());
+						valor = greencode.kernel.Form.getFieldValue(context, f, fieldType, result.toString(), element);
 
 						if (valor instanceof String) {
 							if (element.trim())
@@ -159,8 +165,18 @@ final class Form {
 		}
 	}
 
-	static Object getFieldValue(Field field, Class<?> instanceClass, final String valor) throws UnknownFormatConversionException {
+	static Object getFieldValue(GreenContext context, Field field, Class<?> instanceClass, final String valor, final greencode.jscript.form.annotation.ElementValue elementAnnotation) throws UnknownFormatConversionException {
 		if (valor != null && !valor.isEmpty()) {
+			if(elementAnnotation.converters().length > 0) {
+				Object lastValue = valor;
+				for(Class<? extends Converter> clazz: elementAnnotation.converters()) {
+					Converter c = GenericReflection.NoThrow.newInstance(clazz, new Class<?>[0]);
+					lastValue = c.set(context, instanceClass, lastValue);
+				}
+				
+				return lastValue;
+			}
+			
 			instanceClass = ClassUtils.toWrapperClass(instanceClass);
 			if (String.class.equals(instanceClass))
 				return valor;
