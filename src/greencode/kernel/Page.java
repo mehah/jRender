@@ -1,12 +1,5 @@
 package greencode.kernel;
 
-import greencode.jscript.FunctionHandle;
-import greencode.jscript.Window;
-import greencode.util.FileUtils;
-import greencode.util.GenericReflection;
-import greencode.util.MergedFile;
-import greencode.util.StringUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -26,6 +19,13 @@ import org.jsoup.select.Elements;
 
 import com.google.gson.Gson;
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
+
+import greencode.jscript.FunctionHandle;
+import greencode.jscript.Window;
+import greencode.util.FileUtils;
+import greencode.util.GenericReflection;
+import greencode.util.MergedFile;
+import greencode.util.StringUtils;
 
 public final class Page {
 	final static HashMap<String, Page> pages = new HashMap<String, Page>();
@@ -268,6 +268,23 @@ public final class Page {
 					src.head().prepend("<script type=\"text/javascript\" src=\""+Core.SRC_CORE_JS_FOR_SCRIPT_HTML+"\"></script>");
 							
 				content = src.html().replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
+				
+				int lastIndex = 0;
+				String startString = "GREENCODE:{(";
+				while((lastIndex = content.indexOf(startString, lastIndex)) != -1) {
+					final int listCloseIndex = content.indexOf('}', lastIndex);
+					final String c = content.substring(lastIndex+startString.length(), listCloseIndex);				
+					
+					try {
+						int closeIndex = c.indexOf(')');
+						Class<?> clazz = Class.forName(c.substring(0, closeIndex));
+						content = content.replaceAll(Pattern.quote(startString+c+'}'), GenericReflection.getValue(clazz, c.substring(closeIndex+2), null).toString());						
+					} catch(ClassNotFoundException e1) {
+						e1.printStackTrace();
+					}
+					
+					lastIndex = listCloseIndex;
+				}				
 			} else
 				content = FileUtils.getContentFile(file.toURI().toURL());
 			
