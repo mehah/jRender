@@ -7,7 +7,8 @@ Greencode.events = {
 	pageLoad: [],
 	containerCloned: [],
 	beforePopstate: [],
-	afterPopstate: []
+	afterPopstate: [],
+	scriptLoad: [],
 };
 
 Greencode.registerEvent = function(name, callback, ref) {

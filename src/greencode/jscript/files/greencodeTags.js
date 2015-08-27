@@ -154,6 +154,7 @@ Greencode.tags = {
 
 					if (Greencode.executeEvent('beforePageRequest', _data))
 						var dataComplete = "";
+					
 					cometReceber.send(data, function(data) {
 						dataComplete += data;
 					}, function(data) {
@@ -171,8 +172,32 @@ Greencode.tags = {
 						dataComplete += data;
 						o.insertAdjacentHTML('beforeEnd', dataComplete);
 						var scripts = Greencode.crossbrowser.querySelectorAll.call(o, 'script');
-						for (var s = -1; ++s < scripts.length;)
-							window.eval(Greencode.crossbrowser.text.call(scripts[s]));
+						for (var s = -1; ++s < scripts.length;) {
+							var scriptElement = scripts[s];
+							if(scriptElement.src) {
+								var script = document.createElement('script'), head = document.getElementsByTagName("head")[0];
+								script.setAttribute("type", scriptElement.type ? scriptElement.type : "text/javascript");
+								script.setAttribute("src", scriptElement.src);
+
+								var done = false;
+								script.onload = script.onreadystatechange = function() {
+									if (!done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete")) {
+										done = true;
+										Greencode.executeEvent('scriptLoad', _data);
+
+										script.onload = script.onreadystatechange = null;
+										if (head && script.parentNode) {
+											head.removeChild(script);
+										}
+									}
+								};
+								
+						        head.appendChild(script);
+								script = null;
+							}
+							else
+								window.eval(Greencode.crossbrowser.text.call(scriptElement));
+						}
 
 						Bootstrap.init(o);
 
