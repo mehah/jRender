@@ -189,11 +189,11 @@ Greencode.tags = {
 										if (head && script.parentNode) {
 											head.removeChild(script);
 										}
+										script = null;
 									}
 								};
 								
 						        head.appendChild(script);
-								script = null;
 							}
 							else
 								window.eval(Greencode.crossbrowser.text.call(scriptElement));

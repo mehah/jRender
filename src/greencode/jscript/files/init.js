@@ -43,11 +43,11 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 						if (head && script.parentNode) {
 							head.removeChild(script);
 						}
+						script = null;
 					}
 				};
 		        
 		        head.appendChild(script);
-				script = null;
 			}
 			else
 				window.document.body.appendChild(elem);
