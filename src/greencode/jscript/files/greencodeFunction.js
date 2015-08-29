@@ -117,7 +117,7 @@ Greencode.customMethod = {
 		this.parentNode.replaceChild(e, this);
 		return this;
 	},
-	replaceWithController: function(url, cid) {
+	replaceWithPageURL: function(url, cid) {
 		var This = this,
 			cometReceber = new Comet(url),
 			first = false;

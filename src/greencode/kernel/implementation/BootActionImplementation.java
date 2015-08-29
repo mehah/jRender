@@ -1,5 +1,6 @@
 package greencode.kernel.implementation;
 
+import greencode.jscript.Form;
 import greencode.kernel.GreenContext;
 import greencode.validator.DataValidation;
 
@@ -15,7 +16,7 @@ public abstract interface BootActionImplementation extends PluginImplementation 
 
 	public void beforeValidation(DataValidation dataValidation);
 
-	public void afterValidation(DataValidation dataValidation);
+	public void afterValidation(Form form, DataValidation dataValidation);
 
 	public void onRequest(HttpServletRequest request, HttpServletResponse response);
 

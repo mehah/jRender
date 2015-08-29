@@ -95,7 +95,7 @@ final class ActionLoader {
 
 			if(Cache.bootAction != null) {
 				Console.log("Calling AfterValidation: [" + classNameBootAction + "]");
-				Cache.bootAction.afterValidation(data);
+				Cache.bootAction.afterValidation(context.requestedForm, data);
 			}
 
 			data = null;

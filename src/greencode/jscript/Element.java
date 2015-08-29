@@ -34,13 +34,29 @@ public class Element extends Node {
 	public String style(String property) {
 		return DOMHandle.getVariableValueByCommand(this, "style."+property, String.class, "@crossbrowser.getStyle", property);
 	}
-	
+
 	public Element[] getElementsByTagName(String tagName) {
-		return getElementsBy("getElementsByTagName.length", "getElementsByTagName", tagName);
+		return getElementsByTagName(tagName, -1);
 	}
 	
+	public Element[] getElementsByTagName(String tagName, int count) {
+		return getElementsBy("getElementsByTagName.length", "getElementsByTagName", tagName, count);
+	}
+	
+	public<E extends Element> E[] getElementsByTagName(String tagName, int count, Class<E> castTo) {
+		return ElementHandle.cast(getElementsByTagName(tagName, count), castTo);
+	}
+
 	public Element[] getElementsByClassName(String tagName) {
-		return getElementsBy("getElementsByClassName.length", "@crossbrowser.getElementsByClassName", tagName);
+		return getElementsByClassName(tagName, -1);
+	}
+	
+	public Element[] getElementsByClassName(String tagName, int count) {
+		return getElementsBy("getElementsByClassName.length", "@crossbrowser.getElementsByClassName", tagName, count);
+	}
+	
+	public<E extends Element> E[] getElementsByClassName(String tagName, int count, Class<E> castTo) {
+		return ElementHandle.cast(getElementsByClassName(tagName, count), castTo);
 	}
 	
 	public Element querySelector(String selector) {
@@ -54,16 +70,23 @@ public class Element extends Node {
 		return ElementHandle.cast(querySelector(selector), castTo);
 	}
 	
-	public Element[] querySelectorAll(String selector) {
-		return getElementsBy("querySelectorAll.length", "@crossbrowser.querySelectorAll", selector);
+	public Element[] querySelectorAll(String selector) { return querySelectorAll(selector, -1); }
+
+	public Element[] querySelectorAll(String selector, int count) {
+		return getElementsBy("querySelectorAll.length", "@crossbrowser.querySelectorAll", selector, count);
 	}
 	
 	public<E extends Element> E[] querySelectorAll(String selector, Class<E> castTo) {
 		return ElementHandle.cast(querySelectorAll(selector), castTo);
 	}
 	
-	private Element[] getElementsBy(String varName, String command, String tagName) {
-		int qnt = DOMHandle.getVariableValueByPropertyNoCache(this, varName, Integer.class, command+"('"+tagName+"').length");
+	public<E extends Element> E[] querySelectorAll(String selector, int count, Class<E> castTo) {
+		return ElementHandle.cast(querySelectorAll(selector, count), castTo);
+	}
+	
+	private Element[] getElementsBy(String varName, String command, String tagName, int qnt) {
+		if(qnt < 1)
+			qnt = DOMHandle.getVariableValueByPropertyNoCache(this, varName, Integer.class, command+"('"+tagName+"').length");
 		
 		Element[] elements = new Element[qnt];
 		int[] uids = new int[qnt];
@@ -105,8 +128,21 @@ public class Element extends Node {
 		
 		DOMHandle.CustomMethod.call(
 			this,
-			"replaceWithController",
-			page.URLName().isEmpty() ? page.path() : page.URLName(),
+			"replaceWithPageURL",
+			greencode.kernel.$GreenContext.getContextPath()+"/"+(page.URLName().isEmpty() ? page.path() : page.URLName()),
+			(conversation == null ? GreenContext.getInstance().getRequest().getConversation() : conversation).getId()
+		);
+	}
+	
+	public void replaceWithPageURL(String url) {
+		replaceWithPageURL(url, null);
+	}
+	
+	public void replaceWithPageURL(String url, Conversation conversation) {		
+		DOMHandle.CustomMethod.call(
+			this,
+			"replaceWithPageURL",
+			greencode.kernel.$GreenContext.getContextPath()+"/"+url,
 			(conversation == null ? GreenContext.getInstance().getRequest().getConversation() : conversation).getId()
 		);
 	}
