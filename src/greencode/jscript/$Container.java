@@ -82,15 +82,25 @@ public final class $Container {
 		for (Field field : elementFields) {
 			Object value = GenericReflection.NoThrow.getValue(field, e);
 			if(value != null) {
-				ElementValue annotation = field.getAnnotation(ElementValue.class);
-				String name = annotation.name();
-				if(name.isEmpty())
-					name = field.getName();
-				
-				JsonObject o = new JsonObject();
-				o.addProperty("name", name);
-				o.add("values", g.toJsonTree(value));
-				fields.add(o);
+				final Class<?> fieldType = field.getType();
+				final boolean isArray;
+				if(isArray = fieldType.isArray() && ClassUtils.isParent(fieldType.getComponentType(), ContainerElement.class) || ClassUtils.isParent(fieldType, ContainerElement.class)) {
+					if(isArray) {
+						for(ContainerElement<?> container: (ContainerElement<?>[])value)
+							container.fill();
+					}else
+						((ContainerElement<?>) value).fill();
+				} else {
+					ElementValue annotation = field.getAnnotation(ElementValue.class);
+					String name = annotation.name();
+					if(name.isEmpty())
+						name = field.getName();
+					
+					JsonObject o = new JsonObject();
+					o.addProperty("name", name);
+					o.add("values", g.toJsonTree(value));
+					fields.add(o);
+				}
 			}
 		}
 		
