@@ -82,7 +82,7 @@ public final class Page {
 	}
 
 	String getContent(GreenContext context) {
-		return (mobilePage != null && context != null && context.getRequest().isMobile() ? mobilePage : this).content;
+		return getCurrentPage(context).content;
 	}
 
 	void setContent(String content) {
@@ -157,7 +157,26 @@ public final class Page {
 					return page;
 
 				inserted = new ArrayList<Page>();
-				src = Jsoup.parse(file, GreenCodeConfig.View.charset);
+				content = FileUtils.getContentFile(file.toURI().toURL()).replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
+
+				int lastIndex = 0;
+				String startString = "GREENCODE:{(";
+				while((lastIndex = content.indexOf(startString, lastIndex)) != -1) {
+					final int listCloseIndex = content.indexOf('}', lastIndex);
+					final String c = content.substring(lastIndex + startString.length(), listCloseIndex);
+
+					try {
+						int closeIndex = c.indexOf(')');
+						Class<?> clazz = Class.forName(c.substring(0, closeIndex));
+						content = content.replaceAll(Pattern.quote(startString + c + '}'), GenericReflection.getValue(clazz, c.substring(closeIndex + 2), null).toString());
+					} catch(ClassNotFoundException e1) {
+						e1.printStackTrace();
+					}
+
+					lastIndex = listCloseIndex;
+				}
+				
+				src = Jsoup.parse(content, GreenCodeConfig.View.charset);
 
 				List<Element> listSelf = src.getElementsByTag("template:import");
 
@@ -279,24 +298,7 @@ public final class Page {
 				if(importCoreJS)
 					src.head().prepend("<script type=\"text/javascript\" src=\"" + Core.SRC_CORE_JS_FOR_SCRIPT_HTML + "\"></script>");
 
-				content = src.html().replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
-
-				int lastIndex = 0;
-				String startString = "GREENCODE:{(";
-				while((lastIndex = content.indexOf(startString, lastIndex)) != -1) {
-					final int listCloseIndex = content.indexOf('}', lastIndex);
-					final String c = content.substring(lastIndex + startString.length(), listCloseIndex);
-
-					try {
-						int closeIndex = c.indexOf(')');
-						Class<?> clazz = Class.forName(c.substring(0, closeIndex));
-						content = content.replaceAll(Pattern.quote(startString + c + '}'), GenericReflection.getValue(clazz, c.substring(closeIndex + 2), null).toString());
-					} catch(ClassNotFoundException e1) {
-						e1.printStackTrace();
-					}
-
-					lastIndex = listCloseIndex;
-				}
+				content = src.html();
 			} else
 				content = FileUtils.getContentFile(file.toURI().toURL());
 
