@@ -28,5 +28,5 @@ public abstract class EventTarget extends DOM {
 	{ DOMHandle.execCommand(this, "@crossbrowser.removeEvent", eventName, handle); }
 	
 	public void removeEventListener(String eventName)
-	{ DOMHandle.execCommand(this, "@crossbrowser.removeEvent"); }
+	{ DOMHandle.execCommand(this, "@crossbrowser.removeEvent", eventName); }
 }

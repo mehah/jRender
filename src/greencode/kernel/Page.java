@@ -157,7 +157,7 @@ public final class Page {
 					return page;
 
 				inserted = new ArrayList<Page>();
-				content = FileUtils.getContentFile(file.toURI().toURL()).replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
+				content = FileUtils.getContentFile(file.toURI().toURL(), GreenCodeConfig.View.charset).replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
 
 				int lastIndex = 0;
 				String startString = "GREENCODE:{(";

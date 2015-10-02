@@ -9,8 +9,8 @@ Greencode.crossbrowser = {
 		else
 			this.attachEvent('on'+eventName, func);
 	},
-	removeEvent: function(eventName, func) {
-		if(Greencode.customEvent[eventName] != null)
+	removeEvent: function(eventName, func, oficialRemove) {
+		if(!oficialRemove && Greencode.customEvent[eventName] != null)
 			Greencode.customEvent[eventName].remove.call(this, func);
 		else if(this.removeEventListener) {
 			if(func == null)
@@ -20,9 +20,9 @@ Greencode.crossbrowser = {
 		}		    
 		else {
 			if(func == null)
-				this.detachEvent('on'+event);
+				this.detachEvent('on'+eventName);
 			else
-				this.detachEvent('on'+event, func);
+				this.detachEvent('on'+eventName, func);
 		}	
 	},
 	shootEvent: function(eventName) {

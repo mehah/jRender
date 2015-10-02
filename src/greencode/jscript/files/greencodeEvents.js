@@ -46,7 +46,7 @@ Greencode.customEvent.scrollreachpercent = {
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent('scroll', Greencode.customEvent.scrollreachpercent.handle);
+		Greencode.crossbrowser.removeEvent.call(this, 'scroll', Greencode.customEvent.scrollreachpercent.handle, true);
 	},
 	handle: function(callback, event, handleObj) {
 		var scrollPercent=100*this.scrollTop/this.scrollHeight/(1-this.clientHeight/this.scrollHeight);
@@ -69,7 +69,7 @@ Greencode.customEvent.scrollreachtop = {
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent('scroll', Greencode.customEvent.scrollreachtop.handle);
+		Greencode.crossbrowser.removeEvent.call(this, 'scroll', Greencode.customEvent.scrollreachtop.handle, true);
 	},
 	handle: function(callback, event) {
 		if(0 == (100*this.scrollTop/this.scrollHeight/(1-this.clientHeight/this.scrollHeight)).toFixed(0))
@@ -84,7 +84,7 @@ Greencode.customEvent.scrollreachbottom = {
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent('scroll', Greencode.customEvent.scrollreachbottom.handle);
+		Greencode.crossbrowser.removeEvent.call(this, 'scroll', Greencode.customEvent.scrollreachbottom.handle, true);
 	},
 	handle: function(callback, event) {
 		if(100 == (100*this.scrollTop/this.scrollHeight/(1-this.clientHeight/this.scrollHeight)).toFixed(0))
@@ -103,7 +103,7 @@ Greencode.customEvent.keyuptime = {
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent('keyup', Greencode.customEvent.keyuptime.handle);
+		Greencode.crossbrowser.removeEvent.call(this, 'keyup', Greencode.customEvent.keyuptime.handle, true);
 	},
 	handle: function(callback, event, handleObj) {
 		var _this = this;
@@ -130,7 +130,7 @@ Greencode.customEvent.enter = {
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent('enter', Greencode.customEvent.enter.handle);
+		Greencode.crossbrowser.removeEvent.call(this, 'keyup', Greencode.customEvent.enter.handle, true);
 	},
 	handle: function(callback, event) {
 		callback.call(this, event);

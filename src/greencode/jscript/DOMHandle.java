@@ -63,7 +63,7 @@ public final class DOMHandle {
 	
 	public static String getDefaultIdToRegisterReturn(int uid) { return uid+"*ref"; }
 	
-	public static void deleteReference(Window window, DOM dom) { deleteReference(window, dom.uid); }
+	public static void deleteReference(DOM dom) { deleteReference(dom.window, dom.uid); }
 	public static void deleteReference(Window window, int uid) { DOMHandle.execCommand(window, "Greencode.cache.remove", uid); }
 	
 	@SuppressWarnings("unchecked")

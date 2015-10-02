@@ -47,6 +47,14 @@ public final class FileUtils {
 		}
 	}
 	
+	public final static String getContentFile(URL file, String charsetName) throws IOException {
+		return getContentFile(file, Charset.forName(charsetName), null);
+	}
+	
+	public final static String getContentFile(URL file, Charset charset) throws IOException {
+		return getContentFile(file, charset, null);
+	}
+	
 	public final static String getContentFile(URL file, Charset charset, FileRead read) throws IOException {
 		InputStream fstream = null;		
 		DataInputStream in = null;
@@ -58,7 +66,7 @@ public final class FileUtils {
 						
 			String strLine;
 			StringBuilder str = new StringBuilder();
-			while ((strLine = br.readLine()) != null && (strLine = read.reading(strLine)) != null)
+			while (((strLine = br.readLine()) != null) && (read == null || read != null && (strLine = read.reading(strLine)) != null))
 				str.append(strLine);
 			
 			return str.toString();

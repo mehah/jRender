@@ -645,8 +645,11 @@ public final class Core implements Filter {
 				DatabaseConnection db = new DatabaseConnection();
 				db.setConfig(GreenCodeConfig.DataBase.configs.get(GreenCodeConfig.DataBase.defaultConfigFile));
 
-				if(db.getConfig() != null)
+				if(db.getConfig() != null) {
 					db.start();
+					db.close();
+				}
+					
 				System.out.println(" [done]");
 			}
 
