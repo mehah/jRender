@@ -1,6 +1,13 @@
 package greencode.jscript;
 
 import greencode.exception.OperationNotAllowedException;
+import greencode.jscript.elements.InputElement;
+import greencode.jscript.elements.InputRadioElement;
+import greencode.jscript.elements.InputTextElement;
+import greencode.jscript.elements.SelectElement;
+import greencode.jscript.elements.SelectElementPrototype;
+import greencode.jscript.elements.SelectMultipleElement;
+import greencode.jscript.elements.TextareaElement;
 import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.jscript.form.annotation.ElementValue;
@@ -48,8 +55,18 @@ public final class $Container {
 						if(type.isArray())
 							type = type.getComponentType();
 
-						if(!(type.equals(Date.class) || ClassUtils.isPrimitiveOrWrapper(type) || type.equals(Part.class) || ClassUtils.isParent(type, ContainerElement.class)))
-							throw new OperationNotAllowedException(LogMessage.getMessage("green-0028", field.getName(), currentClass.getSimpleName()));
+						if(!(
+							type.equals(Date.class) ||
+							type.equals(Part.class) ||
+							type.equals(TextareaElement.class) ||
+							type.equals(InputTextElement.class) ||
+							type.equals(InputRadioElement.class) ||
+							type.equals(SelectElement.class) ||
+							type.equals(SelectMultipleElement.class) ||
+							ClassUtils.isPrimitiveOrWrapper(type) ||
+							ClassUtils.isParent(type, ContainerElement.class))) {
+								throw new OperationNotAllowedException(LogMessage.getMessage("green-0028", field.getName(), currentClass.getSimpleName()));
+						}
 
 						fieldList.add(field);
 					}

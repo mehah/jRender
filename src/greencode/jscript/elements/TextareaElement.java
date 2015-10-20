@@ -55,5 +55,8 @@ public class TextareaElement extends Element {
 	/**Only supported in HTML5.*/
 	public void wrap(WrapAttr wrap) { DOMHandle.setProperty(this, "wrap", wrap); }
 	
+	public void value(String value) { DOMHandle.setProperty(this, "value", value); }	
+	public String value() { return DOMHandle.getVariableValueByProperty(this, "value", String.class, "value"); }
+	
 	public static TextareaElement cast(Element e) { return ElementHandle.cast(e, TextareaElement.class); }
 }
