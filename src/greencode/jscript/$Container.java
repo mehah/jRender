@@ -58,11 +58,7 @@ public final class $Container {
 						if(!(
 							type.equals(Date.class) ||
 							type.equals(Part.class) ||
-							type.equals(TextareaElement.class) ||
-							type.equals(InputTextElement.class) ||
-							type.equals(InputRadioElement.class) ||
-							type.equals(SelectElement.class) ||
-							type.equals(SelectMultipleElement.class) ||
+							isAcceptableElement(type) ||
 							ClassUtils.isPrimitiveOrWrapper(type) ||
 							ClassUtils.isParent(type, ContainerElement.class))) {
 								throw new OperationNotAllowedException(LogMessage.getMessage("green-0028", field.getName(), currentClass.getSimpleName()));
@@ -85,6 +81,15 @@ public final class $Container {
 
 		return fields;
 	}
+	
+	private static boolean isAcceptableElement(Class<?> type) {
+		return
+			type.equals(TextareaElement.class) ||
+			type.equals(InputTextElement.class) ||
+			type.equals(InputRadioElement.class) ||
+			type.equals(SelectElement.class) ||
+			type.equals(SelectMultipleElement.class);
+	}
 
 	public static HashMap<Integer, ContainerElement<?>> getContainers(Form form) {
 		if(form.containers == null)
@@ -100,6 +105,9 @@ public final class $Container {
 			Object value = GenericReflection.NoThrow.getValue(field, e);
 			if(value != null) {
 				final Class<?> fieldType = field.getType();
+				if(isAcceptableElement(fieldType))
+					continue;
+				
 				final boolean isArray;
 				if(isArray = fieldType.isArray() && ClassUtils.isParent(fieldType.getComponentType(), ContainerElement.class) || ClassUtils.isParent(fieldType, ContainerElement.class)) {
 					if(isArray) {
