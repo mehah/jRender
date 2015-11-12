@@ -342,6 +342,12 @@ Greencode.customMethod = {
 	prepend: function(node) {
 		this.insertBefore(node, this.firstChild);
 		return node;
+	},
+	selectOptionByValue: function(v) {
+		var e = Greencode.crossbrowser.querySelector.call(this, 'option[value="'+v+'"]');
+		if(e != null)
+			e.selected = true;
+		return this;
 	}
 };
 

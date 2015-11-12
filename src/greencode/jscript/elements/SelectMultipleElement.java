@@ -8,7 +8,7 @@ public class SelectMultipleElement extends SelectElementPrototype {
 	protected SelectMultipleElement(Window window) { super("select-multiple", window); }
 	
 	// CUSTOM METHOD
-	public Object[] selectedValues() {
-		return DOMHandle.getVariableValue(this, "selectedValues", Object[].class);
+	public String[] selectedValues() {
+		return DOMHandle.getVariableValue(this, "selectedValues", String[].class);
 	}
 }

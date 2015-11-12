@@ -5,6 +5,11 @@ import java.util.HashMap;
 
 import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.annotation.QuerySelector;
+import greencode.jscript.elements.InputRadioElement;
+import greencode.jscript.elements.InputTextElement;
+import greencode.jscript.elements.SelectElement;
+import greencode.jscript.elements.SelectMultipleElement;
+import greencode.jscript.elements.TextareaElement;
 import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.jscript.form.annotation.ElementValue;
@@ -177,8 +182,16 @@ public abstract class Form extends Element implements ContainerElementImplementa
 	public void reset() {
 		Field[] fields = greencode.jscript.$Container.getElementFields(this);
 		try {
-			for(Field field: fields) {
-				field.set(this, ClassUtils.getDefaultValue(field.getType()));
+			for(Field f: fields) {
+				Class<?> type = f.getType();
+				if(type.equals(TextareaElement.class) || type.equals(InputTextElement.class) || type.equals(InputRadioElement.class)) {
+					DOMHandle.setVariableValue((Element) f.get(this), "value", null);
+				} else if(type.equals(SelectElement.class)) {
+					DOMHandle.setVariableValue((Element) f.get(this), "selectedValue", null);
+				} else if(type.equals(SelectMultipleElement.class)) {
+					DOMHandle.setVariableValue((Element) f.get(this), "selectedValues", null);
+				}else
+					f.set(this, ClassUtils.getDefaultValue(type));
 			}
 		} catch(Exception e) {
 			e.printStackTrace();

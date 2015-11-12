@@ -1,5 +1,6 @@
 package greencode.kernel;
 
+import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Locale;
@@ -43,6 +44,7 @@ public final class GreenContext {
 	Window currentWindow;
 	greencode.jscript.window.annotation.Page currentPageAnnotation;
 	Form requestedForm;
+	Method requestedMethod;
 	
 	private DatabaseConnection databaseConnection;
 	boolean executeAction = true;
@@ -86,6 +88,11 @@ public final class GreenContext {
 		exceptionCheck();
 		
 		return this.currentWindow;
+	}
+	
+	public Method getRequestedMethod() {
+		exceptionCheck();
+		return this.requestedMethod;
 	}
 	
 	public greencode.jscript.window.annotation.Page currentPageAnnotation() {
@@ -182,6 +189,7 @@ public final class GreenContext {
 		this.currentMessagePropertie = null;
 		this.currentWindow = null;
 		this.requestedForm = null;
+		this.requestedMethod = null;
 		this.userLocale = null;
 		this.listAttrSync = null;
 		this.listAttrSyncCache = null;

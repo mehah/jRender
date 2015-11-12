@@ -285,6 +285,10 @@ public final class Core implements Filter {
 			if(hashcodeRequestMethod != null) {
 				registeredFunctions = greencode.jscript.$Window.getRegisteredFunctions((Window) requestController);
 				requestController = (HttpAction) registeredFunctions.get(hashcodeRequestMethod);
+				if(requestController == null) {
+					
+				}
+				
 				requestClass = requestController.getClass();
 			} else
 				registeredFunctions = null;
@@ -340,7 +344,7 @@ public final class Core implements Filter {
 					}
 				}
 
-				requestMethod = GenericReflection.getMethod(requestClass, methodName, listArgsClass);
+				context.requestedMethod = requestMethod = GenericReflection.getMethod(requestClass, methodName, listArgsClass);
 
 				Rule.forMethod(context, requestMethod);
 			} catch(NoSuchMethodException e1) {

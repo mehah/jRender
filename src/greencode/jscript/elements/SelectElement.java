@@ -11,8 +11,19 @@ public class SelectElement extends SelectElementPrototype {
 	
 	public static SelectElement cast(Element e) { return ElementHandle.cast(e, SelectElement.class); }
 	
-	// CUSTOM METHOD
-	public Object selectedValue() {
-		return DOMHandle.getVariableValue(this, "selectedValue", Object.class);
+	/**
+	 * CUSTOM METHOD
+	 * @return String
+	 */
+	public String selectedValue() {
+		return DOMHandle.getVariableValue(this, "selectedValue", String.class);
+	}
+	
+	/**
+	 * CUSTOM METHOD
+	 */
+	public void selectedValue(String value) {
+		DOMHandle.setVariableValue(this, "selectedValue", value);
+		DOMHandle.CustomMethod.call(this, "selectOptionByValue", value);
 	}
 }
