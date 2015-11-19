@@ -137,7 +137,7 @@ final class Form {
 									_value = ((String) _value).trim();
 
 								if(METHOD_TYPE_IS_GET)
-									_value = StringUtils.toCharset((String) _value, GreenCodeConfig.View.charset);
+									_value = StringUtils.toCharset((String) _value, GreenCodeConfig.Server.View.charset);
 							}
 
 							values[i] = _value;
@@ -166,7 +166,7 @@ final class Form {
 								valor = ((String) valor).trim();
 
 							if(METHOD_TYPE_IS_GET)
-								valor = StringUtils.toCharset((String) valor, GreenCodeConfig.View.charset);
+								valor = StringUtils.toCharset((String) valor, GreenCodeConfig.Server.View.charset);
 						}
 					}					
 					

@@ -35,7 +35,7 @@ public final class ViewSession implements Serializable {
 	private final long creationTime = System.currentTimeMillis();
 	private long lastAccessedTime = creationTime, thisAccessedTime = creationTime;
 	
-	private int maxInactiveInterval = GreenCodeConfig.ViewSession.maxInactiveInterval;
+	private int maxInactiveInterval = GreenCodeConfig.Server.View.Session.maxInactiveInterval;
 	
 	boolean isNew = true;
 	private final StandardSession session;

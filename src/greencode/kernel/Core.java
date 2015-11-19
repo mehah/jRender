@@ -27,9 +27,6 @@ import greencode.jscript.window.annotation.BeforeAction;
 import greencode.jscript.window.annotation.Destroy;
 import greencode.jscript.window.annotation.ForceSync;
 import greencode.jscript.window.annotation.PageParameter;
-import greencode.kernel.GreenCodeConfig.Browser;
-import greencode.kernel.GreenCodeConfig.Internationalization;
-import greencode.kernel.GreenCodeConfig.Internationalization.Variant;
 import greencode.kernel.implementation.BootActionImplementation;
 import greencode.kernel.implementation.PluginImplementation;
 import greencode.util.ArrayUtils;
@@ -142,9 +139,9 @@ public final class Core implements Filter {
 
 	@Override
 	public void doFilter(final ServletRequest request, ServletResponse response, final FilterChain chain) throws IOException, ServletException {
-		request.setCharacterEncoding(GreenCodeConfig.View.charset);
-		response.setCharacterEncoding(GreenCodeConfig.View.charset);
-		response.setContentType("text/html;charset=" + GreenCodeConfig.View.charset);
+		request.setCharacterEncoding(GreenCodeConfig.Server.View.charset);
+		response.setCharacterEncoding(GreenCodeConfig.Server.View.charset);
+		response.setContentType("text/html;charset=" + GreenCodeConfig.Server.View.charset);
 
 		if(hasError) {
 			response.getWriter().write(LogMessage.getMessage("green-0000"));
@@ -182,7 +179,7 @@ public final class Core implements Filter {
 			return;
 		}
 
-		if(GreenCodeConfig.Response.gzipSupport) {
+		if(GreenCodeConfig.Server.Response.gzipSupport) {
 			if(acceptsGZipEncoding((HttpServletRequest) request)) {
 				final HttpServletResponse httpResponse = (HttpServletResponse) response;
 				httpResponse.addHeader("Content-Encoding", "gzip");
@@ -247,11 +244,11 @@ public final class Core implements Filter {
 		// Multipart System
 		{
 			MultipartConfig multipartConfig = null;
-			if(((GreenCodeConfig.Multipart.autodectetion) || ((multipartConfig = requestClass.getAnnotation(MultipartConfig.class)) != null)) && request.getContentType() != null && request.getContentType().indexOf("multipart/form-data") > -1) {
+			if(((GreenCodeConfig.Server.Request.Multipart.autodectetion) || ((multipartConfig = requestClass.getAnnotation(MultipartConfig.class)) != null)) && request.getContentType() != null && request.getContentType().indexOf("multipart/form-data") > -1) {
 
 				Request _request = (Request) GenericReflection.NoThrow.getValue(requestField, request);
 				_request.getContext().setAllowCasualMultipartParsing(true);
-				_request.getConnector().setMaxPostSize((int) (multipartConfig != null ? multipartConfig.maxRequestSize() : GreenCodeConfig.Multipart.maxRequestSize));
+				_request.getConnector().setMaxPostSize((int) (multipartConfig != null ? multipartConfig.maxRequestSize() : GreenCodeConfig.Server.Request.Multipart.maxRequestSize));
 			}
 		}
 
@@ -351,7 +348,7 @@ public final class Core implements Filter {
 				throw new NoSuchMethodException(LogMessage.getMessage("green-0007", methodName, controllerName));
 			}
 
-			if(GreenCodeConfig.Console.writeLog)
+			if(GreenCodeConfig.Server.writeLog)
 				processTime = System.currentTimeMillis();
 
 			String classNameBootAction = null;
@@ -393,7 +390,7 @@ public final class Core implements Filter {
 									"Greencode.util.loadScript",
 									Core.CONTEXT_PATH + "/jscript/greencode/modules/" + page.moduleName + ".js",
 									false,
-									GreenCodeConfig.View.charset
+									GreenCodeConfig.Server.View.charset
 								);
 								DOMHandle.execCommand(
 									context.currentWindow,
@@ -416,7 +413,7 @@ public final class Core implements Filter {
 				}
 
 				if(databaseConnectionEvent != null)
-					databaseConnectionEvent.afterRequest();
+					databaseConnectionEvent.afterRequest(context);
 
 				if(hasBootaction) {
 					AfterAction a = requestMethod.getAnnotation(AfterAction.class);
@@ -435,14 +432,14 @@ public final class Core implements Filter {
 					"Greencode.util.loadScript",
 					Core.CONTEXT_PATH + "/jscript/greencode/msg_" + context.userLocale.toString() + ".js",
 					false,
-					GreenCodeConfig.View.charset
+					GreenCodeConfig.Server.View.charset
 				);
 			}
 
 			ElementsScan.sendElements(context);
 
 			if(databaseConnectionEvent != null)
-				databaseConnectionEvent.onSuccess();
+				databaseConnectionEvent.onSuccess(context);
 
 			if(requestMethod.isAnnotationPresent(Destroy.class)) {
 				if(registeredFunctions != null)
@@ -459,16 +456,17 @@ public final class Core implements Filter {
 			}
 
 			if(Cache.bootAction != null) {
-				if(Cache.bootAction.onException(context, e)) {
-					JsonObject json = new JsonObject();
-					json.add("errors", context.errors);
-					ElementsScan.send(context, json);
-				}else
-					ElementsScan.sendElements(context);
+				Cache.bootAction.onException(context, e);
 			}
 
 			if(databaseConnectionEvent != null)
-				databaseConnectionEvent.onError(e);
+				databaseConnectionEvent.onError(context, e);
+
+			JsonObject json = new JsonObject();
+			json.add("errors", context.errors);
+			ElementsScan.send(context, json);
+			
+			ElementsScan.sendElements(context);
 		} finally {
 			context.destroy();
 
@@ -476,7 +474,7 @@ public final class Core implements Filter {
 				((GZipServletResponseWrapper) response).close();
 		}
 
-		if(GreenCodeConfig.Console.writeLog) {
+		if(GreenCodeConfig.Server.writeLog) {
 			processTime = System.currentTimeMillis() - processTime;
 			int ms = (int) ((processTime) % 1000);
 			int seconds = (int) ((processTime / 1000) % 60);
@@ -511,15 +509,15 @@ public final class Core implements Filter {
 				throw new IOException("Could not find file: src/greencode.config.xml");
 			}
 
-			Variant variant = Internationalization.getVariantLogByLocale(Locale.getDefault());
+			GreenCodeConfig.Server.Internationalization.Variant variant = GreenCodeConfig.Server.Internationalization.getVariantLogByLocale(Locale.getDefault());
 
 			if(variant == null)
-				variant = Internationalization.getVariantLogByLocale(new Locale("pt", "BR"));
+				variant = GreenCodeConfig.Server.Internationalization.getVariantLogByLocale(new Locale("pt", "BR"));
 
 			if(variant != null) {
 				LogMessage.instance.load(new InputStreamReader(variant.resource.openStream(), variant.charsetName));
 
-				for(Variant v: Internationalization.pagesLocale) {
+				for(GreenCodeConfig.Server.Internationalization.Variant v: GreenCodeConfig.Server.Internationalization.pagesLocale) {
 					try {
 						Properties p = new Properties();
 						p.load(new InputStreamReader(v.resource.openStream(), v.charsetName));
@@ -530,8 +528,8 @@ public final class Core implements Filter {
 				}
 			}
 
-			if(GreenCodeConfig.DataBase.defaultConfigFile != null)
-				GreenCodeConfig.DataBase.getConfig(GreenCodeConfig.DataBase.defaultConfigFile);
+			if(GreenCodeConfig.Server.DataBase.defaultConfigFile != null)
+				GreenCodeConfig.Server.DataBase.getConfig(GreenCodeConfig.Server.DataBase.defaultConfigFile);
 
 			try {
 				Class.forName("com.google.gson.Gson");
@@ -561,16 +559,16 @@ public final class Core implements Filter {
 			for(String fileName: coreJSFiles)
 				coreFileJS.append(classLoader.getResource("greencode/jscript/files/" + fileName));
 
-			coreFileJS.append("Greencode.className = {").append("greenContext: '" + GreenContext.class.getName() + "',").append("containerElement: '" + ContainerElement.class.getName() + "',").append("containerEventObject: '" + ContainerEventObject.class.getName() + "',").append("element: '" + Element.class.getName() + "'").append("};").append("Greencode.CONTEXT_PATH = '" + fConfig.getServletContext().getContextPath() + "';").append("Greencode.DEBUG_MODE = " + Browser.consoleDebug + ";");
+			coreFileJS.append("Greencode.className = {").append("greenContext: '" + GreenContext.class.getName() + "',").append("containerElement: '" + ContainerElement.class.getName() + "',").append("containerEventObject: '" + ContainerEventObject.class.getName() + "',").append("element: '" + Element.class.getName() + "'").append("};").append("Greencode.CONTEXT_PATH = '" + fConfig.getServletContext().getContextPath() + "';").append("Greencode.DEBUG_MODE = " + GreenCodeConfig.Browser.consoleDebug + ";");
 
 			coreFileJS.save();
 
 			for(String fileName: jsFiles)
 				FileUtils.createFile(FileUtils.getContentFile(classLoader.getResource("greencode/jscript/files/" + fileName)), greencodePath + "/" + fileName);
 
-			final Charset charset = Charset.forName(GreenCodeConfig.View.charset);
+			final Charset charset = Charset.forName(GreenCodeConfig.Server.View.charset);
 			final long currentTime = new Date().getTime();
-			for(Variant v: Internationalization.pagesLocale) {
+			for(GreenCodeConfig.Server.Internationalization.Variant v: GreenCodeConfig.Server.Internationalization.pagesLocale) {
 				Page p = new Page();
 				p.lastModified = currentTime;
 
@@ -624,11 +622,11 @@ public final class Core implements Filter {
 			classesTeste.clear();
 			System.out.print(" [done]\n");
 
-			if(GreenCodeConfig.View.templatePaths != null) {
+			if(GreenCodeConfig.Server.View.templatePaths != null) {
 				System.out.println(defaultLogMsg + "Caching Template(s)...");
 
-				if(GreenCodeConfig.View.templatePaths != null) {
-					for(Entry<String, String> entry: GreenCodeConfig.View.templatePaths.entrySet()) {
+				if(GreenCodeConfig.Server.View.templatePaths != null) {
+					for(Entry<String, String> entry: GreenCodeConfig.Server.View.templatePaths.entrySet()) {
 						File f = FileUtils.getFileInWebContent(entry.getValue());
 						Cache.templates.put(entry.getKey(), f);
 
@@ -636,7 +634,7 @@ public final class Core implements Filter {
 							throw new IOException(LogMessage.getMessage("green-0002", entry.getValue()));
 
 						String _default = "";
-						if(Cache.defaultTemplate == null && entry.getValue().equals(GreenCodeConfig.View.defaultTemplatePath)) {
+						if(Cache.defaultTemplate == null && entry.getValue().equals(GreenCodeConfig.Server.View.defaultTemplatePath)) {
 							GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", f);
 							_default = "(Default)";
 						}
@@ -652,13 +650,10 @@ public final class Core implements Filter {
 			} else {
 				System.out.print(defaultLogMsg + "Testing Database Connection ...");
 				DatabaseConnection db = new DatabaseConnection();
-				db.setConfig(GreenCodeConfig.DataBase.configs.get(GreenCodeConfig.DataBase.defaultConfigFile));
-
 				if(db.getConfig() != null) {
 					db.start();
 					db.close();
-				}
-					
+				}				
 				System.out.println(" [done]");
 			}
 
@@ -671,11 +666,11 @@ public final class Core implements Filter {
 				System.out.println(" [done]");
 			}
 
-			if(GreenCodeConfig.Plugins.list != null && GreenCodeConfig.Plugins.list.length > 0) {
+			if(GreenCodeConfig.Server.Plugins.list != null && GreenCodeConfig.Server.Plugins.list.length > 0) {
 				System.out.print(defaultLogMsg + "Initializing Plugins ...");
 
 				ArrayList<PluginImplementation> list = new ArrayList<PluginImplementation>();
-				for(Class<PluginImplementation> c: GreenCodeConfig.Plugins.list) {
+				for(Class<PluginImplementation> c: GreenCodeConfig.Server.Plugins.list) {
 					PluginImplementation plugin = c.newInstance();
 					plugin.init(greencodePath, classLoader, fConfig.getServletContext(), coreFileJS);
 					list.add(plugin);

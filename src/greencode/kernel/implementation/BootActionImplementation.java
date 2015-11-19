@@ -20,7 +20,7 @@ public abstract interface BootActionImplementation extends PluginImplementation 
 
 	public void onRequest(HttpServletRequest request, HttpServletResponse response);
 	
-	public boolean onException(GreenContext context, Exception e);
+	public void onException(GreenContext context, Exception e);
 
 	public void initUserContext(GreenContext context);
 	

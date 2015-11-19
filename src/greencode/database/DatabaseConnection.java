@@ -25,7 +25,7 @@ import java.util.Properties;
 
 public final class DatabaseConnection implements Connection {
 	private Connection connection;
-	private DatabaseConfig config;
+	private DatabaseConfig config = GreenCodeConfig.Server.DataBase.getConfig(GreenCodeConfig.Server.DataBase.defaultConfigFile);
 
 	private ArrayList<Statement> statements = new ArrayList<Statement>();
 
@@ -57,7 +57,7 @@ public final class DatabaseConnection implements Connection {
 				chanceConnected = 1;
 
 				System.out.println(LogMessage.getMessage("green-db-0003", config.getConnectionFileName()));
-				config = GreenCodeConfig.DataBase.getConfig(config.getConnectionFileName());
+				config = GreenCodeConfig.Server.DataBase.getConfig(config.getConnectionFileName());
 				start();
 			} else
 				throw e;

@@ -1,47 +1,48 @@
 <!-- Greencode DTD -->
 
-<!ELEMENT greencode-config (console, browser, multipart, response, view, viewSession, anti-flood, database?, internationalization?, plugins?)>
-<!ELEMENT console EMPTY>
-	<!ATTLIST console writeLog ( true | false ) "true" >
-	
+<!ELEMENT greencode-config (browser, server)>
+
 <!ELEMENT browser EMPTY>
 	<!ATTLIST browser consoleDebug ( true | false ) "true" >
 	
-<!ELEMENT multipart EMPTY>
-	<!ATTLIST multipart autodectetion ( true | false ) "false" >
-	<!ATTLIST multipart max-request-size CDATA "-1">
-
-<!ELEMENT response EMPTY>
-	<!ATTLIST response gzip ( true | false ) "false" >
+<!ELEMENT server (request, response, view, database?, internationalization?, plugins?)>
+	<!ATTLIST server writeLog ( true | false ) "true" >
 	
-<!ELEMENT view (templates?)>
-	<!ATTLIST view bootable ( true | false ) "false" >
-	<!ATTLIST view seek-change ( true | false ) "true" >
-	<!ATTLIST view use-minified ( true | false ) "true" >	
-	<!ATTLIST view charset CDATA #REQUIRED>
-	<!ELEMENT templates (file+)>
-		<!ELEMENT file EMPTY>
-			<!ATTLIST file name CDATA #REQUIRED>
-			<!ATTLIST file path CDATA #REQUIRED>
-			<!ATTLIST file default CDATA #FIXED "default">
+	<!ELEMENT request (multipart)>
+	<!ELEMENT multipart EMPTY>
+		<!ATTLIST multipart autodectetion ( true | false ) "false" >
+		<!ATTLIST multipart max-request-size CDATA "-1">
 	
-<!ELEMENT viewSession EMPTY>
-	<!ATTLIST viewSession maxInactiveInterval CDATA #REQUIRED>
-	
-<!ELEMENT anti-flood (default-max-request)>
-<!ELEMENT default-max-request ANY>
-<!ELEMENT database (default-config-file, show-query?, drivers)>
-	<!ELEMENT default-config-file ANY>
-	<!ELEMENT show-query ANY>
-	<!ELEMENT drivers ANY>
-	
-<!ELEMENT internationalization (locale+)>
-	<!ELEMENT locale EMPTY>
-		<!ATTLIST locale language CDATA #REQUIRED>
-		<!ATTLIST locale country CDATA #REQUIRED>
-		<!ATTLIST locale file CDATA #REQUIRED>
-		<!ATTLIST locale charset CDATA #REQUIRED>
+	<!ELEMENT response EMPTY>
+		<!ATTLIST response gzip ( true | false ) "false" >
 		
-<!ELEMENT plugins (plugin+)>
-	<!ELEMENT plugin EMPTY>
-		<!ATTLIST plugin class CDATA #REQUIRED>
+	<!ELEMENT view (templates?, session)>
+		<!ATTLIST view bootable ( true | false ) "false" >
+		<!ATTLIST view seek-change ( true | false ) "true" >
+		<!ATTLIST view use-minified ( true | false ) "true" >	
+		<!ATTLIST view charset CDATA #REQUIRED>
+		<!ELEMENT templates (file+)>
+			<!ELEMENT file EMPTY>
+				<!ATTLIST file name CDATA #REQUIRED>
+				<!ATTLIST file path CDATA #REQUIRED>
+				<!ATTLIST file default CDATA #FIXED "default">
+		
+		<!ELEMENT session EMPTY>
+			<!ATTLIST session maxInactiveInterval CDATA #REQUIRED>
+		
+	<!ELEMENT default-max-request ANY>
+	<!ELEMENT database (default-config-file, show-query?, drivers)>
+		<!ELEMENT default-config-file ANY>
+		<!ELEMENT show-query ANY>
+		<!ELEMENT drivers ANY>
+		
+	<!ELEMENT internationalization (locale+)>
+		<!ELEMENT locale EMPTY>
+			<!ATTLIST locale language CDATA #REQUIRED>
+			<!ATTLIST locale country CDATA #REQUIRED>
+			<!ATTLIST locale file CDATA #REQUIRED>
+			<!ATTLIST locale charset CDATA #REQUIRED>
+			
+	<!ELEMENT plugins (plugin+)>
+		<!ELEMENT plugin EMPTY>
+			<!ATTLIST plugin class CDATA #REQUIRED>

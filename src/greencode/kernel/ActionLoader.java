@@ -61,7 +61,7 @@ final class ActionLoader {
 
 					Object value = context.request.getParameter(parametro);
 					if(value != null) {
-						value = fieldType.equals(String.class) ? StringUtils.toCharset((String) value, GreenCodeConfig.View.charset) : GenericReflection.getDeclaredMethod(ClassUtils.toWrapperClass(fieldType), "valueOf", String.class).invoke(null, context.request.getParameter(parametro));
+						value = fieldType.equals(String.class) ? StringUtils.toCharset((String) value, GreenCodeConfig.Server.View.charset) : GenericReflection.getDeclaredMethod(ClassUtils.toWrapperClass(fieldType), "valueOf", String.class).invoke(null, context.request.getParameter(parametro));
 						f.set(controller, value);
 					} else
 						f.set(controller, ClassUtils.getDefaultValue(fieldType));
@@ -111,7 +111,7 @@ final class ActionLoader {
 				Database.startConnection(context, cA);
 			else {
 				databaseConnectionEvent = (DatabaseConnectionEvent) Cache.classDatabaseConnectionEvent.newInstance();
-				databaseConnectionEvent.beforeRequest(cA);
+				databaseConnectionEvent.beforeRequest(context, cA);
 			}
 		}
 

@@ -14,7 +14,7 @@ public final class Message {
 	public static String getMessage(String key) {
 		final String msg = getPropertie().getProperty(key);
 		if(msg == null)
-			throw new NullPointerException(LogMessage.getMessage("green-0006", key, GreenCodeConfig.Internationalization.getVariantPageByLocale(GreenContext.getInstance().userLocale).fileName));
+			throw new NullPointerException(LogMessage.getMessage("green-0006", key, GreenCodeConfig.Server.Internationalization.getVariantPageByLocale(GreenContext.getInstance().userLocale).fileName));
 			
 		return msg;
 	}

@@ -64,7 +64,7 @@ public abstract class Console {
 	public static void warning(String msg) { System.err.println("["+Core.projectName+":Warning]: "+msg); }
 	
 	public static void log(String msg) {
-		if(GreenCodeConfig.Console.writeLog)
+		if(GreenCodeConfig.Server.writeLog)
 			System.out.println("["+Core.projectName+"] "+msg);
 	}
 	

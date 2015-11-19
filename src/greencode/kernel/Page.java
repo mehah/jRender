@@ -157,7 +157,7 @@ public final class Page {
 					return page;
 
 				inserted = new ArrayList<Page>();
-				content = FileUtils.getContentFile(file.toURI().toURL(), GreenCodeConfig.View.charset).replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
+				content = FileUtils.getContentFile(file.toURI().toURL(), GreenCodeConfig.Server.View.charset).replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
 
 				int lastIndex = 0;
 				String startString = "GREENCODE:{(";
@@ -176,7 +176,7 @@ public final class Page {
 					lastIndex = listCloseIndex;
 				}
 				
-				src = Jsoup.parse(content, GreenCodeConfig.View.charset);
+				src = Jsoup.parse(content, GreenCodeConfig.Server.View.charset);
 
 				List<Element> listSelf = src.getElementsByTag("template:import");
 
@@ -191,7 +191,7 @@ public final class Page {
 						if(f != null) {
 							Page template = loadStructure(f);
 
-							if(!GreenCodeConfig.View.bootable)
+							if(!GreenCodeConfig.Server.View.bootable)
 								inserted.add(template);
 
 							templateImported = template.document;
@@ -201,7 +201,7 @@ public final class Page {
 						Page template = loadStructure(Cache.defaultTemplate);
 						templateImported = template.document;
 
-						if(!GreenCodeConfig.View.bootable)
+						if(!GreenCodeConfig.Server.View.bootable)
 							inserted.add(template);
 					}
 
@@ -252,7 +252,7 @@ public final class Page {
 						try {
 							Page _page = loadStructure(f);
 
-							if(!GreenCodeConfig.View.bootable)
+							if(!GreenCodeConfig.Server.View.bootable)
 								inserted.add(_page);
 
 							if(element.hasAttr("head"))
@@ -302,7 +302,7 @@ public final class Page {
 			} else
 				content = FileUtils.getContentFile(file.toURI().toURL());
 
-			if(GreenCodeConfig.View.useMinified) {
+			if(GreenCodeConfig.Server.View.useMinified) {
 				HtmlCompressor html = new HtmlCompressor();
 				html.setRemoveIntertagSpaces(true);
 				content = html.compress(content);
@@ -345,7 +345,7 @@ public final class Page {
 				if(file.exists()) {
 					mobilePage.file = file;
 
-					if(GreenCodeConfig.View.bootable)
+					if(GreenCodeConfig.Server.View.bootable)
 						loadStructure(file, mobilePage, true);
 
 					pReference.mobilePage = mobilePage;
@@ -388,7 +388,7 @@ public final class Page {
 				pReference.file = file;
 				pages.put(page.URLName().isEmpty() ? page.path() : page.URLName(), pReference);
 
-				if(GreenCodeConfig.View.bootable)
+				if(GreenCodeConfig.Server.View.bootable)
 					loadStructure(file, pReference, true);
 			} else
 				Console.error(LogMessage.getMessage("green-0014", page.path()));
@@ -396,7 +396,7 @@ public final class Page {
 	}
 
 	static Page pathAnalyze(String servletPath, Page page, HttpServletRequest request) {
-		if(GreenCodeConfig.View.bootable)
+		if(GreenCodeConfig.Server.View.bootable)
 			return page;
 
 		try {
@@ -404,7 +404,7 @@ public final class Page {
 
 			if(page != null) {
 				if(page.content != null) {
-					if(GreenCodeConfig.View.seekChange) {
+					if(GreenCodeConfig.Server.View.seekChange) {
 						(page.mobilePage != null && greencode.http.$HttpRequest.isMobile(request.getHeader("user-agent")) ? page.mobilePage : page).verifyChanges();
 					}
 
@@ -417,7 +417,7 @@ public final class Page {
 				final String ext = FileUtils.getExtension(servletPath);
 
 				final boolean isCss = ext.equals("css"), isJs = ext.equals("js");
-				if((GreenCodeConfig.View.seekChange) && (isCss || isJs)) {
+				if((GreenCodeConfig.Server.View.seekChange) && (isCss || isJs)) {
 					MergedFile mergedFile = Cache.mergedFiles.get(servletPath);
 					if(mergedFile != null)
 						mergedFile.verifyChanges();
@@ -432,7 +432,7 @@ public final class Page {
 			if(page == null && !requestsCached.contains(servletPath) || page != null && page.document == null) {
 				File file = FileUtils.getFileInWebContent(servletPath);
 				if(file != null && file.exists()) {
-					Console.log(isView ? "Applying (template" + (GreenCodeConfig.View.useMinified ? ", minified" : "") + ") in " + servletPath : "Applying (minified) in " + servletPath);
+					Console.log(isView ? "Applying (template" + (GreenCodeConfig.Server.View.useMinified ? ", minified" : "") + ") in " + servletPath : "Applying (minified) in " + servletPath);
 
 					page = loadStructure(file, page, true);
 					if(page != null && page.mobilePage != null)

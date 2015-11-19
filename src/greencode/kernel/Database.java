@@ -10,9 +10,9 @@ class Database {
 		final DatabaseConfig config;
 		
 		if(!cA.value().isEmpty())
-			config = GreenCodeConfig.DataBase.getConfig(cA.value());
+			config = GreenCodeConfig.Server.DataBase.getConfig(cA.value());
 		else {
-			DatabaseConfig defaultConfig = GreenCodeConfig.DataBase.configs.get(GreenCodeConfig.DataBase.defaultConfigFile);
+			DatabaseConfig defaultConfig = GreenCodeConfig.Server.DataBase.configs.get(GreenCodeConfig.Server.DataBase.defaultConfigFile);
 			config = new DatabaseConfig();			
 			config.setDatabase(cA.database().isEmpty() ? defaultConfig.getDatabase() : cA.database());
 			config.setPassword(cA.password().isEmpty() ? defaultConfig.getPassword() : cA.password());			
