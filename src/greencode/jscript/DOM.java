@@ -27,6 +27,12 @@ public abstract class DOM {
 		this.viewSession = viewSession;
 	}
 	
+	public void destroy() {
+		this.variables = null;
+		this.uid = 0;
+		DOMHandle.deleteReference(this);
+	}
+	
 	/*
 	 * Microsoft Internet Explorer
 	 * somente começara a mostrar dados depois de terem recebido 256 bytes de saída,
@@ -54,7 +60,7 @@ public abstract class DOM {
 		}
 	}
 	
-	void flush(boolean buffer) {
+	final void flush(boolean buffer) {
 		GreenContext context = GreenContext.getInstance();
 				
 		try {			
@@ -70,5 +76,5 @@ public abstract class DOM {
 		}
 	}
 	
-	public void flush() { flush(true); }
+	public final void flush() { flush(true); }
 }

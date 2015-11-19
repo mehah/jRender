@@ -7,7 +7,7 @@ import greencode.jscript.Element;
 import greencode.jscript.ElementHandle;
 import greencode.jscript.Window;
 
-public class InputFileElement extends InputElementDisabling {
+public class InputFileElement extends InputElementDisabling<String> {
 	protected InputFileElement(Window window) { super("file", window); }
 	
 	public String accept() { return DOMHandle.getVariableValueByProperty(this, "accept", String.class, "propName"); }

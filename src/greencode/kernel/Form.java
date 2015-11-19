@@ -3,6 +3,8 @@ package greencode.kernel;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -150,28 +152,31 @@ final class Form {
 			} else {
 				try {
 					Object result = (map == null ? context.request.getParameter(parametro) : map.get(parametro));
+					
+					Type type = f.getGenericType();
+					final Class<?> realFieldType = type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType)type).getActualTypeArguments()[0] : f.getType();
 
-					if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class)) {
-						DOMHandle.setVariableValue((Element) f.get(container), "value", result);
-					} else if(fieldType.equals(SelectElement.class)) {
-						DOMHandle.setVariableValue((Element) f.get(container), "selectedValue", result);
-					} else if(fieldType.equals(SelectMultipleElement.class)) {
-						DOMHandle.setVariableValue((Element) f.get(container), "selectedValues", result);
+					if(result == null) {
+						valor = ClassUtils.isPrimitiveType(realFieldType) ? ClassUtils.getDefaultValue(realFieldType) : null;
 					} else {
-						if(result == null) {
-							valor = ClassUtils.isPrimitiveType(fieldType) ? ClassUtils.getDefaultValue(fieldType) : null;
-						} else {
-							valor = greencode.kernel.Form.getFieldValue(context, f, fieldType, result.toString(), element);
+						valor = greencode.kernel.Form.getFieldValue(context, f, realFieldType, result.toString(), element);
 
-							if(valor instanceof String) {
-								if(element.trim())
-									valor = ((String) valor).trim();
+						if(valor instanceof String) {
+							if(element.trim())
+								valor = ((String) valor).trim();
 
-								if(METHOD_TYPE_IS_GET)
-									valor = StringUtils.toCharset((String) valor, GreenCodeConfig.View.charset);
-							}
+							if(METHOD_TYPE_IS_GET)
+								valor = StringUtils.toCharset((String) valor, GreenCodeConfig.View.charset);
 						}
-
+					}					
+					
+					if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class)) {
+						DOMHandle.setVariableValue((Element) f.get(container), "value", valor);
+					} else if(fieldType.equals(SelectElement.class)) {
+						DOMHandle.setVariableValue((Element) f.get(container), "selectedValue", valor);
+					} else if(fieldType.equals(SelectMultipleElement.class)) {
+						DOMHandle.setVariableValue((Element) f.get(container), "selectedValues", valor);
+					} else {
 						f.set(container, valor);
 					}
 				} catch(UnknownFormatConversionException e) {
@@ -225,6 +230,7 @@ final class Form {
 					Console.warning(LogMessage.getMessage("green-0033", valor, convert.pattern()));
 				}
 			} else {
+				return valor;
 				/* return HttpParameter.Context.getObjectRequest(valor); */
 			}
 		}

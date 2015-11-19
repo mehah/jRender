@@ -3,7 +3,7 @@ package greencode.jscript.elements;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.Window;
 
-public abstract class InputElementCheckable extends InputElementDisabling {
+public abstract class InputElementCheckable<T> extends InputElementDisabling<T> {
 		
 	protected InputElementCheckable(String type, Window window) { super(type, window); }
 	

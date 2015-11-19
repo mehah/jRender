@@ -5,7 +5,7 @@ import greencode.jscript.Element;
 import greencode.jscript.ElementHandle;
 import greencode.jscript.Window;
 
-public class SelectElement extends SelectElementPrototype {
+public class SelectElement<T> extends SelectElementPrototype {
 	protected SelectElement() { super("select-one"); }
 	protected SelectElement(Window window) { super("select-one", window); }
 	
@@ -15,14 +15,14 @@ public class SelectElement extends SelectElementPrototype {
 	 * CUSTOM METHOD
 	 * @return String
 	 */
-	public String selectedValue() {
-		return DOMHandle.getVariableValue(this, "selectedValue", String.class);
+	public T selectedValue() {
+		return (T) DOMHandle.getVariableValue(this, "selectedValue", Object.class);
 	}
 	
 	/**
 	 * CUSTOM METHOD
 	 */
-	public void selectedValue(String value) {
+	public void selectedValue(T value) {
 		DOMHandle.setVariableValue(this, "selectedValue", value);
 		DOMHandle.CustomMethod.call(this, "selectOptionByValue", value);
 	}

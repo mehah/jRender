@@ -458,9 +458,14 @@ public final class Core implements Filter {
 			} catch(StopProcess e2) {
 			}
 
-			JsonObject json = new JsonObject();
-			json.add("errors", context.errors);
-			ElementsScan.send(context, json);
+			if(Cache.bootAction != null) {
+				if(Cache.bootAction.onException(context, e)) {
+					JsonObject json = new JsonObject();
+					json.add("errors", context.errors);
+					ElementsScan.send(context, json);
+				}else
+					ElementsScan.sendElements(context);
+			}
 
 			if(databaseConnectionEvent != null)
 				databaseConnectionEvent.onError(e);

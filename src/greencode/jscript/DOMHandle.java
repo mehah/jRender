@@ -21,12 +21,7 @@ public final class DOMHandle {
 	
 	public static Integer getUID(DOM d) { return d.uid; }
 	public static Window getWindow(DOM d) { return d.window; }
-	
-	public static void replaceReference(DOM dom, DOM newDom) {
-		dom.uid = newDom.uid;
-		dom.variables = newDom.variables;
-	}
-	
+		
 	public static void registerElementByCommand(DOM owner, Node e, String name, Object... parameters)
 	{ registerReturnByCommand(owner, e.uid, name, parameters); }
 	

@@ -3,7 +3,7 @@ package greencode.jscript.elements;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.Window;
 
-public abstract class InputElementTextField extends InputElementDisabling {
+public abstract class InputElementTextField<T> extends InputElementDisabling<T> {
 		
 	protected InputElementTextField(String type, Window window) { super(type, window); }
 	
@@ -15,9 +15,9 @@ public abstract class InputElementTextField extends InputElementDisabling {
 	
 	public Integer size() { return DOMHandle.getVariableValueByProperty(this, "size", Integer.class, "size"); }
 	
-	public void defaultValue(String defaultValue) { DOMHandle.setProperty(this, "defaultValue", defaultValue); }
+	public void defaultValue(T defaultValue) { DOMHandle.setProperty(this, "defaultValue", defaultValue); }
 	
-	public String defaultValue() { return DOMHandle.getVariableValueByProperty(this, "defaultValue", String.class, "defaultValue"); }
+	public T defaultValue() { return (T) DOMHandle.getVariableValueByProperty(this, "defaultValue", Object.class, "defaultValue"); }
 	
 	public void readOnly(Boolean readOnly) { DOMHandle.setProperty(this, "readOnly", readOnly); }
 	

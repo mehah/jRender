@@ -5,7 +5,7 @@ import greencode.jscript.Element;
 import greencode.jscript.Form;
 import greencode.jscript.Window;
 
-public abstract class InputElement extends Element {
+public abstract class InputElement<T> extends Element {
 	
 	protected InputElement(String type, Window window) {
 		super(window, "input");
@@ -22,9 +22,9 @@ public abstract class InputElement extends Element {
 	
 	public String type() { return DOMHandle.getVariableValueByProperty(this, "type", String.class, "type"); }
 	
-	public void value(String value) { DOMHandle.setProperty(this, "value", value); }
+	public void value(T value) { DOMHandle.setProperty(this, "value", value); }
 	
-	public String value() { return DOMHandle.getVariableValueByProperty(this, "value", String.class, "value"); }
+	public T value() { return (T) DOMHandle.getVariableValueByProperty(this, "value", Object.class, "value"); }
 	
 	public void disabled(boolean value) { DOMHandle.setProperty(this, "disabled", value); }
 	
