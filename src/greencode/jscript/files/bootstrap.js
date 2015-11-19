@@ -378,7 +378,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 
 	Greencode.tags.process(mainElement);
 
-	if(jsonObject == null) {
+	if(__jsonObject == null) {
 		var jsons = Greencode.crossbrowser.querySelectorAll.call(mainElement, 'div.JSON_CONTENT');
 		if(jsons != null && jsons.length > 0) {
 			for(var i = -1; ++i < jsons.length;) {
@@ -396,9 +396,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 
 			return;
 		}
-	}
-
-	if(__jsonObject != null) {
+	}else {
 		if(!Greencode.jQuery.isArray(__jsonObject))
 			__jsonObject = [ __jsonObject ];
 
@@ -501,10 +499,10 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				cometReceber = null;
 
 				if(!Greencode.DEBUG_MODE)
-					jsonObject.sync
+					delete jsonObject.sync;
 			}
 
-			if(jsonObject.error != null) {
+			if(jsonObject.errors != null) {
 				var divGreenCodeModalErro = document.createElement("div"), spanTitulo = document.createElement("span"), spanBotaoFechar = document.createElement("span"), topBar = document.createElement("div"), contentModalError = document.createElement("div");
 
 				divGreenCodeModalErro.setAttribute('id', 'GreenCodemodalErro');
@@ -539,7 +537,6 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 
 				document.body.appendChild(divGreenCodeModalErro);
 
-				jsonObject.errors = [jsonObject.error];
 				for( var i in jsonObject.errors) {
 					var error = jsonObject.errors[i], title = error.className + ": " + error.message, divTitle = document.createElement("div");
 
@@ -570,11 +567,10 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 						}
 					}
 				}
+				;
 
-				if(!Greencode.DEBUG_MODE) {
-					delete jsonObject.error;
+				if(!Greencode.DEBUG_MODE)
 					delete jsonObject.errors;
-				}
 			}
 
 			if(!Greencode.DEBUG_MODE)

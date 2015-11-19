@@ -437,9 +437,6 @@ public final class Core implements Filter {
 					GreenCodeConfig.Server.View.charset
 				);
 			}
-
-			ElementsScan.sendElements(context);
-
 			if(databaseConnectionEvent != null)
 				databaseConnectionEvent.onSuccess(context);
 
@@ -490,14 +487,16 @@ public final class Core implements Filter {
 			if(databaseConnectionEvent != null)
 				databaseConnectionEvent.onError(context, e);
 
-			error = new JsonObject();
-			error.add("error", error);
-			ElementsScan.send(context, error);
+			JsonObject json = new JsonObject();
+			JsonArray jsonarray = new JsonArray();
+			jsonarray.add(error);
 			
-			ElementsScan.sendElements(context);
+			json.add("errors", jsonarray);
+			ElementsScan.send(context, json);
 			
-			Console.error(thr.getMessage());
+			e.printStackTrace();
 		} finally {
+			ElementsScan.sendElements(context);
 			context.destroy();
 
 			if(response instanceof GZipServletResponseWrapper)
