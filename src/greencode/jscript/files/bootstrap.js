@@ -289,14 +289,11 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 				Greencode.executeEvent('afterEvent', _data);
 			});
 	
-			delete cometReceber;
 			cometReceber = null;
 		}
 
-		if(!Greencode.DEBUG_MODE) {
-			delete param;
-			delete tagEventObject;
-		}
+		param = null;
+		tagEventObject = null;
 	}
 };
 
@@ -495,14 +492,13 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 						uid : sync.uid
 					});
 
-				delete cometReceber;
 				cometReceber = null;
 
 				if(!Greencode.DEBUG_MODE)
 					delete jsonObject.sync;
 			}
 
-			if(jsonObject.errors != null) {
+			if(jsonObject.error != null) {
 				var divGreenCodeModalErro = document.createElement("div"), spanTitulo = document.createElement("span"), spanBotaoFechar = document.createElement("span"), topBar = document.createElement("div"), contentModalError = document.createElement("div");
 
 				divGreenCodeModalErro.setAttribute('id', 'GreenCodemodalErro');
@@ -537,44 +533,38 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 
 				document.body.appendChild(divGreenCodeModalErro);
 
-				for( var i in jsonObject.errors) {
-					var error = jsonObject.errors[i], title = error.className + ": " + error.message, divTitle = document.createElement("div");
+				var error = jsonObject.error, title = error.className + ": " + error.message, divTitle = document.createElement("div");
 
-					for(i in Greencode.modalErro.content.title.style)
-						divTitle.style[i] = Greencode.modalErro.content.title.style[i];
+				for(i in Greencode.modalErro.content.title.style)
+					divTitle.style[i] = Greencode.modalErro.content.title.style[i];
 
-					divTitle.appendChild(document.createTextNode(title));
+				divTitle.appendChild(document.createTextNode(title));
 
-					contentModalError.appendChild(divTitle);
+				contentModalError.appendChild(divTitle);
 
-					if(error.stackTrace != null) {
-						for( var i2 in error.stackTrace) {
-							var st = error.stackTrace[i2], msg = st.className + '.' + st.methodName + '(', lineDiv = document.createElement("div");
+				if(error.stackTrace != null) {
+					for( var i2 in error.stackTrace) {
+						var st = error.stackTrace[i2], msg = st.className + '.' + st.methodName + '(', lineDiv = document.createElement("div");
 
-							msg += (st.lineNumber < 0 ? 'Unknown Source' : st.fileName + ':' + st.lineNumber) + ')';
+						msg += (st.lineNumber < 0 ? 'Unknown Source' : st.fileName + ':' + st.lineNumber) + ')';
 
-							lineDiv.appendChild(document.createTextNode(msg));
+						lineDiv.appendChild(document.createTextNode(msg));
 
-							if(st.possibleError) {
-								for( var i3 in Greencode.modalErro.content.possibleErro.style)
-									lineDiv.style[i3] = Greencode.modalErro.content.possibleErro.style[i3];
-							} else {
-								for( var i3 in Greencode.modalErro.content.lineClass.style)
-									lineDiv.style[i3] = Greencode.modalErro.content.lineClass.style[i3];
-							}
-
-							contentModalError.appendChild(lineDiv);
+						if(st.possibleError) {
+							for( var i3 in Greencode.modalErro.content.possibleErro.style)
+								lineDiv.style[i3] = Greencode.modalErro.content.possibleErro.style[i3];
+						} else {
+							for( var i3 in Greencode.modalErro.content.lineClass.style)
+								lineDiv.style[i3] = Greencode.modalErro.content.lineClass.style[i3];
 						}
+
+						contentModalError.appendChild(lineDiv);
 					}
 				}
-				;
 
 				if(!Greencode.DEBUG_MODE)
-					delete jsonObject.errors;
+					delete jsonObject.error;
 			}
-
-			if(!Greencode.DEBUG_MODE)
-				delete jsonObject;
 
 			jsonObject = null;
 		}

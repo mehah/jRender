@@ -32,7 +32,7 @@ var IframeHttpRequest = function() {
 			try {
 				document.body.removeChild(frame);
 			} catch(e) {}
-			delete frame;
+			frame = null;
 		}
 		clearInterval(intervalId);
 	};

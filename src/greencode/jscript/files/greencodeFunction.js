@@ -145,7 +145,6 @@ Greencode.customMethod = {
 			Greencode.executeEvent('pageLoad', _data);
 		});
 		
-		delete cometReceber;
 		cometReceber = null;
 		return this;
 	},
@@ -367,7 +366,6 @@ Greencode.util = {
 			eval(data);
 		});
 		
-		delete cometReceber;
 		cometReceber = null;
 	},
 	objectToString: function(v, filter) {

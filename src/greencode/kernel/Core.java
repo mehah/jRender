@@ -487,14 +487,11 @@ public final class Core implements Filter {
 			if(databaseConnectionEvent != null)
 				databaseConnectionEvent.onError(context, e);
 
-			JsonObject json = new JsonObject();
-			JsonArray jsonarray = new JsonArray();
-			jsonarray.add(error);
-			
-			json.add("errors", jsonarray);
+			JsonObject json = new JsonObject();			
+			json.add("error", error);
 			ElementsScan.send(context, json);
 			
-			e.printStackTrace();
+			Console.error(e);
 		} finally {
 			ElementsScan.sendElements(context);
 			context.destroy();

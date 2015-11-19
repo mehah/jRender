@@ -221,7 +221,6 @@ Greencode.tags = {
 						Greencode.executeEvent('pageLoad', _data);
 					});
 
-					delete cometReceber;
 					cometReceber = null;
 
 					return false;
@@ -269,7 +268,6 @@ Greencode.tags = {
 						Bootstrap.init(form, JSON.parse(data));
 				});
 
-				delete cometReceber;
 				cometReceber = null;
 			});
 		}
