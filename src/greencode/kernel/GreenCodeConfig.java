@@ -1,6 +1,7 @@
 package greencode.kernel;
 
 import greencode.database.DatabaseConfig;
+import greencode.exception.GreencodeError;
 import greencode.kernel.implementation.PluginImplementation;
 import greencode.util.GenericReflection;
 
@@ -60,7 +61,7 @@ public final class GreenCodeConfig {
 					GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "autodectetion", Boolean.parseBoolean(currentElement.attr("autodectetion").trim()));
 					GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "maxRequestSize", Integer.parseInt(currentElement.attr("max-request-size").trim()));
 				}
-				
+
 				currentElement = server.getElementsByTag("response").first();
 				GenericReflection.NoThrow.setFinalStaticValue(Server.Response.class, "gzipSupport", Boolean.parseBoolean(currentElement.attr("gzip").trim()));
 
@@ -86,10 +87,9 @@ public final class GreenCodeConfig {
 
 					subCurrentElement = currentElement.getElementsByTag("session").first();
 					{
-						GenericReflection.NoThrow.setFinalStaticValue(Server.View.Session.class, "maxInactiveInterval", Integer.parseInt(subCurrentElement.attr("maxInactiveInterval")));	
-					}					
+						GenericReflection.NoThrow.setFinalStaticValue(Server.View.Session.class, "maxInactiveInterval", Integer.parseInt(subCurrentElement.attr("maxInactiveInterval")));
+					}
 				}
-				
 
 				currentElement = server.getElementsByTag("database").first();
 				if(currentElement != null) {
@@ -185,73 +185,75 @@ public final class GreenCodeConfig {
 			final static HashMap<String, DatabaseConfig> configs = new HashMap<String, DatabaseConfig>();
 
 			public static DatabaseConfig getConfig(String path) {
+				if(path == null)
+					return null;
+				
 				if(configs.containsKey(path))
 					return configs.get(path);
-				else {
-					System.out.println(Core.defaultLogMsg + "Caching Database Config File: " + path);
 
-					Document src = null;
-					try {
-						final URL databaseConfigXml = GreenCodeConfig.class.getClassLoader().getResource(path);
-						if(databaseConfigXml == null)
-							throw new IOException("Could not find the configuration file database called '" + path + "'.");
+				System.out.println(Core.defaultLogMsg + "Caching Database Config File: " + path);
 
-						src = Jsoup.parse(new File(databaseConfigXml.getPath()), GreenCodeConfig.DEFAULT_CHARSET);
-						
-						Element databaseConfig = src.getElementsByTag("database-config").first();
-						if(databaseConfig != null) {
-							Elements listCurrentElement;
-							
-							DatabaseConfig config = new DatabaseConfig();
+				Document src = null;
+				try {
+					final URL databaseConfigXml = GreenCodeConfig.class.getClassLoader().getResource(path);
+					if(databaseConfigXml == null)
+						throw new IOException();
 
-							config.setServerName(databaseConfig.attr("server-name"));
-							config.setDatabase(databaseConfig.attr("database"));
-							config.setSchema(databaseConfig.attr("schema"));
-							config.setUserName(databaseConfig.attr("username"));
-							config.setPassword(databaseConfig.attr("password"));
-							
-							listCurrentElement = databaseConfig.getElementsByTag("reconnect");
-							if(!listCurrentElement.isEmpty()) {
-								Element reconnectTag = listCurrentElement.first();
-								
-								config.setChanceReconnect(Byte.parseByte(reconnectTag.attr("chance")));
-								config.setConnectionFileName(reconnectTag.attr("file"));
-							}
+					src = Jsoup.parse(new File(databaseConfigXml.getPath()), GreenCodeConfig.DEFAULT_CHARSET);
 
-							listCurrentElement = null;
+					Element databaseConfig = src.getElementsByTag("database-config").first();
+					if(databaseConfig != null) {
+						Elements listCurrentElement;
 
-							if(config.getDatabase() != null && !config.getDatabase().isEmpty()) {
-								String driverName = DataBase.drives.get(config.getDatabase());
-								if(driverName == null)
-									throw new ConfigurationException("Driver do Banco de Dados especificado não foi declarado no arquivo de configuração 'greencode.config.xml'.");
+						DatabaseConfig config = new DatabaseConfig();
 
+						config.setServerName(databaseConfig.attr("server-name"));
+						config.setDatabase(databaseConfig.attr("database"));
+						config.setSchema(databaseConfig.attr("schema"));
+						config.setUserName(databaseConfig.attr("username"));
+						config.setPassword(databaseConfig.attr("password"));
+
+						listCurrentElement = databaseConfig.getElementsByTag("reconnect");
+						if(!listCurrentElement.isEmpty()) {
+							Element reconnectTag = listCurrentElement.first();
+
+							config.setChanceReconnect(Byte.parseByte(reconnectTag.attr("chance")));
+							config.setConnectionFileName(reconnectTag.attr("file"));
+						}
+
+						listCurrentElement = null;
+
+						if(config.getDatabase() != null && !config.getDatabase().isEmpty()) {
+							String driverName = DataBase.drives.get(config.getDatabase());
+							if(driverName == null)
+								throw new ConfigurationException("Driver do Banco de Dados especificado não foi declarado no arquivo de configuração 'greencode.config.xml'.");
+
+							try {
+								Class.forName(driverName);
+							} catch(Exception e) {
 								try {
-									Class.forName(driverName);
-								} catch(Exception e) {
-									try {
-										DriverManager.registerDriver((Driver) Class.forName(driverName).newInstance());
-									} catch(ClassNotFoundException e1) {
-										throw new ClassNotFoundException(LogMessage.getMessage("green-db-0000", config.getDatabase()));
-									} catch(Exception e2) {
-										throw new RuntimeException(e2);
-									}
+									DriverManager.registerDriver((Driver) Class.forName(driverName).newInstance());
+								} catch(ClassNotFoundException e1) {
+									throw new ClassNotFoundException(LogMessage.getMessage("green-db-0000", config.getDatabase()));
+								} catch(Exception e2) {
+									throw new RuntimeException(e2);
 								}
 							}
+						}
 
-							configs.put(path, config);
-							return config;
-						}
-					} catch(Exception e) {
-						greencode.kernel.Console.error(e);
-					} finally {
-						if(src != null) {
-							src.empty();
-							src = null;
-						}
+						configs.put(path, config);
+						return config;
 					}
-
-					return null;
+				} catch(Exception e) {
+					Console.error(LogMessage.getMessage("green-db-0007", path));
+				} finally {
+					if(src != null) {
+						src.empty();
+						src = null;
+					}
 				}
+
+				return null;
 			}
 		}
 

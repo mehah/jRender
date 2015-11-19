@@ -5,6 +5,7 @@ import java.util.HashMap;
 import javax.servlet.http.Part;
 
 import greencode.exception.ConnectionLost;
+import greencode.exception.GreencodeError;
 import greencode.http.ViewSession;
 import greencode.kernel.Console;
 import greencode.kernel.ElementsScan;
@@ -108,7 +109,7 @@ public final class DOMHandle {
 					try {
 						v = GenericReflection.getDeclaredMethod(cast, "valueOf", String.class).invoke(null, v);
 					} catch (Exception e) {
-						Console.error(e);
+						throw new GreencodeError(e);
 					}
 				}else
 					v = context.gsonInstance.fromJson((String) v, cast);

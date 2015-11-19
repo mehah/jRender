@@ -3,6 +3,7 @@ package greencode.kernel;
 import greencode.database.DatabaseConnection;
 import greencode.database.implementation.DatabaseConnectionEvent;
 import greencode.exception.ConnectionLost;
+import greencode.exception.GreencodeError;
 import greencode.exception.OperationNotAllowedException;
 import greencode.exception.StopProcess;
 import greencode.http.HttpAction;
@@ -71,6 +72,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.RequestFacade;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
 @WebFilter(displayName = "core", urlPatterns = "/*")
@@ -450,10 +452,36 @@ public final class Core implements Filter {
 				
 		} catch(StopProcess e) {
 		} catch(Exception e) {
-			try {
-				Console.error(e.getCause() == null ? e : e.getCause());
-			} catch(StopProcess e2) {
+			Throwable thr = e.getCause() == null ? e : e.getCause(); 
+
+			JsonArray stackTrace = new JsonArray();
+			JsonObject error = new JsonObject();
+			error.add("stackTrace", stackTrace);
+			
+			error.addProperty("className", thr.getClass().getName());
+			error.addProperty("message", thr.getMessage());
+			
+			for (StackTraceElement trace : thr.getStackTrace()) {
+				if(trace == null)
+					continue;
+				
+				JsonObject o = new JsonObject();
+				o.addProperty("className", trace.getClassName());
+				o.addProperty("methodName", trace.getMethodName());
+				o.addProperty("lineNumber", trace.getLineNumber());
+				o.addProperty("fileName", trace.getFileName());
+				try {
+					ClassLoader cl = Class.forName(trace.getClassName()).getClassLoader();
+					if(cl == null)
+						throw new ClassNotFoundException();
+					
+					o.addProperty("possibleError", cl.getResource("/") != null);
+				} catch (ClassNotFoundException e1) {
+					o.addProperty("possibleError", false);
+				}
+				stackTrace.add(o);
 			}
+			
 
 			if(Cache.bootAction != null) {
 				Cache.bootAction.onException(context, e);
@@ -462,11 +490,13 @@ public final class Core implements Filter {
 			if(databaseConnectionEvent != null)
 				databaseConnectionEvent.onError(context, e);
 
-			JsonObject json = new JsonObject();
-			json.add("errors", context.errors);
-			ElementsScan.send(context, json);
+			error = new JsonObject();
+			error.add("error", error);
+			ElementsScan.send(context, error);
 			
 			ElementsScan.sendElements(context);
+			
+			Console.error(thr.getMessage());
 		} finally {
 			context.destroy();
 
@@ -683,7 +713,7 @@ public final class Core implements Filter {
 
 			GenericReflection.NoThrow.setFinalStaticValue(Core.class, "hasError", false);
 		} catch(Exception e) {
-			e.printStackTrace();
+			throw new GreencodeError(e);
 		}
 	}
 }

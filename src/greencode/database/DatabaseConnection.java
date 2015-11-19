@@ -1,5 +1,6 @@
 package greencode.database;
 
+import greencode.exception.GreencodeError;
 import greencode.kernel.Console;
 import greencode.kernel.GreenCodeConfig;
 import greencode.kernel.LogMessage;
@@ -37,18 +38,21 @@ public final class DatabaseConnection implements Connection {
 
 	public void start() throws SQLException {
 		close();
-		String url = "jdbc:" + getConfig().getDatabase() + "://" + getConfig().getServerName() + ":3306/" + getConfig().getSchema();
+		if(config == null) {
+			Console.error(LogMessage.getMessage("green-db-0008"));
+		}
+		String url = "jdbc:" + config.getDatabase() + "://" + config.getServerName() + ":3306/" + config.getSchema();
 		try {
-			this.connection = DriverManager.getConnection(url, getConfig().getUserName(), getConfig().getPassword());
+			this.connection = DriverManager.getConnection(url, config.getUserName(), config.getPassword());
 		} catch (SQLException e) {
-			Console.error(url + "\n" + LogMessage.getMessage("green-db-0001", getConfig().getDatabase()));
+			Console.error(url + "\n" + LogMessage.getMessage("green-db-0001", config.getDatabase()));
 
 			if (config.getChanceReconnect() > 0 && chanceConnected < config.getChanceReconnect()) {
 				Console.log(LogMessage.getMessage("green-db-0002"));
 				try {
 					Thread.sleep(250);
 				} catch (InterruptedException e1) {
-					Console.error(e1);
+					throw new GreencodeError(e1);
 				}
 
 				++chanceConnected;
@@ -264,7 +268,7 @@ public final class DatabaseConnection implements Connection {
 		try {
 			getConnection().setClientInfo(properties);
 		} catch (SQLException e) {
-			Console.error(e);
+			throw new GreencodeError(e);
 		}
 	}
 
@@ -272,7 +276,7 @@ public final class DatabaseConnection implements Connection {
 		try {
 			getConnection().setClientInfo(name, value);
 		} catch (SQLException e) {
-			Console.error(e);
+			throw new GreencodeError(e);
 		}
 	}
 

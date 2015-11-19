@@ -504,7 +504,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 					jsonObject.sync
 			}
 
-			if(jsonObject.errors != null) {
+			if(jsonObject.error != null) {
 				var divGreenCodeModalErro = document.createElement("div"), spanTitulo = document.createElement("span"), spanBotaoFechar = document.createElement("span"), topBar = document.createElement("div"), contentModalError = document.createElement("div");
 
 				divGreenCodeModalErro.setAttribute('id', 'GreenCodemodalErro');
@@ -539,6 +539,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 
 				document.body.appendChild(divGreenCodeModalErro);
 
+				jsonObject.errors = [jsonObject.error];
 				for( var i in jsonObject.errors) {
 					var error = jsonObject.errors[i], title = error.className + ": " + error.message, divTitle = document.createElement("div");
 
@@ -569,10 +570,11 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 						}
 					}
 				}
-				;
 
-				if(!Greencode.DEBUG_MODE)
+				if(!Greencode.DEBUG_MODE) {
+					delete jsonObject.error;
 					delete jsonObject.errors;
+				}
 			}
 
 			if(!Greencode.DEBUG_MODE)

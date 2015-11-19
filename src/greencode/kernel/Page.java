@@ -20,6 +20,7 @@ import org.jsoup.select.Elements;
 import com.google.gson.Gson;
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 
+import greencode.exception.GreencodeError;
 import greencode.jscript.FunctionHandle;
 import greencode.jscript.Window;
 import greencode.util.FileUtils;
@@ -119,7 +120,7 @@ public final class Page {
 				page.lastModified = 0;
 				Page.loadStructure(page.file, null, isPrincipal);
 			} catch(IOException e) {
-				Console.error(e);
+				throw new GreencodeError(e);
 			}
 		}
 
@@ -442,7 +443,7 @@ public final class Page {
 				}
 			}
 		} catch(IOException e) {
-			Console.error(e);
+			throw new GreencodeError(e);
 		}
 
 		return page;

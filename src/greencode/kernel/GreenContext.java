@@ -12,7 +12,6 @@ import javax.servlet.http.HttpSession;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 
 import greencode.database.DatabaseConnection;
 import greencode.exception.OperationNotAllowedException;
@@ -32,7 +31,6 @@ public final class GreenContext {
 	
 	private boolean destroyed;
 	
-	final JsonArray errors = new JsonArray();
 	final HttpRequest request;
 	final HttpServletResponse response;
 	final public Gson gsonInstance = getGsonInstance();
