@@ -98,7 +98,6 @@ public final class Core implements Filter {
 		"init.js"
 	};
 	
-
 	public void destroy() {
 		if(Cache.bootAction != null) {
 			System.out.print(defaultLogMsg + "Destroying BootAction...");
@@ -153,7 +152,7 @@ public final class Core implements Filter {
 		final String servletPath = ((HttpServletRequest) request).getServletPath().substring(1);
 
 		if(servletPath.equals("$synchronize")) {
-			GreenContext context = new GreenContext(new HttpRequest((HttpServletRequest) request), (HttpServletResponse) response, null);
+			GreenContext context = new GreenContext(new HttpRequest((HttpServletRequest) request, (HttpServletResponse)response), (HttpServletResponse) response, null);
 
 			final Integer uid = Integer.parseInt(request.getParameter("uid"));
 
@@ -257,7 +256,10 @@ public final class Core implements Filter {
 		Console.log(":: Request Processing ::");
 		GreenContext context = new GreenContext((HttpServletRequest) request, (HttpServletResponse) response, page);
 		try {
+			Class<?>[] listArgsClass = null;
 			if(page != null) {
+				listArgsClass = new Class<?>[]{GreenContext.class};
+				
 				Rule.forClass(context, page);
 
 				if(!(page.pageAnnotation.parameters().length == 1 && page.pageAnnotation.parameters()[0].name().isEmpty())) {
@@ -302,51 +304,52 @@ public final class Core implements Filter {
 			greencode.kernel.Form.processRequestedForm(context);
 
 			try {
-				Class<?>[] listArgsClass = null;
-				String[] _args = context.request.getParameterValues("_args[]");
-				if(_args != null) {
-					final int _argsSize = _args.length;
+				if(context.request.isAjax() && listArgsClass == null) {
+					String[] _args = context.request.getParameterValues("_args[]");
+					if(_args != null) {
+						final int _argsSize = _args.length;
 
-					ElementsScan eArg = ElementsScan.getElements(context.getRequest().getViewSession());
+						ElementsScan eArg = ElementsScan.getElements(context.getRequest().getViewSession());
 
-					eArg.args = new Integer[_argsSize];
-					listArgs = new Object[_argsSize];
-					listArgsClass = new Class<?>[_argsSize];
+						eArg.args = new Integer[_argsSize];
+						listArgs = new Object[_argsSize];
+						listArgsClass = new Class<?>[_argsSize];
 
-					int cntSkip = 0;
-					for(int i = -1; ++i < _argsSize;) {
-						HashMap<String, String> j = context.gsonInstance.fromJson(_args[i], (new HashMap<String, String>()).getClass());
+						int cntSkip = 0;
+						for(int i = -1; ++i < _argsSize;) {
+							HashMap<String, String> j = context.gsonInstance.fromJson(_args[i], (new HashMap<String, String>()).getClass());
 
-						Class<?> _class = Class.forName(j.get("className"));
-						listArgsClass[i] = _class;
+							Class<?> _class = Class.forName(j.get("className"));
+							listArgsClass[i] = _class;
 
-						if(_class.equals(GreenContext.class)) {
-							++cntSkip;
-							listArgs[i] = context;
-						} else {
-							DOM dom;
-							if(_class.equals(ContainerEventObject.class)) {
-								dom = new ContainerEventObject(context, Integer.parseInt(j.get("uid")));
+							if(_class.equals(GreenContext.class)) {
 								++cntSkip;
-							} else if(_class.equals(ContainerElement.class)) {
-								dom = greencode.jscript.$Container.getContainers(context.requestedForm).get(Integer.parseInt(j.get("uid")));
-								listArgsClass[i] = dom.getClass();
-								++cntSkip;
-							} else if(_class.equals(Element.class)) {
-								Class<? extends Element> castoTo = (Class<? extends Element>) Class.forName(j.get("castTo"));
-								dom = ElementHandle.getInstance(castoTo, context.currentWindow);
-								greencode.jscript.$DOMHandle.setUID(dom, Integer.parseInt(j.get("uid")));
-								listArgsClass[i] = castoTo;
-								++cntSkip;
+								listArgs[i] = context;
 							} else {
-								dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);
-								eArg.args[i - cntSkip] = DOMHandle.getUID(dom);
+								DOM dom;
+								if(_class.equals(ContainerEventObject.class)) {
+									dom = new ContainerEventObject(context, Integer.parseInt(j.get("uid")));
+									++cntSkip;
+								} else if(_class.equals(ContainerElement.class)) {
+									dom = greencode.jscript.$Container.getContainers(context.requestedForm).get(Integer.parseInt(j.get("uid")));
+									listArgsClass[i] = dom.getClass();
+									++cntSkip;
+								} else if(_class.equals(Element.class)) {
+									Class<? extends Element> castoTo = (Class<? extends Element>) Class.forName(j.get("castTo"));
+									dom = ElementHandle.getInstance(castoTo, context.currentWindow);
+									greencode.jscript.$DOMHandle.setUID(dom, Integer.parseInt(j.get("uid")));
+									listArgsClass[i] = castoTo;
+									++cntSkip;
+								} else {
+									dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);
+									eArg.args[i - cntSkip] = DOMHandle.getUID(dom);
+								}
+								listArgs[i] = dom;
 							}
-							listArgs[i] = dom;
 						}
-					}
+					}	
 				}
-
+				
 				context.requestedMethod = requestMethod = GenericReflection.getMethod(requestClass, methodName, listArgsClass);
 
 				Rule.forMethod(context, requestMethod);
@@ -388,7 +391,7 @@ public final class Core implements Filter {
 
 					if(context.executeAction) {
 						if(page != null && requestController instanceof Window) {
-							((Window) requestController).init();
+							((Window) requestController).init(context);
 
 							if(page.moduleName != null) {
 								DOMHandle.execCommand(
@@ -410,7 +413,7 @@ public final class Core implements Filter {
 						} else if(requestController instanceof EventFunction)
 							((EventFunction) requestController).init((EventObject) listArgs[0]);
 						else if(requestController instanceof SimpleFunction)
-							((SimpleFunction) requestController).init();
+							((SimpleFunction) requestController).init(context);
 						else
 							requestMethod.invoke(requestController, listArgs);
 					}

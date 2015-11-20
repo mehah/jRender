@@ -59,7 +59,7 @@ public final class GreenContext {
 		boolean sessionInitialized = request.getSession(false) != null;
 				
 		this.response = response;
-		this.request = new HttpRequest(request);
+		this.request = new HttpRequest(request, response);
 		this.currentPageAnnotation = currentPage == null ? null : currentPage.pageAnnotation;
 		
 		if(!sessionInitialized && getBootAction() != null)

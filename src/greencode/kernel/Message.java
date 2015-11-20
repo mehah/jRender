@@ -8,13 +8,14 @@ public final class Message {
 	final static HashMap<String, Properties> properties = new HashMap<String, Properties>();
 	
 	private Message(){}
-	
-	private static Properties getPropertie() { return GreenContext.getInstance().currentMessagePropertie; }
-	
+		
 	public static String getMessage(String key) {
-		final String msg = getPropertie().getProperty(key);
+		GreenContext context = GreenContext.getInstance();
+		Properties properties = context.currentMessagePropertie;
+		
+		final String msg = properties.getProperty(key);
 		if(msg == null)
-			throw new NullPointerException(LogMessage.getMessage("green-0006", key, GreenCodeConfig.Server.Internationalization.getVariantPageByLocale(GreenContext.getInstance().userLocale).fileName));
+			throw new NullPointerException(LogMessage.getMessage("green-0006", key, GreenCodeConfig.Server.Internationalization.getVariantPageByLocale(context.userLocale).fileName));
 			
 		return msg;
 	}

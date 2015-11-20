@@ -4,15 +4,16 @@ import java.security.Principal;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+import javax.servlet.http.HttpServletResponse;
+
 import greencode.exception.OperationNotAllowedException;
 import greencode.http.enumeration.RequestMethod;
 import greencode.http.security.UserPrincipal;
-import greencode.kernel.GreenContext;
 import greencode.kernel.LogMessage;
 import greencode.util.FileUtils;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 
 public final class HttpRequest extends HttpServletRequestWrapper {
 	final HashMap<String, String> params = new HashMap<String, String>();	
@@ -24,15 +25,18 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 	private Boolean isMobile = null;
 	
 	private final Conversation conversation;
+	private final ServletResponse response;
 	
 	private Extension extension;
 	private ViewSession viewSession = null;
 	private UserPrincipal userPrincipal;
 	final boolean __contentIsHtml;
 	
-	public HttpRequest(HttpServletRequest request) {
+	public HttpRequest(HttpServletRequest request, HttpServletResponse response) {
 		super(request);
-						
+
+		this.response = response;
+		
 		isIFrameHttpRequest = request.getParameterMap().containsKey("isAjax");
 		isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With")) || isIFrameHttpRequest;
 		
@@ -92,7 +96,7 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 			ViewSessionContext viewContext = new ViewSessionContext(getSession());
 			
 			if((this.viewSession = viewContext.getViewSession(viewId)) == null) {
-				if(GreenContext.getInstance().getResponse().isCommitted())
+				if(response.isCommitted())
 					throw new IllegalStateException("Cannot create a view session after the response has been committed");
 				
 				this.viewSession = new ViewSession(viewId, getSession(), viewContext);

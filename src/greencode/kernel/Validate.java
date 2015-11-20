@@ -61,16 +61,22 @@ final class Validate {
 			if(element.validators().length > 0) {
 				final boolean validateIsPartial = methodValidate.type().equals(ValidateType.PARTIAL);
 				
+				final Element elementObject;
 				Object valor = GenericReflection.NoThrow.getValue(f, __container);
-				if(valor instanceof InputElement || valor instanceof TextareaElement) {
-					valor = DOMHandle.getVariableValue((Element)valor, "value", Object.class);
-				}else if(valor instanceof SelectElement) {
-					valor = DOMHandle.getVariableValue((Element)valor, "selectedValue", Object.class);
-				}else if(valor instanceof SelectMultipleElement) {
-					valor = DOMHandle.getVariableValue((Element)valor, "selectedValues", Object.class);
-				}				
+				if(valor instanceof Element) {
+					elementObject = (Element) valor;
+					if(valor instanceof InputElement || valor instanceof TextareaElement) {
+						valor = DOMHandle.getVariableValue((Element)valor, "value", Object.class);
+					}else if(valor instanceof SelectElement) {
+						valor = DOMHandle.getVariableValue((Element)valor, "selectedValue", Object.class);
+					}else if(valor instanceof SelectMultipleElement) {
+						valor = DOMHandle.getVariableValue((Element)valor, "selectedValues", Object.class);
+					}
+				}else
+					elementObject = null;
+
 				for(Validator validator: element.validators()) {
-					if(!validate(context, form, container, parametro, validator, valor, dataValidation)) {
+					if(!validate(context, form, container, elementObject, parametro, valor, validator, dataValidation)) {
 						if(validateIsPartial)
 							return false;
 
@@ -83,12 +89,12 @@ final class Validate {
 		return true;
 	}
 
-	private static boolean validate(GreenContext context, Form form, ContainerElement<?> container, String name, Validator validation, Object value, DataValidation dataValidation) {
+	private static boolean validate(GreenContext context, Form form, ContainerElement<?> container, Element element, String name, Object value, Validator validation, DataValidation dataValidation) {
 		final greencode.validator.Validator oValidation = ValidatorFactory.getValidationInstance(context.getRequest().getViewSession(), validation.value());
 
 		Console.log("Calling Validator of "+name+": [" + oValidation.getClass().getSimpleName() + "]");
 
-		boolean res = oValidation.validate(context.currentWindow, form, container, name, value, validation.labels(), dataValidation);
+		boolean res = oValidation.validate(context.currentWindow, form, container, element, name, value, validation.labels(), dataValidation);
 		if(!res)
 			context.executeAction = false;
 

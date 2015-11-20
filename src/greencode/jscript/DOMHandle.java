@@ -71,10 +71,8 @@ public final class DOMHandle {
 	
 	public static boolean containVariableKey(DOM owner, String key) { return owner.variables.containsKey(key); }
 	
-	private static Object getSyncValue(DOM owner, String varName, boolean isMethod, String methodOrPropName, Object... parameters) {
-		synchronized (owner) {
-			GreenContext context = GreenContext.getInstance();
-			
+	private static Object getSyncValue(GreenContext context, DOM owner, String varName, boolean isMethod, String methodOrPropName, Object... parameters) {
+		synchronized (owner) {			
 			if(!isMethod)
 				methodOrPropName = '#'+methodOrPropName;		
 			
@@ -102,7 +100,7 @@ public final class DOMHandle {
 		GreenContext context = GreenContext.getInstance();
 		
 		if(greencode.kernel.$GreenContext.isForcingSynchronization(context, _name) || !owner.variables.containsKey(varName)) {
-			Object v = getSyncValue(owner, varName, isMethod, _name, parameters);
+			Object v = getSyncValue(context, owner, varName, isMethod, _name, parameters);
 			
 			if(cast != null && !cast.equals(String.class) && !cast.equals(Part.class)) {
 				if(ClassUtils.isPrimitiveOrWrapper(cast)) {

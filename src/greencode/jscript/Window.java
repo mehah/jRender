@@ -67,7 +67,7 @@ public abstract class Window extends EventTarget implements HttpAction {
 	
 	public Screen screen() { return DOMHandle.getVariableValueByProperty(this, "screen", Screen.class, "screen"); }
 		
-	public abstract void init();
+	public abstract void init(GreenContext context);
 	
 	public boolean connectionAborted() {
 		try {

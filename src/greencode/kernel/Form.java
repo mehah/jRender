@@ -109,81 +109,89 @@ final class Form {
 				}
 				f.set(container, valor);
 			} else if(fieldType.equals(Part.class)) {
-				f.set(container, GreenContext.getInstance().getRequest().getPart(parametro));
-			} else if(fieldType.isArray()) {
-				final String[] valores;
-				if(map == null) {
-					String[] _valores = context.request.getParameterValues(parametro + "[]");
-					if(_valores == null) {
-						valor = context.request.getParameter(parametro);
-						valores = valor != null ? new String[]{(String) valor} : null;
-					} else
-						valores = _valores;
-				} else {
-					List<Object> list = (List<Object>) map.get(parametro);
-					valores = list == null ? null : list.toArray(new String[list.size()]);
-				}
+				f.set(container, context.getRequest().getPart(parametro));
+			} else {
+				final Type type = f.getGenericType();				
+				final boolean isElementMultipleValue = fieldType.equals(SelectMultipleElement.class);
+				
+				if(isElementMultipleValue || fieldType.isArray()) {
+					final String[] valores;
+					if(map == null) {
+						String[] _valores = context.request.getParameterValues(parametro + "[]");
+						if(_valores == null) {
+							valor = context.request.getParameter(parametro);
+							valores = valor != null ? new String[]{(String) valor} : null;
+						} else
+							valores = _valores;
+					} else {
+						List<Object> list = (List<Object>) map.get(parametro);
+						valores = list == null ? null : list.toArray(new String[list.size()]);
+					}
 
-				if(valores != null) {
-					final Object[] values = (Object[]) Array.newInstance(ClassUtils.toWrapperClass(fieldType.getComponentType()), valores.length);
+					if(valores != null) {
+						final Class<?> realFieldType = type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType)type).getActualTypeArguments()[0] : fieldType.getComponentType();
+						
+						final Object[] values = (Object[]) Array.newInstance(ClassUtils.toWrapperClass(realFieldType), valores.length);
 
-					try {
-						for(int i = -1; ++i < valores.length;) {
-							Object _value = greencode.kernel.Form.getFieldValue(context, f, fieldType.getComponentType(), valores[i], element);
+						try {
+							for(int i = -1; ++i < valores.length;) {
+								Object _value = greencode.kernel.Form.getFieldValue(context, f, realFieldType, valores[i], element);
 
-							if(_value == null)
-								Console.error(LogMessage.getMessage("green-0019", f.getName(), f.getDeclaringClass().getSimpleName()));
+								if(_value == null)
+									Console.error(LogMessage.getMessage("green-0019", f.getName(), f.getDeclaringClass().getSimpleName()));
 
-							if(_value instanceof String) {
-								if(element.trim())
-									_value = ((String) _value).trim();
+								if(_value instanceof String) {
+									if(element.trim())
+										_value = ((String) _value).trim();
 
-								if(METHOD_TYPE_IS_GET)
-									_value = StringUtils.toCharset((String) _value, GreenCodeConfig.Server.View.charset);
+									if(METHOD_TYPE_IS_GET)
+										_value = StringUtils.toCharset((String) _value, GreenCodeConfig.Server.View.charset);
+								}
+
+								values[i] = _value;
 							}
 
-							values[i] = _value;
+							if(isElementMultipleValue) {
+								DOMHandle.setVariableValue((Element) f.get(container), "selectedValues", values);
+							} else {
+								f.set(container, ClassUtils.isPrimitiveType(fieldType.getComponentType()) ? ArrayUtils.wrapperToPrimitive(values) : values);
+							}
+						} catch(UnknownFormatConversionException e) {
+							Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
 						}
+					} else if(!isElementMultipleValue)
+						f.set(container, null);
+				} else {
+					try {
+						Object result = (map == null ? context.request.getParameter(parametro) : map.get(parametro));
 
-						f.set(container, ClassUtils.isPrimitiveType(fieldType.getComponentType()) ? ArrayUtils.wrapperToPrimitive(values) : values);
+						final Class<?> realFieldType = type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType)type).getActualTypeArguments()[0] : f.getType();
+						
+						if(result == null) {
+							valor = ClassUtils.isPrimitiveType(realFieldType) ? ClassUtils.getDefaultValue(realFieldType) : null;
+						} else {
+							valor = greencode.kernel.Form.getFieldValue(context, f, realFieldType, result.toString(), element);
+
+							if(valor instanceof String) {
+								if(element.trim())
+									valor = ((String) valor).trim();
+
+								if(METHOD_TYPE_IS_GET)
+									valor = StringUtils.toCharset((String) valor, GreenCodeConfig.Server.View.charset);
+							}
+						}					
+						
+						if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class)) {
+							DOMHandle.setVariableValue((Element) f.get(container), "value", valor);
+						} else if(fieldType.equals(SelectElement.class)) {
+							DOMHandle.setVariableValue((Element) f.get(container), "selectedValue", valor);
+						} else {
+							f.set(container, valor);
+						}
 					} catch(UnknownFormatConversionException e) {
 						Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
 					}
-				} else
-					f.set(container, null);
-			} else {
-				try {
-					Object result = (map == null ? context.request.getParameter(parametro) : map.get(parametro));
-					
-					Type type = f.getGenericType();
-					final Class<?> realFieldType = type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType)type).getActualTypeArguments()[0] : f.getType();
-
-					if(result == null) {
-						valor = ClassUtils.isPrimitiveType(realFieldType) ? ClassUtils.getDefaultValue(realFieldType) : null;
-					} else {
-						valor = greencode.kernel.Form.getFieldValue(context, f, realFieldType, result.toString(), element);
-
-						if(valor instanceof String) {
-							if(element.trim())
-								valor = ((String) valor).trim();
-
-							if(METHOD_TYPE_IS_GET)
-								valor = StringUtils.toCharset((String) valor, GreenCodeConfig.Server.View.charset);
-						}
-					}					
-					
-					if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class)) {
-						DOMHandle.setVariableValue((Element) f.get(container), "value", valor);
-					} else if(fieldType.equals(SelectElement.class)) {
-						DOMHandle.setVariableValue((Element) f.get(container), "selectedValue", valor);
-					} else if(fieldType.equals(SelectMultipleElement.class)) {
-						DOMHandle.setVariableValue((Element) f.get(container), "selectedValues", valor);
-					} else {
-						f.set(container, valor);
-					}
-				} catch(UnknownFormatConversionException e) {
-					Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
-				}
+				}	
 			}
 		}
 	}

@@ -24,9 +24,7 @@ import com.google.gson.JsonObject;
 public final class FunctionHandle {
 	private final transient GreenContext context = GreenContext.getInstance();
 	
-	private final Integer
-		viewId = context == null ? null : context.getRequest().getViewSession().getId(),
-		   cid = context == null ? null : context.getRequest().getConversationId();
+	private final Integer cid = context == null ? null : context.getRequest().getConversationId();
 		
 	boolean isFunction = true;
 		
