@@ -182,13 +182,11 @@ var Comet = function(url) {
 
 	function isArray(value) {
 		return value && typeof value === 'object' && Object.prototype.toString.call(value) == '[object Array]';
-	}
-
+	}	
+	
 	this.onMessage = function(c1, c2) {
-		var ultLength = null;
 		ajaxRequest.onreadystatechange = null;
-
-		var o = this;
+		var ultLength = 0, o = this;
 
 		Greencode.crossbrowser.registerEvent.call(window, 'unload', function() {
 			o.abort();
@@ -215,46 +213,56 @@ var Comet = function(url) {
 					}
 				}
 			} else if(o.getCometType() === Comet().STREAMING) {
-				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null;
+				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null, isArray = false, lastPosJson = -1, qntStartPos = 0, qntEndPos = 0;
+
+				console.log(txt.match(/<json/g), txt.match(/<json>/g));
 				
-				if(!isIframe) {
-					// Fix
-					var posJsonContent = txt.indexOf('class="JSON_CONTENT"');
-					if(posJsonContent != -1 && txt.indexOf('</div j>', posJsonContent) == -1)
-						return;
-					
-					txt = txt.substring(ultLength);
+				while((lastPosJson = txt.indexOf('<json', lastPosJson+1)) != -1) {
+					++qntStartPos;
 				}
 				
+				lastPosJson = -1;
+				
+				while((lastPosJson = txt.indexOf('</json>', lastPosJson+1)) != -1) {
+					++qntEndPos;
+				}
+				
+				if(qntStartPos != qntEndPos)
+					return;
+				
+				/*
+				 * Remover todas as ',' desnecessárias.
+				 */
+				txt = txt.replace(/^\,+|\,+$/g, "");								
+								
+				if(!isIframe) {
+					txt = txt.substring(ultLength);
+					ultLength = txt.length;
+				}					
+				
 				if(jsonContentType) {
-					/*
-					 * Remover todas as ',' desnecessárias.
-					 */
-					txt = txt.replace(/^\,+|\,+$/g, "");
+					isArray = true;
+					data = [];
 
-					var pos = 0;
-					while((pos = txt.indexOf('},,')) != -1) {
-						var t = txt.substring(0, pos + 2);
-						txt = t + txt.substring(t.length + 1, txt.length);
-					}
-
-					var isArray = false;
-
-					if(txt.length !== 0) {
+					if(txt.length > 0) {
 						try {
-							data = JSON.parse(txt);
-						} catch(e) {
-							try {
-								data = JSON.parse('[' + txt + ']');
-								isArray = true;
-							} catch(e) {
-								if(typeof console != 'undefined') {
-									console.log(e);
-									console.log('[' + txt + ']');
+							var div = document.createElement('div');
+							div.innerHTML = txt;
+							
+							var es = div.getElementsByTagName('json');
+							for (var i = -1; ++i < es.length;) {
+								var jsonTxt = Greencode.crossbrowser.text.call(es[i]);
+								if(jsonTxt.length > 0) {
+									data.push(JSON.parse(jsonTxt));
 								}
-								ajaxRequest.abort();
-								return;
 							}
+							div = null;
+						} catch(e) {							if(typeof console != 'undefined') {
+								console.log(e);
+								console.log(txt);
+							}
+							ajaxRequest.abort();
+							return;
 						}
 					}
 				} else
@@ -279,7 +287,7 @@ var Comet = function(url) {
 						}
 					}
 				} else if(this.readyState === LOADING || this.readyState === HEADERS_RECEIVED) {
-					if(txt.length !== 0) {
+					if(data.length > 0) {
 						if(isArray) {
 							for( var i in data)
 								c1.call(o, data[i]);
@@ -287,9 +295,6 @@ var Comet = function(url) {
 							c1.call(o, data);
 					}
 				}
-
-				if(!isIframe)
-					ultLength = ajaxRequest.responseText.length;
 			}
 		};
 	};

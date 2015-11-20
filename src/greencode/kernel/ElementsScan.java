@@ -1,16 +1,15 @@
 package greencode.kernel;
 
-import greencode.http.HttpRequest;
-import greencode.http.ViewSession;
-import greencode.jscript.DOM;
-import greencode.jscript.JSCommand;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+
+import greencode.http.ViewSession;
+import greencode.jscript.DOM;
+import greencode.jscript.JSCommand;
 
 public class ElementsScan {
 	private final List<JSCommand> comm = new ArrayList<JSCommand>(); /* commands */
@@ -60,15 +59,9 @@ public class ElementsScan {
 			}catch(Exception e) { // java.util.ConcurrentModificationException || java.util.NoSuchElementException
 				send(context, o, context.getGsonInstance());
 				return;
-			}
+			}		
 		}
-
-		final HttpRequest httpRequest = context.getRequest();
-		if(!httpRequest.isIFrameHttpRequest() && !greencode.http.$HttpRequest.contentIsHtml(httpRequest))
-			json.insert(0, ",");
-		else
-			json.insert(0, "<div class=\"JSON_CONTENT\" style=\"display: none;\">").append("</div j>");
 		
-		context.getResponse().getWriter().write(json.toString());
+		context.getResponse().getWriter().write(json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());
 	}
 }

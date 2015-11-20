@@ -376,19 +376,20 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 	Greencode.tags.process(mainElement);
 
 	if(__jsonObject == null) {
-		var jsons = Greencode.crossbrowser.querySelectorAll.call(mainElement, 'div.JSON_CONTENT');
+		var jsons = mainElement.getElementsByTagName('JSON');
 		if(jsons != null && jsons.length > 0) {
-			for(var i = -1; ++i < jsons.length;) {
-				var jsonDiv = jsons[i];
-
-				if(jsonDiv.parentNode)
-					jsonDiv.parentNode.removeChild(jsonDiv);				
-				
+			var jsonDiv;
+			while(jsonDiv = jsons[0]) {				
 				try {
-					Bootstrap.init(mainElement, JSON.parse(Greencode.crossbrowser.text.call(jsonDiv)));
-					Greencode.executeEvent('init');
+					var txt = Greencode.crossbrowser.text.call(jsonDiv);
+					if(txt.length > 0) {
+						Bootstrap.init(mainElement, JSON.parse(txt));
+						Greencode.executeEvent('init');						
+					}
 				} catch (e) {
 				}
+				
+				jsonDiv.parentNode.removeChild(jsonDiv);
 			}
 
 			return;

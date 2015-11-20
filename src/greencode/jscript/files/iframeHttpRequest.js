@@ -170,16 +170,7 @@ var IframeHttpRequest = function() {
 				if(fContent.body == null || fContent.readyState === "uninitialized" || fContent.URL === 'about:blank')
 					return;
 
-				if(!data.__contentIsHtml) {
-					var txt = '', elements = Greencode.crossbrowser.getElementsByClassName.call(fContent.body, 'JSON_CONTENT');
-					for(var int = -1; ++int < elements.length;) {
-						if(elements.length > 1)
-							txt += ',';
-						txt += elements[int].innerHTML;
-					}
-					o.responseText = txt;
-				} else
-					o.responseText = fContent.body.innerHTML;
+				o.responseText = fContent.body.innerHTML;
 
 				fContent.body.innerHTML = "";
 				if(o.responseText != null) {
