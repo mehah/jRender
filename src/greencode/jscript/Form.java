@@ -5,6 +5,8 @@ import java.util.HashMap;
 
 import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.annotation.QuerySelector;
+import greencode.jscript.elements.InputHiddenElement;
+import greencode.jscript.elements.InputPasswordElement;
 import greencode.jscript.elements.InputRadioElement;
 import greencode.jscript.elements.InputTextElement;
 import greencode.jscript.elements.SelectElement;
@@ -183,15 +185,15 @@ public abstract class Form extends Element implements ContainerElementImplementa
 		Field[] fields = greencode.jscript.$Container.getElementFields(this);
 		try {
 			for(Field f: fields) {
-				Class<?> type = f.getType();
-				if(type.equals(TextareaElement.class) || type.equals(InputTextElement.class) || type.equals(InputRadioElement.class)) {
+				Class<?> fieldType = f.getType();
+				if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class)) {
 					DOMHandle.setVariableValue((Element) f.get(this), "value", null);
-				} else if(type.equals(SelectElement.class)) {
+				} else if(fieldType.equals(SelectElement.class)) {
 					DOMHandle.setVariableValue((Element) f.get(this), "selectedValue", null);
-				} else if(type.equals(SelectMultipleElement.class)) {
+				} else if(fieldType.equals(SelectMultipleElement.class)) {
 					DOMHandle.setVariableValue((Element) f.get(this), "selectedValues", null);
 				}else
-					f.set(this, ClassUtils.getDefaultValue(type));
+					f.set(this, ClassUtils.getDefaultValue(fieldType));
 			}
 		} catch(Exception e) {
 			e.printStackTrace();

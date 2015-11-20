@@ -223,13 +223,13 @@ var Comet = function(url) {
 			} else if (o.getCometType() === Comet().STREAMING) {
 				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null, isArray = false, qntStartPos, qntEndPos;
 
-				qntStartPos = getCountCharacter(txt, '<*html>');
-				qntEndPos = getCountCharacter(txt, '</*html>');
+				qntStartPos = getCountCharacter(txt, '<ajaxcontent>');
+				qntEndPos = getCountCharacter(txt, '</ajaxcontent>');
 				
 				if (qntStartPos != qntEndPos)
 					return;
 				else if(qntStartPos != 0) {
-					txt = txt.replace('<*html>', '').replace('</*html>', '');
+					txt = txt.replace('<ajaxcontent>', '').replace('</ajaxcontent>', '');
 				}
 				
 				qntStartPos = getCountCharacter(txt, '<json');

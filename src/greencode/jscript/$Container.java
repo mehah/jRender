@@ -2,6 +2,8 @@ package greencode.jscript;
 
 import greencode.exception.OperationNotAllowedException;
 import greencode.jscript.elements.InputElement;
+import greencode.jscript.elements.InputHiddenElement;
+import greencode.jscript.elements.InputPasswordElement;
 import greencode.jscript.elements.InputRadioElement;
 import greencode.jscript.elements.InputTextElement;
 import greencode.jscript.elements.SelectElement;
@@ -86,6 +88,8 @@ public final class $Container {
 		return
 			type.equals(TextareaElement.class) ||
 			type.equals(InputTextElement.class) ||
+			type.equals(InputPasswordElement.class) ||
+			type.equals(InputHiddenElement.class) ||
 			type.equals(InputRadioElement.class) ||
 			type.equals(SelectElement.class) ||
 			type.equals(SelectMultipleElement.class);

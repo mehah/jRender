@@ -274,7 +274,7 @@ public final class Core implements Filter {
 					content = page.getContent(context);
 
 				if(greencode.http.$HttpRequest.__contentIsHtml(context.request)) {
-					content = "<*html>"+content+"</*html>";
+					content = "<ajaxcontent>"+content+"</ajaxcontent>";
 				}
 				
 				context.getResponse().getWriter().write(content);

@@ -1,6 +1,12 @@
 package greencode.kernel;
 
+import greencode.jscript.DOMHandle;
+import greencode.jscript.Element;
 import greencode.jscript.Form;
+import greencode.jscript.elements.InputElement;
+import greencode.jscript.elements.SelectElement;
+import greencode.jscript.elements.SelectMultipleElement;
+import greencode.jscript.elements.TextareaElement;
 import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.jscript.form.annotation.Validator;
@@ -55,7 +61,14 @@ final class Validate {
 			if(element.validators().length > 0) {
 				final boolean validateIsPartial = methodValidate.type().equals(ValidateType.PARTIAL);
 				
-				final Object valor = GenericReflection.NoThrow.getValue(f, __container);
+				Object valor = GenericReflection.NoThrow.getValue(f, __container);
+				if(valor instanceof InputElement || valor instanceof TextareaElement) {
+					valor = DOMHandle.getVariableValue((Element)valor, "value", Object.class);
+				}else if(valor instanceof SelectElement) {
+					valor = DOMHandle.getVariableValue((Element)valor, "selectedValue", Object.class);
+				}else if(valor instanceof SelectMultipleElement) {
+					valor = DOMHandle.getVariableValue((Element)valor, "selectedValues", Object.class);
+				}				
 				for(Validator validator: element.validators()) {
 					if(!validate(context, form, container, parametro, validator, valor, dataValidation)) {
 						if(validateIsPartial)

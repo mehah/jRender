@@ -20,6 +20,8 @@ import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.Element;
 import greencode.jscript.Window;
+import greencode.jscript.elements.InputHiddenElement;
+import greencode.jscript.elements.InputPasswordElement;
 import greencode.jscript.elements.InputRadioElement;
 import greencode.jscript.elements.InputTextElement;
 import greencode.jscript.elements.SelectElement;
@@ -170,7 +172,7 @@ final class Form {
 						}
 					}					
 					
-					if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class)) {
+					if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class)) {
 						DOMHandle.setVariableValue((Element) f.get(container), "value", valor);
 					} else if(fieldType.equals(SelectElement.class)) {
 						DOMHandle.setVariableValue((Element) f.get(container), "selectedValue", valor);
