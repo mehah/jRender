@@ -152,76 +152,75 @@ Greencode.tags = {
 						href : href
 					};
 
-					if (Greencode.executeEvent('beforePageRequest', _data))
-						var dataComplete = "";
-					
-					cometReceber.send(data, function(data) {
-						dataComplete += data;
-					}, function(data) {
-						var tags = new Array();
-
-						delete listTags[window.location.href];
-						listTags[window.location.href] = tags;
-
-						for (var ii = -1; ++ii < o.childNodes.length;)
-							tags.push(o.childNodes[ii]);
-
-						if (empty)
-							Greencode.customMethod.empty.call(o);
-
-						dataComplete += data;
-						o.insertAdjacentHTML('beforeEnd', dataComplete);
-						var scripts = Greencode.crossbrowser.querySelectorAll.call(o, 'script');
-						for (var s = -1; ++s < scripts.length;) {
-							var scriptElement = scripts[s];
-							if(scriptElement.src) {
-								var script = document.createElement('script'), head = document.getElementsByTagName("head")[0];
-								script.setAttribute("type", scriptElement.type ? scriptElement.type : "text/javascript");
-								script.setAttribute("src", scriptElement.src);
-
-								var done = false;
-								script.onload = script.onreadystatechange = function() {
-									if (!done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete")) {
-										done = true;
-										Greencode.executeEvent('scriptLoad', _data);
-
-										script.onload = script.onreadystatechange = null;
-										if (head && script.parentNode) {
-											head.removeChild(script);
+					if (Greencode.executeEvent('beforePageRequest', _data) !== false) {					
+						var dataComplete = "";					
+						cometReceber.send(data, function(data) {
+							dataComplete += data;
+						}, function(data) {
+							var tags = new Array();
+	
+							delete listTags[window.location.href];
+							listTags[window.location.href] = tags;
+	
+							for (var ii = -1; ++ii < o.childNodes.length;)
+								tags.push(o.childNodes[ii]);
+	
+							if (empty)
+								Greencode.customMethod.empty.call(o);
+	
+							dataComplete += data;
+							o.insertAdjacentHTML('beforeEnd', dataComplete);
+							var scripts = Greencode.crossbrowser.querySelectorAll.call(o, 'script');
+							for (var s = -1; ++s < scripts.length;) {
+								var scriptElement = scripts[s];
+								if(scriptElement.src) {
+									var script = document.createElement('script'), head = document.getElementsByTagName("head")[0];
+									script.setAttribute("type", scriptElement.type ? scriptElement.type : "text/javascript");
+									script.setAttribute("src", scriptElement.src);
+	
+									var done = false;
+									script.onload = script.onreadystatechange = function() {
+										if (!done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete")) {
+											done = true;
+											Greencode.executeEvent('scriptLoad', _data);
+	
+											script.onload = script.onreadystatechange = null;
+											if (head && script.parentNode) {
+												head.removeChild(script);
+											}
+											script = null;
 										}
-										script = null;
-									}
-								};
-								
-						        head.appendChild(script);
+									};
+									
+							        head.appendChild(script);
+								}
+								else
+									window.eval(Greencode.crossbrowser.text.call(scriptElement));
 							}
-							else
-								window.eval(Greencode.crossbrowser.text.call(scriptElement));
-						}
-
-						Bootstrap.init(o);
-
-						if (changeURL) {
-							if (history.pushState == null)
-								window.location.hash = "#!" + href;
-							else {
-								history.replaceState({selector : appendTo}, null, location.href);
-								history.pushState({selector : appendTo}, null, href);
-
-								tags = new Array();
-								delete listTags[window.location.href];
-								listTags[window.location.href] = tags;
-
-								for (var ii = -1; ++ii < o.childNodes.length;)
-									tags.push(o.childNodes[ii]);
+	
+							Bootstrap.init(o);
+	
+							if (changeURL) {
+								if (history.pushState == null)
+									window.location.hash = "#!" + href;
+								else {
+									history.replaceState({selector : appendTo}, null, location.href);
+									history.pushState({selector : appendTo}, null, href);
+	
+									tags = new Array();
+									delete listTags[window.location.href];
+									listTags[window.location.href] = tags;
+	
+									for (var ii = -1; ++ii < o.childNodes.length;)
+										tags.push(o.childNodes[ii]);
+								}
 							}
-						}
-
-						Greencode.executeEvent('afterPageRequest', _data);
-						Greencode.executeEvent('pageLoad', _data);
-					});
-
-					cometReceber = null;
+	
+							Greencode.executeEvent('afterPageRequest', _data);
+							Greencode.executeEvent('pageLoad', _data);
+						});
+						cometReceber = null;
+					}					
 
 					return false;
 				});

@@ -273,6 +273,10 @@ public final class Core implements Filter {
 				else
 					content = page.getContent(context);
 
+				if(greencode.http.$HttpRequest.__contentIsHtml(context.request)) {
+					content = "<*html>"+content+"</*html>";
+				}
+				
 				context.getResponse().getWriter().write(content);
 			}
 
@@ -477,8 +481,7 @@ public final class Core implements Filter {
 					o.addProperty("possibleError", false);
 				}
 				stackTrace.add(o);
-			}
-			
+			}			
 
 			if(Cache.bootAction != null) {
 				Cache.bootAction.onException(context, e);

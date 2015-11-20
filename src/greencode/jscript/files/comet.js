@@ -2,7 +2,7 @@
  * - Simulador de Socket Real-Time. Por: Renato Machado dos Santos
  */
 var Comet = function(url) {
-	if(url == null) {
+	if (url == null) {
 		return {
 			LONG_POLLING : 1,
 			STREAMING : 2,
@@ -34,17 +34,17 @@ var Comet = function(url) {
 		HEADERS_RECEIVED = 2,
 		LOADING = 3,
 		DONE = 4;
-
+		
 	/* var useXDR = false; */
 
 	this.reconnect = function(b) {
-		if(b == null)
+		if (b == null)
 			return reconnect;
 		reconnect = b;
 	};
 
 	this.jsonContentType = function(b) {
-		if(b == null)
+		if (b == null)
 			return jsonContentType;
 		jsonContentType = b;
 	};
@@ -102,23 +102,23 @@ var Comet = function(url) {
 	};
 
 	this.send = function(p, c1, c2) {
-		if(ajaxRequest === null) {
+		if (ajaxRequest === null) {
 			var useIframe = false;
-			if(forceConnectType != null) {
-				if(forceConnectType === Comet().IframeHttpRequest)
+			if (forceConnectType != null) {
+				if (forceConnectType === Comet().IframeHttpRequest)
 					useIframe = true;
-			} else if(this.getCometType() === Comet().STREAMING && window.ActiveXObject != null)
+			} else if (this.getCometType() === Comet().STREAMING && window.ActiveXObject != null)
 				useIframe = true;
 
-			if(useIframe)
+			if (useIframe)
 				ajaxRequest = new IframeHttpRequest();
 			else {
 				try {
 					ajaxRequest = new XMLHttpRequest();
-				} catch(e) {
+				} catch (e) {
 					try {
 						ajaxRequest = new ActiveXObject("Microsoft.XMLHTTP");
-					} catch(e) {
+					} catch (e) {
 						alert("Não foi possivel abrir uma instancia de conexão!");
 						return false;
 					}
@@ -130,19 +130,19 @@ var Comet = function(url) {
 
 		data.__contentIsHtml = !jsonContentType;
 
-		if(closed === true) {
+		if (closed === true) {
 			var hasContent = !(/^(?:GET|HEAD)$/.test(methodRequest)), parameters = "";
-			if(!(ajaxRequest instanceof IframeHttpRequest) && data != null) {
-				if(data instanceof Object) {
+			if (!(ajaxRequest instanceof IframeHttpRequest) && data != null) {
+				if (data instanceof Object) {
 					data = Greencode.jQuery.param(data);
-					if(!hasContent)
+					if (!hasContent)
 						parameters = (parameters.indexOf('?') === -1 ? '?' : '&') + data;
 				}
 			}
 			var newURL = url + parameters;
 
 			ajaxRequest.open(methodRequest, newURL, async);
-			if(hasContent)
+			if (hasContent)
 				ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=" + charset);
 
 			ajaxRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
@@ -150,19 +150,19 @@ var Comet = function(url) {
 			closed = false;
 		}
 
-		if(c1 != null)
+		if (c1 != null)
 			this.onMessage(c1, c2);
 
 		ajaxRequest.send(data != null ? data : null);
 	};
 
 	this.onAbort = function(c) {
-		if(c == null) {
+		if (c == null) {
 			clearTimeout(eventReconnect);
 			eventReconnect = null;
 
 			closed = true;
-			if(onAbort != null)
+			if (onAbort != null)
 				onAbort.call(o);
 		} else
 			onAbort = c;
@@ -176,14 +176,23 @@ var Comet = function(url) {
 		eventReconnect = null;
 
 		closed = true;
-		if(onError != null)
+		if (onError != null)
 			onError.call(o);
 	};
+	
+	function getCountCharacter(txt, character) {
+		var last = -1, qnt = 0;
+		while ((last = txt.indexOf(character, last + 1)) != -1) {
+			++qnt;
+		}
+		
+		return qnt;
+	}
 
 	function isArray(value) {
 		return value && typeof value === 'object' && Object.prototype.toString.call(value) == '[object Array]';
-	}	
-	
+	}
+
 	this.onMessage = function(c1, c2) {
 		ajaxRequest.onreadystatechange = null;
 		var ultLength = 0, o = this;
@@ -195,69 +204,69 @@ var Comet = function(url) {
 		ajaxRequest.onreadystatechange = function() {
 			state = this.readyState;
 
-			if(this.readyState === UNSENT)
+			if (this.readyState === UNSENT)
 				o.onAbort();
-			else if(o.getCometType() === Comet().LONG_POLLING && this.readyState === DONE) {
-				if(this.status !== 200)
+			else if (o.getCometType() === Comet().LONG_POLLING && this.readyState === DONE) {
+				if (this.status !== 200)
 					erroEvent();
 				else {
-					var reconnectByReturn = c1.call(o, jsonContentType ? JSON.parse(ajaxRequest.responseText)
-							: ajaxRequest.responseText);
+					var reconnectByReturn = c1.call(o, jsonContentType ? JSON.parse(ajaxRequest.responseText) : ajaxRequest.responseText);
 
 					closed = true;
-					if(o.reconnect() === true && reconnectByReturn !== false) {
+					if (o.reconnect() === true && reconnectByReturn !== false) {
 						eventReconnect = setTimeout(function() {
 							o.send(null, c1);
 						}, reconnectDelay);
 						return;
 					}
 				}
-			} else if(o.getCometType() === Comet().STREAMING) {
-				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null, isArray = false, lastPosJson = -1, qntStartPos = 0, qntEndPos = 0;
+			} else if (o.getCometType() === Comet().STREAMING) {
+				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null, isArray = false, qntStartPos, qntEndPos;
 
-				console.log(txt.match(/<json/g), txt.match(/<json>/g));
+				qntStartPos = getCountCharacter(txt, '<*html>');
+				qntEndPos = getCountCharacter(txt, '</*html>');
 				
-				while((lastPosJson = txt.indexOf('<json', lastPosJson+1)) != -1) {
-					++qntStartPos;
-				}
-				
-				lastPosJson = -1;
-				
-				while((lastPosJson = txt.indexOf('</json>', lastPosJson+1)) != -1) {
-					++qntEndPos;
-				}
-				
-				if(qntStartPos != qntEndPos)
+				if (qntStartPos != qntEndPos)
 					return;
+				else if(qntStartPos != 0) {
+					txt = txt.replace('<*html>', '').replace('</*html>', '');
+				}
 				
+				qntStartPos = getCountCharacter(txt, '<json');
+				qntEndPos = getCountCharacter(txt, '</json>');
+				
+				if (qntStartPos != qntEndPos)
+					return;
+
 				/*
 				 * Remover todas as ',' desnecessárias.
 				 */
-				txt = txt.replace(/^\,+|\,+$/g, "");								
-								
-				if(!isIframe) {
+				txt = txt.replace(/^\,+|\,+$/g, "");
+
+				if (!isIframe) {
 					txt = txt.substring(ultLength);
 					ultLength = txt.length;
-				}					
-				
-				if(jsonContentType) {
+				}
+
+				if (jsonContentType) {
 					isArray = true;
 					data = [];
 
-					if(txt.length > 0) {
+					if (txt.length > 0) {
 						try {
 							var div = document.createElement('div');
 							div.innerHTML = txt;
-							
+
 							var es = div.getElementsByTagName('json');
 							for (var i = -1; ++i < es.length;) {
 								var jsonTxt = Greencode.crossbrowser.text.call(es[i]);
-								if(jsonTxt.length > 0) {
+								if (jsonTxt.length > 0) {
 									data.push(JSON.parse(jsonTxt));
 								}
 							}
 							div = null;
-						} catch(e) {							if(typeof console != 'undefined') {
+						} catch (e) {
+							if (typeof console != 'undefined') {
 								console.log(e);
 								console.log(txt);
 							}
@@ -267,18 +276,18 @@ var Comet = function(url) {
 					}
 				} else
 					data = txt;
-				
-				if(this.readyState === DONE) {
-					if(this.status !== 200)
+
+				if (this.readyState === DONE) {
+					if (this.status !== 200)
 						erroEvent();
 					else {
 						var reconnectByReturn = true;
 
-						if(c2 != null)
+						if (c2 != null)
 							reconnectByReturn = c2.call(o, data);
 
 						closed = true;
-						if(o.reconnect() === true && reconnectByReturn !== false) {
+						if (o.reconnect() === true && reconnectByReturn !== false) {
 							eventReconnect = setTimeout(function() {
 								o.send(null, c1, c2);
 							}, reconnectDelay);
@@ -286,10 +295,10 @@ var Comet = function(url) {
 							return;
 						}
 					}
-				} else if(this.readyState === LOADING || this.readyState === HEADERS_RECEIVED) {
-					if(data.length > 0) {
-						if(isArray) {
-							for( var i in data)
+				} else if (this.readyState === LOADING || this.readyState === HEADERS_RECEIVED) {
+					if (data.length > 0) {
+						if (isArray) {
+							for ( var i in data)
 								c1.call(o, data[i]);
 						} else
 							c1.call(o, data);

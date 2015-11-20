@@ -28,6 +28,7 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 	private Extension extension;
 	private ViewSession viewSession = null;
 	private UserPrincipal userPrincipal;
+	final boolean __contentIsHtml;
 	
 	public HttpRequest(HttpServletRequest request) {
 		super(request);
@@ -35,7 +36,9 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 		isIFrameHttpRequest = request.getParameterMap().containsKey("isAjax");
 		isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With")) || isIFrameHttpRequest;
 		
-		contentIsHtml = !isAjax || Boolean.parseBoolean(request.getParameter("__contentIsHtml"));
+		__contentIsHtml = Boolean.parseBoolean(request.getParameter("__contentIsHtml"));
+		
+		contentIsHtml = !isAjax || __contentIsHtml;
 		
 		String v = request.getParameter("viewId");
 		if(v != null && !v.isEmpty()) {
