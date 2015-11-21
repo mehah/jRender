@@ -181,12 +181,7 @@ var Comet = function(url) {
 	};
 	
 	function getCountCharacter(txt, character) {
-		var last = -1, qnt = 0;
-		while ((last = txt.indexOf(character, last + 1)) != -1) {
-			++qnt;
-		}
-		
-		return qnt;
+		return txt.split(character).length - 1;
 	}
 
 	function isArray(value) {
@@ -223,13 +218,15 @@ var Comet = function(url) {
 			} else if (o.getCometType() === Comet().STREAMING) {
 				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null, isArray = false, qntStartPos, qntEndPos;
 
-				qntStartPos = getCountCharacter(txt, '<ajaxcontent>');
-				qntEndPos = getCountCharacter(txt, '</ajaxcontent>');
-				
-				if (qntStartPos != qntEndPos)
-					return;
-				else if(qntStartPos != 0) {
-					txt = txt.replace('<ajaxcontent>', '').replace('</ajaxcontent>', '');
+				if(ajaxRequest.__contentIsHtml) {
+					qntStartPos = getCountCharacter(txt, '<ajaxcontent>');
+					qntEndPos = getCountCharacter(txt, '</ajaxcontent>');
+					
+					if (qntStartPos != qntEndPos)
+						return;
+					else if(qntStartPos != 0) {
+						txt = txt.replace('<ajaxcontent>', '').replace('</ajaxcontent>', '');
+					}
 				}
 				
 				qntStartPos = getCountCharacter(txt, '<json');
