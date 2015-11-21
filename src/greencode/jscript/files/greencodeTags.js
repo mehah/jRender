@@ -140,6 +140,7 @@ Greencode.tags = {
 					cometReceber.reconnect(false);
 					cometReceber.setAsync(true);
 					cometReceber.jsonContentType(false);
+					//cometReceber.forceConnectType(Comet().IframeHttpRequest);
 
 					var _data = {
 						mainElement : o,

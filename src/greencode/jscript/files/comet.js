@@ -180,10 +180,6 @@ var Comet = function(url) {
 			onError.call(o);
 	};
 	
-	function getCountCharacter(txt, character) {
-		return txt.split(character).length - 1;
-	}
-
 	function isArray(value) {
 		return value && typeof value === 'object' && Object.prototype.toString.call(value) == '[object Array]';
 	}
@@ -216,34 +212,28 @@ var Comet = function(url) {
 					}
 				}
 			} else if (o.getCometType() === Comet().STREAMING) {
-				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null, isArray = false, qntStartPos, qntEndPos;
+				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null, isArray = false;
 
-				if(ajaxRequest.__contentIsHtml) {
-					qntStartPos = getCountCharacter(txt, '<ajaxcontent>');
-					qntEndPos = getCountCharacter(txt, '</ajaxcontent>');
-					
-					if (qntStartPos != qntEndPos)
-						return;
-					else if(qntStartPos != 0) {
-						txt = txt.replace('<ajaxcontent>', '').replace('</ajaxcontent>', '');
-					}
+				if (!isIframe && ultLength) {
+					txt = txt.substring(ultLength);
 				}
 				
-				qntStartPos = getCountCharacter(txt, '<json');
-				qntEndPos = getCountCharacter(txt, '</json>');
+				if(!jsonContentType) {
+					if ((txt.split(/<ajaxcontent>|<\/ajaxcontent>/gi).length-1) % 2 != 0)
+						return;
+				}
 				
-				if (qntStartPos != qntEndPos)
+				if ((txt.split(/<json|<\/json>/gi).length-1) % 2 != 0)
 					return;
-
+				
+				if (!isIframe) {
+					ultLength = ajaxRequest.responseText.length;
+				}
+				
 				/*
 				 * Remover todas as ',' desnecessárias.
 				 */
 				txt = txt.replace(/^\,+|\,+$/g, "");
-
-				if (!isIframe) {
-					txt = txt.substring(ultLength);
-					ultLength = txt.length;
-				}
 
 				if (jsonContentType) {
 					isArray = true;
@@ -271,9 +261,10 @@ var Comet = function(url) {
 							return;
 						}
 					}
-				} else
-					data = txt;
-
+				}else {
+					data = txt.replace(/<ajaxcontent>|<\/ajaxcontent>/gi, '');
+				}
+				
 				if (this.readyState === DONE) {
 					if (this.status !== 200)
 						erroEvent();
@@ -295,8 +286,9 @@ var Comet = function(url) {
 				} else if (this.readyState === LOADING || this.readyState === HEADERS_RECEIVED) {
 					if (data.length > 0) {
 						if (isArray) {
-							for ( var i in data)
+							for (var i = -1; ++i < data.length;) {
 								c1.call(o, data[i]);
+							}								
 						} else
 							c1.call(o, data);
 					}
