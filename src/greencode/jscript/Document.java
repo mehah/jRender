@@ -2,8 +2,10 @@ package greencode.jscript;
 
 import java.util.HashMap;
 
+import greencode.exception.GreencodeError;
 import greencode.jscript.elements.BodyElement;
 import greencode.jscript.elements.HeadElement;
+import greencode.kernel.LogMessage;
 import greencode.util.GenericReflection;
 
 public class Document extends Node {
@@ -90,7 +92,23 @@ public class Document extends Node {
 	}
 
 	public <E extends Element> E getElementById(String id, Class<E> cast) {
+		if(cast.getTypeParameters().length > 0)
+			throw new GreencodeError(LogMessage.getMessage("green-0043", cast.getSimpleName()));
 		return ElementHandle.cast(getElementById(id), cast);
+	}
+	
+	public <E extends Element> E getElementById(String id, Element e) {
+		Class<?> classUnnamed = e.getClass();
+		Class<?> clazz = classUnnamed.getSuperclass();
+		if(clazz.getTypeParameters().length == 0)
+			throw new GreencodeError(LogMessage.getMessage("green-0044"));
+		
+		if(!classUnnamed.isAnonymousClass()) {
+			throw new GreencodeError(LogMessage.getMessage("green-0045", clazz.getSimpleName()));
+		}
+		
+		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
+		return (E) e;
 	}
 
 	public Element[] getElementsByName(String tagName) {
@@ -113,7 +131,25 @@ public class Document extends Node {
 	}
 
 	public <E extends Element> E querySelector(String selector, Class<E> cast) {
+		if(cast.getTypeParameters().length > 0)
+			throw new GreencodeError(LogMessage.getMessage("green-0043", cast.getSimpleName()));
+		
 		return ElementHandle.cast(querySelector(selector), cast);
+	}
+	
+	public <E extends Element> E querySelector(String selector, Element e) {
+		Class<?> classUnnamed = e.getClass();
+		Class<?> clazz = classUnnamed.getSuperclass();
+		if(clazz.getTypeParameters().length == 0)
+			throw new GreencodeError(LogMessage.getMessage("green-0044"));
+		
+		if(!classUnnamed.isAnonymousClass()) {
+			throw new GreencodeError(LogMessage.getMessage("green-0045", clazz.getSimpleName()));
+		}
+		
+		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
+		
+		return (E) e;
 	}
 
 	public Element[] querySelectorAll(String selector) {
