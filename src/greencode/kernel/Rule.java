@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServletResponse;
 
 final class Rule {
 
-	static void forClass(GreenContext context, Page page) throws IOException {
+	static void forClass(GreenContext context, FileWeb page) throws IOException {
 		if(page.pageAnnotation.rules().length > 0) 
 			process(context, page.pageAnnotation.rules());
 	}

@@ -3,9 +3,10 @@ package greencode.kernel;
 import greencode.exception.GreencodeError;
 
 public abstract class Console {
-
+	static final String msgError = "\n[" + Core.projectName + ":Error]: ";
+	
 	public static void error(Throwable e) {
-		System.err.print("\n[" + Core.projectName + ":Error]: ");
+		System.err.print(msgError);
 		throw new GreencodeError(e);
 	}
 	

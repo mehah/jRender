@@ -91,18 +91,18 @@ public final class ClassUtils {
 		return null;
 	}
 	
-	public final static boolean isParent(Class<?> Class, Class<?> parentClass) {
-		if(Class.isArray())
-			Class = Class.getComponentType();
+	public final static boolean isParent(Class<?> clazz, Class<?> parentClass) {
+		if(clazz.isArray())
+			clazz = clazz.getComponentType();
 		
-		HashSet<Class<?>> parents = parentsClass.get(Class);
+		HashSet<Class<?>> parents = parentsClass.get(clazz);
 		
 		if(parents == null) {
-			parentsClass.put(Class, parents = new HashSet<Class<?>>());
+			parentsClass.put(clazz, parents = new HashSet<Class<?>>());
 			
 			boolean isParent = false;
 			
-			Class<?> parent = Class;
+			Class<?> parent = clazz;
 			while((parent = parent.getSuperclass()) != Object.class && parent != null) {
 				if(!isParent && parent.equals(parentClass))
 					isParent = true;

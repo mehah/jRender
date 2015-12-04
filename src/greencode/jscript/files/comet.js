@@ -223,6 +223,8 @@ var Comet = function(url) {
 						return;
 				}
 				
+				/* Performance test: http://jsperf.com/count-number-of-matches/4
+				 */
 				if ((txt.split(/<json|<\/json>/gi).length-1) % 2 != 0)
 					return;
 				

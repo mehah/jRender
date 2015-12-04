@@ -1,42 +1,5 @@
 package greencode.kernel;
 
-import greencode.database.DatabaseConnection;
-import greencode.database.implementation.DatabaseConnectionEvent;
-import greencode.exception.ConnectionLost;
-import greencode.exception.GreencodeError;
-import greencode.exception.OperationNotAllowedException;
-import greencode.exception.StopProcess;
-import greencode.http.HttpAction;
-import greencode.http.HttpRequest;
-import greencode.http.gzip.GZipServletResponseWrapper;
-import greencode.jscript.DOM;
-import greencode.jscript.DOMHandle;
-import greencode.jscript.Element;
-import greencode.jscript.ElementHandle;
-import greencode.jscript.Form;
-import greencode.jscript.Window;
-import greencode.jscript.WindowHandle;
-import greencode.jscript.elements.custom.ContainerElement;
-import greencode.jscript.event.EventObject;
-import greencode.jscript.event.custom.ContainerEventObject;
-import greencode.jscript.form.annotation.Name;
-import greencode.jscript.function.implementation.EventFunction;
-import greencode.jscript.function.implementation.Function;
-import greencode.jscript.function.implementation.SimpleFunction;
-import greencode.jscript.window.annotation.AfterAction;
-import greencode.jscript.window.annotation.BeforeAction;
-import greencode.jscript.window.annotation.Destroy;
-import greencode.jscript.window.annotation.ForceSync;
-import greencode.jscript.window.annotation.PageParameter;
-import greencode.kernel.implementation.BootActionImplementation;
-import greencode.kernel.implementation.PluginImplementation;
-import greencode.util.ArrayUtils;
-import greencode.util.ClassUtils;
-import greencode.util.FileUtils;
-import greencode.util.FileUtils.FileRead;
-import greencode.util.GenericReflection;
-import greencode.util.PackageUtils;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -75,18 +38,55 @@ import org.apache.catalina.connector.RequestFacade;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import greencode.database.DatabaseConnection;
+import greencode.database.implementation.DatabaseConnectionEvent;
+import greencode.exception.ConnectionLost;
+import greencode.exception.GreencodeError;
+import greencode.exception.OperationNotAllowedException;
+import greencode.exception.StopProcess;
+import greencode.http.HttpAction;
+import greencode.http.HttpRequest;
+import greencode.http.gzip.GZipServletResponseWrapper;
+import greencode.jscript.DOM;
+import greencode.jscript.DOMHandle;
+import greencode.jscript.Element;
+import greencode.jscript.ElementHandle;
+import greencode.jscript.Form;
+import greencode.jscript.Window;
+import greencode.jscript.WindowHandle;
+import greencode.jscript.elements.custom.ContainerElement;
+import greencode.jscript.event.EventObject;
+import greencode.jscript.event.custom.ContainerEventObject;
+import greencode.jscript.form.annotation.Name;
+import greencode.jscript.function.implementation.EventFunction;
+import greencode.jscript.function.implementation.Function;
+import greencode.jscript.function.implementation.SimpleFunction;
+import greencode.jscript.window.annotation.AfterAction;
+import greencode.jscript.window.annotation.BeforeAction;
+import greencode.jscript.window.annotation.Destroy;
+import greencode.jscript.window.annotation.ForceSync;
+import greencode.jscript.window.annotation.PageParameter;
+import greencode.kernel.implementation.BootActionImplementation;
+import greencode.kernel.implementation.PluginImplementation;
+import greencode.util.ArrayUtils;
+import greencode.util.ClassUtils;
+import greencode.util.FileUtils;
+import greencode.util.FileUtils.FileRead;
+import greencode.util.GenericReflection;
+import greencode.util.PackageUtils;
+
 @WebFilter(displayName = "core", urlPatterns = "/*")
 public final class Core implements Filter {
 	final static String CONTEXT_PATH = null, projectName = null, defaultLogMsg = null;
 	final static String SRC_CORE_JS_FOR_SCRIPT_HTML = null;
-	private final static Boolean hasError = true;
+	private final static Boolean HAS_ERROR = true;
 
-	private final static String[] jsFiles = {
+	private final static String[] JS_SUPPORT_FILES = {
+		"json3.js",
 		"sizzle.js"
 	};
 
-	private final static String[] coreJSFiles = {
-		"json3.js",
+	private final static String[] JS_CORE_FILES = {
 		"greencode.js",
 		"greencodeFunction.js",
 		"greencodeEvents.js",
@@ -137,14 +137,15 @@ public final class Core implements Filter {
 	}
 
 	private final static Field requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request");
-
+	private final static String INIT_METHOD_NAME = "init";
+	
 	@Override
 	public void doFilter(final ServletRequest request, ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		request.setCharacterEncoding(GreenCodeConfig.Server.View.charset);
 		response.setCharacterEncoding(GreenCodeConfig.Server.View.charset);
 		response.setContentType("text/html;charset=" + GreenCodeConfig.Server.View.charset);
 
-		if(hasError) {
+		if(HAS_ERROR) {
 			response.getWriter().write(LogMessage.getMessage("green-0000"));
 			return;
 		}
@@ -194,49 +195,51 @@ public final class Core implements Filter {
 			Cache.bootAction.onRequest((HttpServletRequest) request, (HttpServletResponse) response);
 
 		final String controllerName, methodName;
-		final Page page;
+		final FileWeb page;
+		final Integer hashcodeRequestMethod;
 
-		Class<? extends HttpAction> requestClass = null;
-		HttpAction requestController = null;
-
-		Integer hashcodeRequestMethod = null;
-
+		Class<? extends HttpAction> requestClass;
 		if(servletPath.indexOf('$') > -1) {
 			page = null;
 			String[] r = servletPath.split("\\$", 2);
 			controllerName = r[0];
-			methodName = "init";
-			hashcodeRequestMethod = new Integer(r[1]);
-
+			hashcodeRequestMethod = Integer.parseInt(r[1]);
+			
 			requestClass = Cache.registeredWindows.get(controllerName);
-		} else if(servletPath.indexOf('@') > -1) {
-			page = null;
-			String[] r = servletPath.split("\\@", 2);
-			controllerName = r[0];
-			methodName = r[1];
-
-			if(methodName.equals("init"))
-				throw new OperationNotAllowedException();
-
-			requestClass = Cache.registeredWindows.get(controllerName);
+			methodName = INIT_METHOD_NAME;
 		} else {
-			page = Page.pathAnalyze(servletPath, Page.pages.get(servletPath), (HttpServletRequest) request);
+			hashcodeRequestMethod = null;
+			
+			if(servletPath.indexOf('@') > -1) {
+				page = null;
+				String[] r = servletPath.split("\\@", 2);
+				controllerName = r[0];
+				methodName = r[1];
 
-			if(page == null || page.window == null) {
-				if(page == null)
-					chain.doFilter(request, response);
-				else
-					response.getWriter().write(page.getContent(null));
+				if(methodName.equals(INIT_METHOD_NAME))
+					throw new OperationNotAllowedException();
 
-				if(response instanceof GZipServletResponseWrapper)
-					((GZipServletResponseWrapper) response).close();
-				return;
+				requestClass = Cache.registeredWindows.get(controllerName);
 			} else {
+				page = FileWeb.pathAnalyze(servletPath, FileWeb.files.get(servletPath), (HttpServletRequest) request);
+
+				if(page == null || page.window == null) {
+					if(page == null)
+						chain.doFilter(request, response);
+					else
+						response.getWriter().write(page.getContent(null));
+
+					if(response instanceof GZipServletResponseWrapper)
+						((GZipServletResponseWrapper) response).close();
+					return;
+				}
+				
 				requestClass = page.window;
 				controllerName = page.window.getSimpleName();
-				methodName = "init";
+				methodName = INIT_METHOD_NAME;
 			}
 		}
+			
 
 		long processTime = 0;
 
@@ -278,11 +281,11 @@ public final class Core implements Filter {
 				if(greencode.http.$HttpRequest.__contentIsHtml(context.request)) {
 					content = "<ajaxcontent>"+content+"</ajaxcontent>";
 				}
-				
-				context.getResponse().getWriter().write(content);
+
+			    context.getResponse().getWriter().write(content);
 			}
 
-			requestController = WindowHandle.getInstance((Class<Window>) requestClass, context.getRequest().getConversation());
+			HttpAction requestController = WindowHandle.getInstance((Class<Window>) requestClass, context.getRequest().getConversation());
 			if(context.currentWindow == null)
 				context.currentWindow = (Window) requestController;
 
@@ -317,16 +320,16 @@ public final class Core implements Filter {
 
 						int cntSkip = 0;
 						for(int i = -1; ++i < _argsSize;) {
-							HashMap<String, String> j = context.gsonInstance.fromJson(_args[i], (new HashMap<String, String>()).getClass());
+							final HashMap<String, String> j = context.gsonInstance.fromJson(_args[i], (new HashMap<String, String>()).getClass());
 
-							Class<?> _class = Class.forName(j.get("className"));
+							final Class<?> _class = Class.forName(j.get("className"));
 							listArgsClass[i] = _class;
 
 							if(_class.equals(GreenContext.class)) {
 								++cntSkip;
 								listArgs[i] = context;
 							} else {
-								DOM dom;
+								final DOM dom;
 								if(_class.equals(ContainerEventObject.class)) {
 									dom = new ContainerEventObject(context, Integer.parseInt(j.get("uid")));
 									++cntSkip;
@@ -450,7 +453,7 @@ public final class Core implements Filter {
 			if(requestMethod.isAnnotationPresent(Destroy.class)) {
 				if(registeredFunctions != null)
 					registeredFunctions.remove(hashcodeRequestMethod);
-				else if(!methodName.equals("init"))
+				else if(!methodName.equals(INIT_METHOD_NAME))
 					WindowHandle.removeInstance((Class<? extends Window>)requestClass, context.getRequest().getConversation());
 			}
 				
@@ -497,7 +500,8 @@ public final class Core implements Filter {
 			json.add("error", error);
 			ElementsScan.send(context, json);
 			
-			Console.error(e);
+			System.err.println(Console.msgError);
+			e.printStackTrace();
 		} finally {
 			ElementsScan.sendElements(context);
 			context.destroy();
@@ -569,9 +573,6 @@ public final class Core implements Filter {
 				throw new ClassNotFoundException(LogMessage.getMessage("green-0001"));
 			}
 
-			Class<BootActionImplementation> classBootAction = null;
-			Class<DatabaseConnectionEvent> classDatabaseConnection = null;
-
 			final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
 			System.out.print(defaultLogMsg + "Copying JavaScript Tools...");
@@ -588,20 +589,20 @@ public final class Core implements Filter {
 
 			final CoreFileJS coreFileJS = new CoreFileJS(greencodePath);
 
-			for(String fileName: coreJSFiles)
+			for(String fileName: JS_CORE_FILES)
 				coreFileJS.append(classLoader.getResource("greencode/jscript/files/" + fileName));
 
 			coreFileJS.append("Greencode.className = {").append("greenContext: '" + GreenContext.class.getName() + "',").append("containerElement: '" + ContainerElement.class.getName() + "',").append("containerEventObject: '" + ContainerEventObject.class.getName() + "',").append("element: '" + Element.class.getName() + "'").append("};").append("Greencode.CONTEXT_PATH = '" + fConfig.getServletContext().getContextPath() + "';").append("Greencode.DEBUG_MODE = " + GreenCodeConfig.Browser.consoleDebug + ";");
 
 			coreFileJS.save();
 
-			for(String fileName: jsFiles)
+			for(String fileName: JS_SUPPORT_FILES)
 				FileUtils.createFile(FileUtils.getContentFile(classLoader.getResource("greencode/jscript/files/" + fileName)), greencodePath + "/" + fileName);
 
 			final Charset charset = Charset.forName(GreenCodeConfig.Server.View.charset);
 			final long currentTime = new Date().getTime();
 			for(GreenCodeConfig.Server.Internationalization.Variant v: GreenCodeConfig.Server.Internationalization.pagesLocale) {
-				Page p = new Page();
+				FileWeb p = new FileWeb();
 				p.lastModified = currentTime;
 
 				p.setContent(FileUtils.getContentFile(v.resource, charset, new FileRead() {
@@ -619,36 +620,33 @@ public final class Core implements Filter {
 
 				}));
 
-				Page.pages.put("jscript/greencode/msg_" + v.locale.toString() + ".js", p);
+				FileWeb.files.put("jscript/greencode/msg_" + v.locale.toString() + ".js", p);
 			}
 
 			System.out.println(" [done]");
 
 			System.out.print(defaultLogMsg + "Caching Classes...");
+			Class<BootActionImplementation> classBootAction = null;
+			Class<DatabaseConnectionEvent> classDatabaseConnection = null;
 			List<Class<?>> classesTeste = PackageUtils.getClasses("/", true);
-			for(Class<?> Class: classesTeste) {
-				if(classBootAction == null && ArrayUtils.contains(Class.getInterfaces(), BootActionImplementation.class))
-					classBootAction = (java.lang.Class<BootActionImplementation>) Class;
-				else if(classDatabaseConnection == null && ArrayUtils.contains(Class.getInterfaces(), DatabaseConnectionEvent.class))
-					classDatabaseConnection = (java.lang.Class<DatabaseConnectionEvent>) Class;
-				/*
-				 * else if(ClassUtils.isParent(Class, Validator.class))
-				 * ValidatorFactory.getValidationInstance((java.lang.Class<?
-				 * extends Validator>) Class);
-				 */
-				else if(ClassUtils.isParent(Class, Form.class) && !Modifier.isAbstract(Class.getModifiers())) {
-					if(!Class.isAnnotationPresent(Name.class))
-						throw new IllegalAccessException(LogMessage.getMessage("green-0027", Class));
+			for(Class<?> clazz: classesTeste) {
+				if(classBootAction == null && ArrayUtils.contains(clazz.getInterfaces(), BootActionImplementation.class)) {
+					classBootAction = (java.lang.Class<BootActionImplementation>) clazz;
+				} else if(classDatabaseConnection == null && ArrayUtils.contains(clazz.getInterfaces(), DatabaseConnectionEvent.class)) {
+					classDatabaseConnection = (java.lang.Class<DatabaseConnectionEvent>) clazz;
+				} else if(ClassUtils.isParent(clazz, Form.class) && !Modifier.isAbstract(clazz.getModifiers())) {
+					if(!clazz.isAnnotationPresent(Name.class))
+						throw new IllegalAccessException(LogMessage.getMessage("green-0027", clazz));
 
-					final String name = Class.getAnnotation(Name.class).value();
+					final String name = clazz.getAnnotation(Name.class).value();
 
 					if(Cache.forms.containsKey(name))
-						throw new Exception(LogMessage.getMessage("green-0031", name, Class.getSimpleName()));
+						throw new Exception(LogMessage.getMessage("green-0031", name, clazz.getSimpleName()));
 
-					Cache.forms.put(name, (java.lang.Class<? extends Form>) Class);
-				} else if(ClassUtils.isParent(Class, Window.class) && !Modifier.isAbstract(Class.getModifiers())) {
-					Annotation.processWindowAnnotation((java.lang.Class<? extends Window>) Class, classLoader, greencodeFolder);
-					Cache.registeredWindows.put(Class.getSimpleName(), (java.lang.Class<? extends Window>) Class);
+					Cache.forms.put(name, (java.lang.Class<? extends Form>) clazz);
+				} else if(ClassUtils.isParent(clazz, Window.class) && !Modifier.isAbstract(clazz.getModifiers())) {
+					Annotation.processWindowAnnotation((java.lang.Class<? extends Window>) clazz, classLoader, greencodeFolder);
+					Cache.registeredWindows.put(clazz.getSimpleName(), (java.lang.Class<? extends Window>) clazz);
 				}
 			}
 			classesTeste.clear();
@@ -657,21 +655,21 @@ public final class Core implements Filter {
 			if(GreenCodeConfig.Server.View.templatePaths != null) {
 				System.out.println(defaultLogMsg + "Caching Template(s)...");
 
-				if(GreenCodeConfig.Server.View.templatePaths != null) {
-					for(Entry<String, String> entry: GreenCodeConfig.Server.View.templatePaths.entrySet()) {
-						File f = FileUtils.getFileInWebContent(entry.getValue());
-						Cache.templates.put(entry.getKey(), f);
+				for(Entry<String, String> entry: GreenCodeConfig.Server.View.templatePaths.entrySet()) {
+					File f = FileUtils.getFileInWebContent(entry.getValue());
+					
+					if(!f.exists())
+						throw new IOException(LogMessage.getMessage("green-0002", entry.getValue()));
 
-						if(!f.exists())
-							throw new IOException(LogMessage.getMessage("green-0002", entry.getValue()));
-
-						String _default = "";
-						if(Cache.defaultTemplate == null && entry.getValue().equals(GreenCodeConfig.Server.View.defaultTemplatePath)) {
-							GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", f);
-							_default = "(Default)";
-						}
-						System.out.println(defaultLogMsg + "Template: " + entry.getValue() + " " + _default);
+					Cache.templates.put(entry.getKey(), f);
+					
+					StringBuilder str = new StringBuilder(defaultLogMsg + "Template: " + entry.getValue());					
+					if(Cache.defaultTemplate == null && entry.getValue().equals(GreenCodeConfig.Server.View.defaultTemplatePath)) {
+						GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", f);
+						str.append(" (Default)");
 					}
+					
+					System.out.println(str.toString());
 				}
 			}
 
@@ -698,22 +696,22 @@ public final class Core implements Filter {
 				System.out.println(" [done]");
 			}
 
-			if(GreenCodeConfig.Server.Plugins.list != null && GreenCodeConfig.Server.Plugins.list.length > 0) {
+			if(GreenCodeConfig.Server.Plugins.list != null) {
 				System.out.print(defaultLogMsg + "Initializing Plugins ...");
 
-				ArrayList<PluginImplementation> list = new ArrayList<PluginImplementation>();
-				for(Class<PluginImplementation> c: GreenCodeConfig.Server.Plugins.list) {
-					PluginImplementation plugin = c.newInstance();
+				PluginImplementation[] list = new PluginImplementation[GreenCodeConfig.Server.Plugins.list.length];
+				for(int i = -1; ++i < list.length;) {
+					PluginImplementation plugin = GreenCodeConfig.Server.Plugins.list[i].newInstance();
 					plugin.init(greencodePath, classLoader, fConfig.getServletContext(), coreFileJS);
-					list.add(plugin);
+					list[i] = plugin;
 				}
-
-				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "plugins", list.toArray(new PluginImplementation[list.size()]));
+				
+				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "plugins", list);
 
 				System.out.println(" [done]");
 			}
 
-			GenericReflection.NoThrow.setFinalStaticValue(Core.class, "hasError", false);
+			GenericReflection.NoThrow.setFinalStaticValue(Core.class, "HAS_ERROR", false);
 		} catch(Exception e) {
 			throw new GreencodeError(e);
 		}

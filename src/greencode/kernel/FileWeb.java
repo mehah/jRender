@@ -23,26 +23,27 @@ import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 import greencode.exception.GreencodeError;
 import greencode.jscript.FunctionHandle;
 import greencode.jscript.Window;
+import greencode.jscript.window.annotation.Page;
 import greencode.util.FileUtils;
 import greencode.util.GenericReflection;
 import greencode.util.MergedFile;
 import greencode.util.StringUtils;
 
-public final class Page {
-	final static HashMap<String, Page> pages = new HashMap<String, Page>();
+public final class FileWeb {
+	final static HashMap<String, FileWeb> files = new HashMap<String, FileWeb>();
 	private final static HashSet<String> requestsCached = new HashSet<String>();
 
-	Page(Class<? extends Window> window, greencode.jscript.window.annotation.Page pageAnnotation) {
+	FileWeb(Class<? extends Window> window, Page pageAnnotation) {
 		this.window = window;
 		this.pageAnnotation = pageAnnotation;
 	}
 
-	Page() {
+	FileWeb() {
 		this(null, null);
 	}
 
 	final Class<? extends Window> window;
-	final greencode.jscript.window.annotation.Page pageAnnotation;
+	final Page pageAnnotation;
 
 	String moduleName;
 
@@ -50,40 +51,39 @@ public final class Page {
 	private String content, selector, selectedContent, ajaxSelector, ajaxSelectedContent;
 
 	long lastModified;
-	List<Page> inserted;
+	List<FileWeb> inserted;
 	Document document;
 
-	private Page mobilePage;
-	// private Mobile pageMobileAnnotation;
+	private FileWeb mobileFile;
 
-	private Page getCurrentPage(GreenContext context) {
-		return mobilePage != null && context.getRequest().isMobile() ? mobilePage : this;
+	private FileWeb getCurrent(GreenContext context) {
+		return mobileFile != null && context.getRequest().isMobile() ? mobileFile : this;
 	}
 
 	String getSelectedContent(String selector, GreenContext context) {
-		Page currentPage = getCurrentPage(context);
+		FileWeb current = getCurrent(context);
 
-		if(currentPage.selector == null) {
-			currentPage.selector = selector;
-			currentPage.selectedContent = currentPage.document.select(selector).html();
+		if(current.selector == null) {
+			current.selector = selector;
+			current.selectedContent = current.document.select(selector).html();
 		}
 
-		return currentPage.selectedContent;
+		return current.selectedContent;
 	}
 
 	String getAjaxSelectedContent(String selector, GreenContext context) {
-		Page currentPage = getCurrentPage(context);
+		FileWeb current = getCurrent(context);
 
-		if(currentPage.ajaxSelector == null) {
-			currentPage.ajaxSelector = selector;
-			currentPage.ajaxSelectedContent = currentPage.document.select(selector).html();
+		if(current.ajaxSelector == null) {
+			current.ajaxSelector = selector;
+			current.ajaxSelectedContent = current.document.select(selector).html();
 		}
 
-		return currentPage.ajaxSelectedContent;
+		return current.ajaxSelectedContent;
 	}
 
 	String getContent(GreenContext context) {
-		return getCurrentPage(context).content;
+		return getCurrent(context).content;
 	}
 
 	void setContent(String content) {
@@ -102,23 +102,23 @@ public final class Page {
 		verifyChanges(this, true);
 	}
 
-	private boolean verifyChanges(final Page page, boolean isPrincipal) {
+	private boolean verifyChanges(final FileWeb file, boolean isPrincipal) {
 		boolean changed = false;
-		if(page.inserted != null) {
-			for(Page i: page.inserted) {
+		if(file.inserted != null) {
+			for(FileWeb i: file.inserted) {
 				if(verifyChanges(i, false))
 					changed = true;
 			}
 		}
 
-		changed = changed || page.changed();
+		changed = changed || file.changed();
 
 		if(changed) {
 			try {
-				page.selector = null;
-				page.ajaxSelector = null;
-				page.lastModified = 0;
-				Page.loadStructure(page.file, null, isPrincipal);
+				file.selector = null;
+				file.ajaxSelector = null;
+				file.lastModified = 0;
+				FileWeb.loadStructure(file.file, null, isPrincipal);
 			} catch(IOException e) {
 				throw new GreencodeError(e);
 			}
@@ -127,12 +127,12 @@ public final class Page {
 		return changed;
 	}
 
-	private static Page loadStructure(File file) throws IOException {
+	private static FileWeb loadStructure(File file) throws IOException {
 		return loadStructure(file, null, false);
 	}
 
 	// TODO: Verificar futuramente para possíveis otimizações.
-	private static Page loadStructure(File file, Page page, boolean importCoreJS) throws IOException {
+	private static FileWeb loadStructure(File file, FileWeb fileWeb, boolean importCoreJS) throws IOException {
 		final String ext = FileUtils.getExtension(file.getName());
 
 		final boolean
@@ -141,23 +141,23 @@ public final class Page {
 			isView = ext.equals("html") || ext.equals("xhtml") || ext.equals("jsp") || ext.equals("htm");
 
 		if(isCss || isJs || isView) {
-			List<Page> inserted = null;
+			List<FileWeb> inserted = null;
 			String content = null, path = null;
 			Document src = null;
 
 			if(isView) {
-				if(page == null) {
+				if(fileWeb == null) {
 					path = file.toURI().toURL().getPath();
 					path = path.substring(path.indexOf("WEB-INF/classes/../../") + 22);
 
-					page = pages.get(path);
+					fileWeb = files.get(path);
 				} else
-					path = page.pageAnnotation.path();
+					path = fileWeb.pageAnnotation.path();
 
-				if(page != null && !page.changed())
-					return page;
+				if(fileWeb != null && !fileWeb.changed())
+					return fileWeb;
 
-				inserted = new ArrayList<Page>();
+				inserted = new ArrayList<FileWeb>();
 				content = FileUtils.getContentFile(file.toURI().toURL(), GreenCodeConfig.Server.View.charset).replaceAll(Pattern.quote("GREENCODE:{CONTEXT_PATH}"), Core.CONTEXT_PATH);
 
 				int lastIndex = 0;
@@ -190,7 +190,7 @@ public final class Page {
 					if(templateName != null && !templateName.isEmpty()) {
 						File f = Cache.templates.get(templateName);
 						if(f != null) {
-							Page template = loadStructure(f);
+							FileWeb template = loadStructure(f);
 
 							if(!GreenCodeConfig.Server.View.bootable)
 								inserted.add(template);
@@ -199,7 +199,7 @@ public final class Page {
 						} else
 							Console.error(LogMessage.getMessage("green-0042", templateName));
 					} else {
-						Page template = loadStructure(Cache.defaultTemplate);
+						FileWeb template = loadStructure(Cache.defaultTemplate);
 						templateImported = template.document;
 
 						if(!GreenCodeConfig.Server.View.bootable)
@@ -251,15 +251,15 @@ public final class Page {
 					if(attrSrc != null && !attrSrc.isEmpty()) {
 						File f = new File(file.getParentFile().getAbsolutePath() + "/" + attrSrc);
 						try {
-							Page _page = loadStructure(f);
+							FileWeb fw = loadStructure(f);
 
 							if(!GreenCodeConfig.Server.View.bootable)
-								inserted.add(_page);
+								inserted.add(fw);
 
 							if(element.hasAttr("head"))
-								src.head().append(_page.content);
+								src.head().append(fw.content);
 							else
-								element.after(_page.content);
+								element.after(fw.content);
 
 							element.remove();
 						} catch(IOException e) {
@@ -310,21 +310,21 @@ public final class Page {
 			}
 
 			if(isView) {
-				if(page == null) {
-					(page = new Page()).file = file;
-					pages.put(path, page);
+				if(fileWeb == null) {
+					(fileWeb = new FileWeb()).file = file;
+					files.put(path, fileWeb);
 				} else
-					page.updateModifiedDate();
+					fileWeb.updateModifiedDate();
 
-				page.content = content;
-				page.document = src;
+				fileWeb.content = content;
+				fileWeb.document = src;
 				if(!inserted.isEmpty())
-					page.inserted = inserted;
+					fileWeb.inserted = inserted;
 
 				src = null;
 				path = null;
 
-				return page;
+				return fileWeb;
 			} else
 				FileUtils.createFile(content, file);
 		}
@@ -332,24 +332,24 @@ public final class Page {
 		return null;
 	}
 
-	static void registerPage(ClassLoader classLoader, Class<? extends Window> c, greencode.jscript.window.annotation.Page page, File greencodeFolder) throws IOException {
+	static void registerPage(ClassLoader classLoader, Class<? extends Window> c, Page page, File greencodeFolder) throws IOException {
 		String path = page.path();
-		if(pages.containsKey(path) && page.URLName().isEmpty() || !(path = page.URLName()).isEmpty() && pages.containsKey(path)) {
-			Console.warning(LogMessage.getMessage("green-0022", path, c.getSimpleName(), pages.get(path).window.getSimpleName()));
+		if(files.containsKey(path) && page.URLName().isEmpty() || !(path = page.URLName()).isEmpty() && files.containsKey(path)) {
+			Console.warning(LogMessage.getMessage("green-0022", path, c.getSimpleName(), files.get(path).window.getSimpleName()));
 		} else {
-			Page pReference = new Page(c, page);
+			FileWeb pReference = new FileWeb(c, page);
 
 			if(!page.mobile().path().isEmpty()) {
-				Page mobilePage = new Page(c, page);
+				FileWeb mobileFileWeb = new FileWeb(c, page);
 
 				File file = FileUtils.getFileInWebContent(page.mobile().path());
 				if(file.exists()) {
-					mobilePage.file = file;
+					mobileFileWeb.file = file;
 
 					if(GreenCodeConfig.Server.View.bootable)
-						loadStructure(file, mobilePage, true);
+						loadStructure(file, mobileFileWeb, true);
 
-					pReference.mobilePage = mobilePage;
+					pReference.mobileFile = mobileFileWeb;
 				} else
 					Console.error(LogMessage.getMessage("green-0014", page.mobile().path()));
 			}
@@ -387,7 +387,7 @@ public final class Page {
 			File file = FileUtils.getFileInWebContent(page.path());
 			if(file.exists()) {
 				pReference.file = file;
-				pages.put(page.URLName().isEmpty() ? page.path() : page.URLName(), pReference);
+				files.put(page.URLName().isEmpty() ? page.path() : page.URLName(), pReference);
 
 				if(GreenCodeConfig.Server.View.bootable)
 					loadStructure(file, pReference, true);
@@ -396,23 +396,23 @@ public final class Page {
 		}
 	}
 
-	static Page pathAnalyze(String servletPath, Page page, HttpServletRequest request) {
+	static FileWeb pathAnalyze(String servletPath, FileWeb fileWeb, HttpServletRequest request) {
 		if(GreenCodeConfig.Server.View.bootable)
-			return page;
+			return fileWeb;
 
 		try {
 			boolean isView = false;
 
-			if(page != null) {
-				if(page.content != null) {
+			if(fileWeb != null) {
+				if(fileWeb.content != null) {
 					if(GreenCodeConfig.Server.View.seekChange) {
-						(page.mobilePage != null && greencode.http.$HttpRequest.isMobile(request.getHeader("user-agent")) ? page.mobilePage : page).verifyChanges();
+						(fileWeb.mobileFile != null && greencode.http.$HttpRequest.isMobile(request.getHeader("user-agent")) ? fileWeb.mobileFile : fileWeb).verifyChanges();
 					}
 
-					return page;
+					return fileWeb;
 				}
 
-				servletPath = page.pageAnnotation.path();
+				servletPath = fileWeb.pageAnnotation.path();
 				isView = true;
 			} else {
 				final String ext = FileUtils.getExtension(servletPath);
@@ -427,17 +427,17 @@ public final class Page {
 				isView = ext.equals("html") || ext.equals("xhtml") || ext.equals("jsp") || ext.equals("htm");
 
 				if(!isCss && !isJs && !isView)
-					return page;
+					return fileWeb;
 			}
 
-			if(page == null && !requestsCached.contains(servletPath) || page != null && page.document == null) {
+			if(fileWeb == null && !requestsCached.contains(servletPath) || fileWeb != null && fileWeb.document == null) {
 				File file = FileUtils.getFileInWebContent(servletPath);
 				if(file != null && file.exists()) {
 					Console.log(isView ? "Applying (template" + (GreenCodeConfig.Server.View.useMinified ? ", minified" : "") + ") in " + servletPath : "Applying (minified) in " + servletPath);
 
-					page = loadStructure(file, page, true);
-					if(page != null && page.mobilePage != null)
-						loadStructure(page.mobilePage.file, page.mobilePage, true);
+					fileWeb = loadStructure(file, fileWeb, true);
+					if(fileWeb != null && fileWeb.mobileFile != null)
+						loadStructure(fileWeb.mobileFile.file, fileWeb.mobileFile, true);
 
 					requestsCached.add(servletPath);
 				}
@@ -446,6 +446,6 @@ public final class Page {
 			throw new GreencodeError(e);
 		}
 
-		return page;
+		return fileWeb;
 	}
 }

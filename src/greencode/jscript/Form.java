@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.annotation.QuerySelector;
+import greencode.jscript.elements.InputFileElement;
 import greencode.jscript.elements.InputHiddenElement;
 import greencode.jscript.elements.InputPasswordElement;
 import greencode.jscript.elements.InputRadioElement;
@@ -99,10 +100,10 @@ public abstract class Form extends Element implements ContainerElementImplementa
 			} else {
 				if(!type.isArray()) {
 					ElementValue aev = f.getAnnotation(ElementValue.class);
-					String selector = "[name='"+(aev.name().isEmpty() ? f.getName() : aev.name())+"']";
+					String selector = "[name='" + (aev.name().isEmpty() ? f.getName() : aev.name()) + "']";
 					v = ElementHandle.cast(this.querySelector(selector), type);
 				}
-					
+
 			}
 
 			GenericReflection.NoThrow.setValue(f, v, this);
@@ -186,13 +187,13 @@ public abstract class Form extends Element implements ContainerElementImplementa
 		try {
 			for(Field f: fields) {
 				Class<?> fieldType = f.getType();
-				if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class)) {
+				if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class) || fieldType.equals(InputFileElement.class)) {
 					DOMHandle.setVariableValue((Element) f.get(this), "value", null);
 				} else if(fieldType.equals(SelectElement.class)) {
 					DOMHandle.setVariableValue((Element) f.get(this), "selectedValue", null);
 				} else if(fieldType.equals(SelectMultipleElement.class)) {
 					DOMHandle.setVariableValue((Element) f.get(this), "selectedValues", null);
-				}else
+				} else
 					f.set(this, ClassUtils.getDefaultValue(fieldType));
 			}
 		} catch(Exception e) {

@@ -1,10 +1,5 @@
 package greencode.kernel;
 
-import greencode.database.DatabaseConfig;
-import greencode.exception.GreencodeError;
-import greencode.kernel.implementation.PluginImplementation;
-import greencode.util.GenericReflection;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,6 +20,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import greencode.database.DatabaseConfig;
+import greencode.kernel.implementation.PluginImplementation;
+import greencode.util.GenericReflection;
+
 public final class GreenCodeConfig {
 	private GreenCodeConfig() {
 	}
@@ -33,46 +32,45 @@ public final class GreenCodeConfig {
 
 	static void load() throws IOException, ClassNotFoundException {
 		System.out.print("[" + Core.projectName + "] Setting Config Parameters ...");
+		
+		InputStream configXml = Core.class.getClassLoader().getResourceAsStream("greencode.config.xml");
 
-		Document src = null;
-		try {
-			InputStream configXml = Core.class.getClassLoader().getResourceAsStream("greencode.config.xml");
+		if(configXml == null)
+			throw new IOException("Could not find file: src/greencode.config.xml");
 
-			if(configXml == null)
-				throw new IOException("Could not find file: src/greencode.config.xml");
+		Element greencodeCofig = Jsoup.parse(configXml, Server.View.charset, "").getElementsByTag("greencode-config").first();
 
-			Element greencodeCofig = (src = Jsoup.parse(configXml, Server.View.charset, "")).getElementsByTag("greencode-config").first();
+		String value;
 
-			String value;
+		Element browser = greencodeCofig.getElementsByTag("browser").first();
+		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "consoleDebug", Boolean.parseBoolean(browser.attr("consoleDebug").trim()));
 
-			Element browser = greencodeCofig.getElementsByTag("browser").first();
-			GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "consoleDebug", Boolean.parseBoolean(browser.attr("consoleDebug").trim()));
+		Element server = greencodeCofig.getElementsByTag("server").first();
+		{
+			GenericReflection.NoThrow.setFinalStaticValue(Server.class, "writeLog", Boolean.parseBoolean(server.attr("writeLog").trim()));
 
-			Element server = greencodeCofig.getElementsByTag("server").first();
+			Element currentElement;
+			Elements listCurrentElement;
+
+			currentElement = server.getElementsByTag("request").first();
 			{
-				GenericReflection.NoThrow.setFinalStaticValue(Server.class, "writeLog", Boolean.parseBoolean(server.attr("writeLog").trim()));
+				currentElement = currentElement.getElementsByTag("multipart").first();
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "autodectetion", Boolean.parseBoolean(currentElement.attr("autodectetion").trim()));
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "maxRequestSize", Integer.parseInt(currentElement.attr("max-request-size").trim()));
+			}
 
-				Element currentElement;
-				Elements listCurrentElement;
+			currentElement = server.getElementsByTag("response").first();
+			GenericReflection.NoThrow.setFinalStaticValue(Server.Response.class, "gzipSupport", Boolean.parseBoolean(currentElement.attr("gzip").trim()));
 
-				currentElement = server.getElementsByTag("request").first();
-				{
-					currentElement = currentElement.getElementsByTag("multipart").first();
-					GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "autodectetion", Boolean.parseBoolean(currentElement.attr("autodectetion").trim()));
-					GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "maxRequestSize", Integer.parseInt(currentElement.attr("max-request-size").trim()));
-				}
+			currentElement = server.getElementsByTag("view").first();
+			{
+				GenericReflection.NoThrow.setFinalStaticValue(Server.View.class, "charset", currentElement.attr("charset"));
+				GenericReflection.NoThrow.setFinalStaticValue(Server.View.class, "bootable", Boolean.parseBoolean(currentElement.attr("bootable")));
+				GenericReflection.NoThrow.setFinalStaticValue(Server.View.class, "useMinified", Boolean.parseBoolean(currentElement.attr("use-minified")));
+				GenericReflection.NoThrow.setFinalStaticValue(Server.View.class, "seekChange", Boolean.parseBoolean(currentElement.attr("seek-change")));
 
-				currentElement = server.getElementsByTag("response").first();
-				GenericReflection.NoThrow.setFinalStaticValue(Server.Response.class, "gzipSupport", Boolean.parseBoolean(currentElement.attr("gzip").trim()));
-
-				currentElement = server.getElementsByTag("view").first();
-				{
-					GenericReflection.NoThrow.setFinalStaticValue(Server.View.class, "charset", currentElement.attr("charset"));
-					GenericReflection.NoThrow.setFinalStaticValue(Server.View.class, "bootable", Boolean.parseBoolean(currentElement.attr("bootable")));
-					GenericReflection.NoThrow.setFinalStaticValue(Server.View.class, "useMinified", Boolean.parseBoolean(currentElement.attr("use-minified")));
-					GenericReflection.NoThrow.setFinalStaticValue(Server.View.class, "seekChange", Boolean.parseBoolean(currentElement.attr("seek-change")));
-
-					Element subCurrentElement = currentElement.getElementsByTag("templates").first();
+				Element subCurrentElement = currentElement.getElementsByTag("templates").first();
+				if(subCurrentElement != null) {
 					listCurrentElement = subCurrentElement.getElementsByTag("file");
 					if(!listCurrentElement.isEmpty()) {
 						Map<String, String> list = new HashMap<String, String>();
@@ -83,63 +81,62 @@ public final class GreenCodeConfig {
 							list.put(element.attr("name"), element.attr("path"));
 						}
 						GenericReflection.NoThrow.setFinalStaticValue(Server.View.class, "templatePaths", Collections.unmodifiableMap(list));
-					}
-
-					subCurrentElement = currentElement.getElementsByTag("session").first();
-					{
-						GenericReflection.NoThrow.setFinalStaticValue(Server.View.Session.class, "maxInactiveInterval", Integer.parseInt(subCurrentElement.attr("maxInactiveInterval")));
-					}
+					}					
 				}
 
-				currentElement = server.getElementsByTag("database").first();
-				if(currentElement != null) {
-					listCurrentElement = currentElement.getElementsByTag("default-config-file");
-					if(!listCurrentElement.isEmpty() && !(value = listCurrentElement.first().text()).isEmpty())
-						GenericReflection.NoThrow.setFinalStaticValue(Server.DataBase.class, "defaultConfigFile", value);
-
-					listCurrentElement = currentElement.getElementsByTag("show-query");
-					if(!listCurrentElement.isEmpty() && !(value = listCurrentElement.first().text()).isEmpty())
-						GenericReflection.NoThrow.setFinalStaticValue(Server.DataBase.class, "showResultQuery", Boolean.parseBoolean(value));
-
-					listCurrentElement = currentElement.getElementsByTag("drivers");
-					if(!listCurrentElement.isEmpty()) {
-						for(Element element: listCurrentElement.first().getAllElements())
-							Server.DataBase.drives.put(element.tagName(), element.text());
-
-						GenericReflection.NoThrow.setFinalStaticValue(Server.DataBase.class, "drives",
-								Server.DataBase.drives/*
-														 * Collections.
-														 * unmodifiableMap(
-														 * DataBase.drives)
-														 */);
-					}
+				subCurrentElement = currentElement.getElementsByTag("session").first();
+				{
+					GenericReflection.NoThrow.setFinalStaticValue(Server.View.Session.class, "maxInactiveInterval", Integer.parseInt(subCurrentElement.attr("maxInactiveInterval")));
 				}
-
-				Server.Internationalization.newVariantInstance(Server.Internationalization.logsLocale, "pt", "BR", "greencode/message/log_pt-BR.properties", "utf-8");
-
-				currentElement = server.getElementsByTag("internationalization").first();
-				if(currentElement != null) {
-					for(Element _locale: currentElement.getElementsByTag("locale"))
-						Server.Internationalization.newVariantInstance(Server.Internationalization.pagesLocale, _locale.attr("language"), _locale.attr("country"), _locale.attr("file"), _locale.attr("charset"));
-				}
-
-				currentElement = server.getElementsByTag("plugins").first();
-				if(currentElement != null) {
-					List<Class<?>> list = new ArrayList<Class<?>>();
-					for(Element e: currentElement.getElementsByTag("plugin"))
-						list.add(Class.forName(e.attr("class")));
-
-					GenericReflection.NoThrow.setFinalStaticValue(Server.Plugins.class, "list", list.toArray(new Class<?>[list.size()]));
-				}
-
-				listCurrentElement = null;
-				currentElement = null;
 			}
-		} finally {
-			if(src != null) {
-				src.empty();
-				src = null;
+
+			currentElement = server.getElementsByTag("database").first();
+			if(currentElement != null) {
+				listCurrentElement = currentElement.getElementsByTag("default-config-file");
+				if(!listCurrentElement.isEmpty() && !(value = listCurrentElement.first().text()).isEmpty())
+					GenericReflection.NoThrow.setFinalStaticValue(Server.DataBase.class, "defaultConfigFile", value);
+
+				listCurrentElement = currentElement.getElementsByTag("show-query");
+				if(!listCurrentElement.isEmpty() && !(value = listCurrentElement.first().text()).isEmpty())
+					GenericReflection.NoThrow.setFinalStaticValue(Server.DataBase.class, "showResultQuery", Boolean.parseBoolean(value));
+
+				listCurrentElement = currentElement.getElementsByTag("drivers");
+				if(!listCurrentElement.isEmpty()) {
+					for(Element element: listCurrentElement.first().getAllElements())
+						Server.DataBase.drives.put(element.tagName(), element.text());
+
+					GenericReflection.NoThrow.setFinalStaticValue(Server.DataBase.class, "drives",
+							Server.DataBase.drives/*
+													 * Collections.
+													 * unmodifiableMap(
+													 * DataBase.drives)
+													 */);
+				}
 			}
+
+			Server.Internationalization.newVariantInstance(Server.Internationalization.logsLocale, "pt", "BR", "greencode/message/log_pt-BR.properties", "utf-8");
+
+			currentElement = server.getElementsByTag("internationalization").first();
+			if(currentElement != null) {
+				for(Element _locale: currentElement.getElementsByTag("locale"))
+					Server.Internationalization.newVariantInstance(Server.Internationalization.pagesLocale, _locale.attr("language"), _locale.attr("country"), _locale.attr("file"), _locale.attr("charset"));
+			}
+
+			currentElement = server.getElementsByTag("plugins").first();
+			if(currentElement != null) {
+				listCurrentElement = currentElement.getElementsByTag("plugin");
+				final Class<?>[] list = new Class<?>[listCurrentElement.size()];
+				
+				if(list.length > 0) {
+					for(int i = -1; ++i < list.length;) {
+						list[0] = Class.forName(listCurrentElement.get(i).attr("class"));
+					}
+					GenericReflection.NoThrow.setFinalStaticValue(Server.Plugins.class, "list", list);
+				}
+			}
+
+			listCurrentElement = null;
+			currentElement = null;
 		}
 
 		System.out.println(" [done]");

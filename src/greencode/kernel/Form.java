@@ -16,10 +16,12 @@ import java.util.UnknownFormatConversionException;
 import javax.servlet.ServletException;
 import javax.servlet.http.Part;
 
+import greencode.exception.GreencodeError;
 import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.Element;
 import greencode.jscript.Window;
+import greencode.jscript.elements.InputFileElement;
 import greencode.jscript.elements.InputHiddenElement;
 import greencode.jscript.elements.InputPasswordElement;
 import greencode.jscript.elements.InputRadioElement;
@@ -110,10 +112,12 @@ final class Form {
 				f.set(container, valor);
 			} else if(fieldType.equals(Part.class)) {
 				f.set(container, context.getRequest().getPart(parametro));
+			} else if(fieldType.equals(InputFileElement.class)) {
+				DOMHandle.setVariableValue((Element) f.get(container), "value", context.getRequest().getPart(parametro));
 			} else {
-				final Type type = f.getGenericType();				
+				final Type type = f.getGenericType();
 				final boolean isElementMultipleValue = fieldType.equals(SelectMultipleElement.class);
-				
+
 				if(isElementMultipleValue || fieldType.isArray()) {
 					final String[] valores;
 					if(map == null) {
@@ -129,8 +133,8 @@ final class Form {
 					}
 
 					if(valores != null) {
-						final Class<?> realFieldType = type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType)type).getActualTypeArguments()[0] : fieldType.getComponentType();
-						
+						final Class<?> realFieldType = type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0] : fieldType.getComponentType();
+
 						final Object[] values = (Object[]) Array.newInstance(ClassUtils.toWrapperClass(realFieldType), valores.length);
 
 						try {
@@ -165,8 +169,8 @@ final class Form {
 					try {
 						Object result = (map == null ? context.request.getParameter(parametro) : map.get(parametro));
 
-						final Class<?> realFieldType = type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType)type).getActualTypeArguments()[0] : f.getType();
-						
+						final Class<?> realFieldType = type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0] : f.getType();
+
 						if(result == null) {
 							valor = ClassUtils.isPrimitiveType(realFieldType) ? ClassUtils.getDefaultValue(realFieldType) : null;
 						} else {
@@ -179,9 +183,9 @@ final class Form {
 								if(METHOD_TYPE_IS_GET)
 									valor = StringUtils.toCharset((String) valor, GreenCodeConfig.Server.View.charset);
 							}
-						}					
-						
-						if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class)) {
+						}
+
+						if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class) || fieldType.equals(InputFileElement.class)) {
 							DOMHandle.setVariableValue((Element) f.get(container), "value", valor);
 						} else if(fieldType.equals(SelectElement.class)) {
 							DOMHandle.setVariableValue((Element) f.get(container), "selectedValue", valor);
@@ -191,7 +195,7 @@ final class Form {
 					} catch(UnknownFormatConversionException e) {
 						Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
 					}
-				}	
+				}
 			}
 		}
 	}
@@ -237,12 +241,12 @@ final class Form {
 				try {
 					return DateUtils.toDate(valor, convert.pattern());
 				} catch(ParseException e) {
-					Console.warning(LogMessage.getMessage("green-0033", valor, convert.pattern()));
+					throw new GreencodeError(LogMessage.getMessage("green-0033", valor, convert.pattern()));
 				}
-			} else {
-				return valor;
-				/* return HttpParameter.Context.getObjectRequest(valor); */
 			}
+			
+			return valor;
+			/* return HttpParameter.Context.getObjectRequest(valor); */
 		}
 
 		return null;

@@ -53,7 +53,7 @@ public final class GreenContext {
 	String[] listAttrSync;
 	HashSet<String> listAttrSyncCache;
 	
-	GreenContext(HttpServletRequest request, HttpServletResponse response, Page currentPage) {
+	GreenContext(HttpServletRequest request, HttpServletResponse response, FileWeb currentPage) {
 		GreenContext.greenContext.set(this);
 		
 		boolean sessionInitialized = request.getSession(false) != null;

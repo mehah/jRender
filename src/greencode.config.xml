@@ -20,10 +20,10 @@
 		 -->
 		<view bootable="false" seek-change="true" charset="utf-8"
 			use-minified="false">
-			<templates>
+			<!-- <templates>
 				<file name="template" path="template/template.html" default="default" />
 				<file name="templateAdm" path="template/templateAdm.html" />
-			</templates>
+			</templates> -->
 			<session maxInactiveInterval="1800" /> <!-- 60*30 = 1800 (30min) -->
 		</view>
 
