@@ -1,5 +1,6 @@
 package greencode.jscript;
 
+import greencode.exception.GreencodeError;
 import greencode.http.Conversation;
 import greencode.jscript.window.annotation.RegisterPage;
 import greencode.jscript.window.listener.WindowDestroyListener;
@@ -43,7 +44,7 @@ public final class WindowHandle {
 							f.set(action, f.get(lastWindow));
 				}
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				throw new GreencodeError(e);
 			}
 		}
 		

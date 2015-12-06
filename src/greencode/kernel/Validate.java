@@ -65,12 +65,8 @@ final class Validate {
 				Object valor = GenericReflection.NoThrow.getValue(f, __container);
 				if(valor instanceof Element) {
 					elementObject = (Element) valor;
-					if(valor instanceof InputElement || valor instanceof TextareaElement) {
+					if(valor instanceof InputElement || valor instanceof TextareaElement || valor instanceof SelectElement || valor instanceof SelectMultipleElement) {
 						valor = DOMHandle.getVariableValue((Element)valor, "value", Object.class);
-					}else if(valor instanceof SelectElement) {
-						valor = DOMHandle.getVariableValue((Element)valor, "selectedValue", Object.class);
-					}else if(valor instanceof SelectMultipleElement) {
-						valor = DOMHandle.getVariableValue((Element)valor, "selectedValues", Object.class);
 					}
 				}else
 					elementObject = null;

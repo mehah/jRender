@@ -7,6 +7,8 @@ public abstract class InputElementTextField<T> extends InputElementDisabling<T> 
 		
 	protected InputElementTextField(String type, Window window) { super(type, window); }
 	
+	protected InputElementTextField(String type, Window window, Class<?> typeValue) { super(type, window, typeValue); }
+	
 	public void maxLength(Integer maxLength) { DOMHandle.setProperty(this, "maxLength", maxLength); }
 	
 	public Integer maxLength() { return DOMHandle.getVariableValueByProperty(this, "maxLength", Integer.class, "maxLength"); }

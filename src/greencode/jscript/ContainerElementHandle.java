@@ -23,15 +23,10 @@ public final class ContainerElementHandle {
 				if(anno.name().equals(name) || f.getName().equals(name)) {
 					Class<?> fieldType = f.getType();
 					Object value = f.get(container);
-					if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class) || fieldType.equals(InputFileElement.class)) {
+					if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class) || fieldType.equals(InputFileElement.class) || fieldType.equals(SelectElement.class) || fieldType.equals(SelectMultipleElement.class))
 						return DOMHandle.getVariableValue((Element) value, "value", null);
-					} else if(fieldType.equals(SelectElement.class)) {
-						return DOMHandle.getVariableValue((Element) value, "selectedValue", null);
-					} else if(fieldType.equals(SelectMultipleElement.class)) {
-						return DOMHandle.getVariableValue((Element) value, "selectedValues", null);
-					} else {
-						return f.get(f.get(container));
-					}
+
+					return f.get(f.get(container));
 				}
 			}
 			

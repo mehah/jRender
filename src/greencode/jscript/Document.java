@@ -10,16 +10,13 @@ import greencode.util.GenericReflection;
 
 public class Document extends Node {
 	final HashMap<Class<? extends Form>, Form> forms = new HashMap<Class<? extends Form>, Form>();
-	public final BodyElement body;
-	public final HeadElement head;
+	public final BodyElement body = greencode.jscript.elements.$Element.getBodyInstance(window);
+	public final HeadElement head = greencode.jscript.elements.$Element.getHeadInstance(window);
 
 	Document(Window window) {
 		super(window);
 
 		this.uid = 3; // Document UID
-
-		body = greencode.jscript.elements.$Element.getBodyInstance(window);
-		head = greencode.jscript.elements.$Element.getHeadInstance(window);
 
 		greencode.jscript.$DOMHandle.setUID(head, 4);
 		greencode.jscript.$DOMHandle.setUID(body, 5);
@@ -30,10 +27,7 @@ public class Document extends Node {
 		F form = (F) forms.get(formClass);
 		if(form == null) {
 			try {
-				form = formClass.newInstance();
-				form.processAnnotation();
-
-				forms.put((Class<? extends Form>) formClass, form);
+				forms.put((Class<? extends Form>) formClass, form = formClass.newInstance());
 			} catch(Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -93,8 +87,32 @@ public class Document extends Node {
 
 	public <E extends Element> E getElementById(String id, Class<E> cast) {
 		if(cast.getTypeParameters().length > 0)
-			throw new GreencodeError(LogMessage.getMessage("green-0043", cast.getSimpleName()));
-		return ElementHandle.cast(getElementById(id), cast);
+			throw new GreencodeError(LogMessage.getMessage("green-0043"));
+		
+		E e = ElementHandle.getInstance(cast, window);
+		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
+		
+		return e;
+	}
+	
+	public <E extends Element> E getElementById(String id, Class<E> cast, Class<?> typeValue) {
+		Element e;
+		if(cast == null) {
+			e = new Element(this.window);
+		}else if(typeValue == null) {
+			if(cast.getTypeParameters().length > 0)
+				throw new GreencodeError(LogMessage.getMessage("green-0043"));
+			
+			e = ElementHandle.getInstance(cast, window);
+		} else {
+			if(cast.getTypeParameters().length == 0)
+				throw new GreencodeError(LogMessage.getMessage("green-0048"));
+			
+			e = ElementHandle.getInstance(cast, window, typeValue);
+		}
+
+		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
+		return (E) e;
 	}
 	
 	public <E extends Element> E getElementById(String id, Element e) {
@@ -103,9 +121,11 @@ public class Document extends Node {
 		if(clazz.getTypeParameters().length == 0)
 			throw new GreencodeError(LogMessage.getMessage("green-0044"));
 		
-		if(!classUnnamed.isAnonymousClass()) {
+		if(!classUnnamed.isAnonymousClass())
 			throw new GreencodeError(LogMessage.getMessage("green-0045", clazz.getSimpleName()));
-		}
+		
+		if(classUnnamed.getGenericSuperclass() instanceof Class)
+			throw new GreencodeError(LogMessage.getMessage("green-0046", ((Class<?>)classUnnamed.getGenericSuperclass()).getSimpleName()));
 		
 		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
 		return (E) e;
@@ -124,17 +144,31 @@ public class Document extends Node {
 	}
 
 	public Element querySelector(String selector) {
-		Element e = new Element(this.window);
-		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
-
-		return e;
+		return querySelector(selector, null, null);
 	}
 
-	public <E extends Element> E querySelector(String selector, Class<E> cast) {
-		if(cast.getTypeParameters().length > 0)
-			throw new GreencodeError(LogMessage.getMessage("green-0043", cast.getSimpleName()));
+	public <E extends Element> E querySelector(String selector, Class<E> cast) {		
+		return querySelector(selector, cast, null);
+	}
+	
+	public <E extends Element> E querySelector(String selector, Class<E> cast, Class<?> typeValue) {
+		Element e;
+		if(cast == null) {
+			e = new Element(this.window);
+		} else {
+			if(typeValue == null) {
+				if(cast.getTypeParameters().length > 0)
+					throw new GreencodeError(LogMessage.getMessage("green-0043", cast.getSimpleName()));
+
+				e = ElementHandle.getInstance(cast, window);
+			} else {
+				e = ElementHandle.getInstance(cast, window, typeValue);
+			}			
+		} 
 		
-		return ElementHandle.cast(querySelector(selector), cast);
+		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
+		
+		return (E) e;
 	}
 	
 	public <E extends Element> E querySelector(String selector, Element e) {
@@ -143,9 +177,8 @@ public class Document extends Node {
 		if(clazz.getTypeParameters().length == 0)
 			throw new GreencodeError(LogMessage.getMessage("green-0044"));
 		
-		if(!classUnnamed.isAnonymousClass()) {
+		if(!classUnnamed.isAnonymousClass())
 			throw new GreencodeError(LogMessage.getMessage("green-0045", clazz.getSimpleName()));
-		}
 		
 		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
 		

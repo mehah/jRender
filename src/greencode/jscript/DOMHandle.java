@@ -1,27 +1,21 @@
 package greencode.jscript;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.HashMap;
 
 import javax.servlet.http.Part;
 
-import org.eclipse.jdt.internal.compiler.apt.model.TypeVariableImpl;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import greencode.exception.ConnectionLost;
 import greencode.exception.GreencodeError;
 import greencode.http.ViewSession;
-import greencode.jscript.elements.InputElement;
 import greencode.kernel.Console;
 import greencode.kernel.ElementsScan;
 import greencode.kernel.GreenContext;
 import greencode.kernel.LogMessage;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 public final class DOMHandle {
 	private DOMHandle() {}
@@ -101,26 +95,12 @@ public final class DOMHandle {
 		return owner.variables.get(varName);
 	}
 	
-	public static class Test<T> extends Test2<T>{
-		
-	}
-	
-	public static class Test2<T> {
-		
-	}
-	
 	@SuppressWarnings("unchecked")
 	private static<C> C getVariableValue(final DOM owner, final String varName, Class<C> cast, boolean isMethod, final String _name, Object... parameters) {
 		GreenContext context = GreenContext.getInstance();
 		
 		if(greencode.kernel.$GreenContext.isForcingSynchronization(context, _name) || !owner.variables.containsKey(varName)) {
 			Object v = getSyncValue(context, owner, varName, isMethod, _name, parameters);
-
-			if(cast.equals(Object.class)) {
-				Class<?> clazz = owner.getClass();				
-				if(clazz.isAnonymousClass())
-					cast = (Class<C>) ((ParameterizedType) clazz.getGenericSuperclass()).getActualTypeArguments()[0];
-			}
 			
 			if(cast != null && !cast.equals(String.class) && !cast.equals(Part.class)) {
 				if(ClassUtils.isPrimitiveOrWrapper(cast)) {

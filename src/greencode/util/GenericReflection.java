@@ -300,8 +300,7 @@ public final class GenericReflection {
 			try {
 				return newInstance(Class.forName(className), parameterTypes, objects);
 			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-				return null;
+				throw new RuntimeException(e);
 			}
 		}
 		
@@ -309,8 +308,7 @@ public final class GenericReflection {
 			try {
 				return getDeclaredConstrutor(_class, parameterTypes).newInstance(objects);
 			} catch (Exception e) {
-				e.printStackTrace();
-				return null;
+				throw new RuntimeException(e);
 			}
 		}
 		
@@ -320,7 +318,7 @@ public final class GenericReflection {
 				modifiersField.setAccessible(true);
 				modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 			} catch (Exception e) {
-				e.printStackTrace();
+				throw new RuntimeException(e);
 			}
 		}
 	}

@@ -39,13 +39,13 @@ public final class DatabaseConnection implements Connection {
 	public void start() throws SQLException {
 		close();
 		if(config == null) {
-			Console.error(LogMessage.getMessage("green-db-0008"));
+			throw new GreencodeError(LogMessage.getMessage("green-db-0008"));
 		}
 		String url = "jdbc:" + config.getDatabase() + "://" + config.getServerName() + ":3306/" + config.getSchema();
 		try {
 			this.connection = DriverManager.getConnection(url, config.getUserName(), config.getPassword());
 		} catch (SQLException e) {
-			Console.error(url + "\n" + LogMessage.getMessage("green-db-0001", config.getDatabase()));
+			Console.warning(url + "\n" + LogMessage.getMessage("green-db-0001", config.getDatabase()));
 
 			if (config.getChanceReconnect() > 0 && chanceConnected < config.getChanceReconnect()) {
 				Console.log(LogMessage.getMessage("green-db-0002"));

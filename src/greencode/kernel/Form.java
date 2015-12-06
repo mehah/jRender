@@ -22,13 +22,6 @@ import greencode.jscript.DOMHandle;
 import greencode.jscript.Element;
 import greencode.jscript.Window;
 import greencode.jscript.elements.InputFileElement;
-import greencode.jscript.elements.InputHiddenElement;
-import greencode.jscript.elements.InputPasswordElement;
-import greencode.jscript.elements.InputRadioElement;
-import greencode.jscript.elements.InputTextElement;
-import greencode.jscript.elements.SelectElement;
-import greencode.jscript.elements.SelectMultipleElement;
-import greencode.jscript.elements.TextareaElement;
 import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.jscript.form.annotation.ConvertDateTime;
@@ -43,9 +36,12 @@ final class Form {
 	static void processRequestedForm(GreenContext context) throws IllegalArgumentException, IllegalAccessException, IllegalStateException, IOException, ServletException {
 		String formName = context.request.getParameter("__requestedForm");
 		if(formName != null) {
+			if(formName.equals("null"))
+				throw new GreencodeError(LogMessage.getMessage("green-0049"));
+				
 			final Class<? extends greencode.jscript.Form> formClass = Cache.forms.get(formName);
 			if(formClass == null)
-				Console.error(LogMessage.getMessage("green-0032", formName));
+				throw new GreencodeError(LogMessage.getMessage("green-0032", formName));
 
 			context.requestedForm = context.currentWindow.document.forms(formClass);
 
@@ -116,7 +112,7 @@ final class Form {
 				DOMHandle.setVariableValue((Element) f.get(container), "value", context.getRequest().getPart(parametro));
 			} else {
 				final Type type = f.getGenericType();
-				final boolean isElementMultipleValue = fieldType.equals(SelectMultipleElement.class);
+				final boolean isElementMultipleValue = greencode.jscript.elements.$Element.isValueMultiSelectable(fieldType);
 
 				if(isElementMultipleValue || fieldType.isArray()) {
 					final String[] valores;
@@ -132,7 +128,12 @@ final class Form {
 						valores = list == null ? null : list.toArray(new String[list.size()]);
 					}
 
-					if(valores != null) {
+					if(valores == null) {
+						if(isElementMultipleValue)
+							DOMHandle.setVariableValue((Element) f.get(container), "value", null);
+						else
+							f.set(container, null);
+					} else {
 						final Class<?> realFieldType = type instanceof ParameterizedType ? (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0] : fieldType.getComponentType();
 
 						final Object[] values = (Object[]) Array.newInstance(ClassUtils.toWrapperClass(realFieldType), valores.length);
@@ -142,7 +143,7 @@ final class Form {
 								Object _value = greencode.kernel.Form.getFieldValue(context, f, realFieldType, valores[i], element);
 
 								if(_value == null)
-									Console.error(LogMessage.getMessage("green-0019", f.getName(), f.getDeclaringClass().getSimpleName()));
+									throw new GreencodeError(LogMessage.getMessage("green-0019", f.getName(), f.getDeclaringClass().getSimpleName()));
 
 								if(_value instanceof String) {
 									if(element.trim())
@@ -156,15 +157,14 @@ final class Form {
 							}
 
 							if(isElementMultipleValue) {
-								DOMHandle.setVariableValue((Element) f.get(container), "selectedValues", values);
+								DOMHandle.setVariableValue((Element) f.get(container), "value", values);
 							} else {
 								f.set(container, ClassUtils.isPrimitiveType(fieldType.getComponentType()) ? ArrayUtils.wrapperToPrimitive(values) : values);
 							}
 						} catch(UnknownFormatConversionException e) {
-							Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
+							throw new GreencodeError(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
 						}
-					} else if(!isElementMultipleValue)
-						f.set(container, null);
+					}
 				} else {
 					try {
 						Object result = (map == null ? context.request.getParameter(parametro) : map.get(parametro));
@@ -185,15 +185,13 @@ final class Form {
 							}
 						}
 
-						if(fieldType.equals(TextareaElement.class) || fieldType.equals(InputTextElement.class) || fieldType.equals(InputRadioElement.class) || fieldType.equals(InputPasswordElement.class) || fieldType.equals(InputHiddenElement.class) || fieldType.equals(InputFileElement.class)) {
+						if(greencode.jscript.elements.$Element.isValueText(fieldType)) {
 							DOMHandle.setVariableValue((Element) f.get(container), "value", valor);
-						} else if(fieldType.equals(SelectElement.class)) {
-							DOMHandle.setVariableValue((Element) f.get(container), "selectedValue", valor);
 						} else {
 							f.set(container, valor);
 						}
 					} catch(UnknownFormatConversionException e) {
-						Console.error(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
+						throw new GreencodeError(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));
 					}
 				}
 			}

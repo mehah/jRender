@@ -1,21 +1,5 @@
 package greencode.jscript;
 
-import greencode.exception.OperationNotAllowedException;
-import greencode.jscript.elements.InputFileElement;
-import greencode.jscript.elements.InputHiddenElement;
-import greencode.jscript.elements.InputPasswordElement;
-import greencode.jscript.elements.InputRadioElement;
-import greencode.jscript.elements.InputTextElement;
-import greencode.jscript.elements.SelectElement;
-import greencode.jscript.elements.SelectMultipleElement;
-import greencode.jscript.elements.TextareaElement;
-import greencode.jscript.elements.custom.ContainerElement;
-import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
-import greencode.jscript.form.annotation.ElementValue;
-import greencode.kernel.LogMessage;
-import greencode.util.ClassUtils;
-import greencode.util.GenericReflection;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
@@ -27,6 +11,14 @@ import javax.servlet.http.Part;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+
+import greencode.exception.OperationNotAllowedException;
+import greencode.jscript.elements.custom.ContainerElement;
+import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
+import greencode.jscript.form.annotation.ElementValue;
+import greencode.kernel.LogMessage;
+import greencode.util.ClassUtils;
+import greencode.util.GenericReflection;
 
 public final class $Container {
 	private $Container() {
@@ -59,7 +51,7 @@ public final class $Container {
 						if(!(
 							type.equals(Date.class) ||
 							type.equals(Part.class) ||
-							isAcceptableElement(type) ||
+							greencode.jscript.elements.$Element.isElementWithValue(type) ||
 							ClassUtils.isPrimitiveOrWrapper(type) ||
 							ClassUtils.isParent(type, ContainerElement.class))) {
 								throw new OperationNotAllowedException(LogMessage.getMessage("green-0028", field.getName(), currentClass.getSimpleName()));
@@ -82,18 +74,6 @@ public final class $Container {
 
 		return fields;
 	}
-	
-	private static boolean isAcceptableElement(Class<?> type) {
-		return
-			type.equals(TextareaElement.class) ||
-			type.equals(InputTextElement.class) ||
-			type.equals(InputPasswordElement.class) ||
-			type.equals(InputHiddenElement.class) ||
-			type.equals(InputRadioElement.class) ||
-			type.equals(InputFileElement.class) ||
-			type.equals(SelectElement.class) ||
-			type.equals(SelectMultipleElement.class);
-	}
 
 	public static HashMap<Integer, ContainerElement<?>> getContainers(Form form) {
 		if(form.containers == null)
@@ -109,7 +89,7 @@ public final class $Container {
 			Object value = GenericReflection.NoThrow.getValue(field, e);
 			if(value != null) {
 				final Class<?> fieldType = field.getType();
-				if(isAcceptableElement(fieldType))
+				if(greencode.jscript.elements.$Element.isElementWithValue(fieldType))
 					continue;
 				
 				final boolean isArray;

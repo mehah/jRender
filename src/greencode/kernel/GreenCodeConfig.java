@@ -21,6 +21,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import greencode.database.DatabaseConfig;
+import greencode.exception.GreencodeError;
 import greencode.kernel.implementation.PluginImplementation;
 import greencode.util.GenericReflection;
 
@@ -242,7 +243,7 @@ public final class GreenCodeConfig {
 						return config;
 					}
 				} catch(Exception e) {
-					Console.error(LogMessage.getMessage("green-db-0007", path));
+					throw new GreencodeError(LogMessage.getMessage("green-db-0007", path));
 				} finally {
 					if(src != null) {
 						src.empty();

@@ -197,7 +197,7 @@ public final class FileWeb {
 
 							templateImported = template.document;
 						} else
-							Console.error(LogMessage.getMessage("green-0042", templateName));
+							throw new GreencodeError(LogMessage.getMessage("green-0042", templateName));
 					} else {
 						FileWeb template = loadStructure(Cache.defaultTemplate);
 						templateImported = template.document;
@@ -263,7 +263,7 @@ public final class FileWeb {
 
 							element.remove();
 						} catch(IOException e) {
-							Console.error(LogMessage.getMessage("green-0020", attrSrc, "template:include", file.getName()));
+							throw new GreencodeError(LogMessage.getMessage("green-0020", attrSrc, "template:include", file.getName()));
 						}
 					}
 				}
@@ -271,10 +271,8 @@ public final class FileWeb {
 				List<Element> joins = src.head().getElementsByAttribute("join");
 				for(Element e: joins) {
 					String filePath = e.attr("file");
-					if(filePath.isEmpty()) {
-						Console.error(LogMessage.getMessage("green-0021", "file", e.tagName(), file.getName()));
-						continue;
-					}
+					if(filePath.isEmpty())
+						throw new GreencodeError(LogMessage.getMessage("green-0021", "file", e.tagName(), file.getName()));
 
 					String[] filesName = e.attr("join").split(",");
 
@@ -283,8 +281,7 @@ public final class FileWeb {
 						String name = filesName[i].trim();
 						File f = FileUtils.getFileInWebContent(name);
 						if(!f.exists()) {
-							Console.error(LogMessage.getMessage("green-0020", name, e.tagName(), file.getName()));
-							continue;
+							throw new GreencodeError(LogMessage.getMessage("green-0020", name, e.tagName(), file.getName()));
 						}
 						files[i] = f;
 					}
@@ -351,7 +348,7 @@ public final class FileWeb {
 
 					pReference.mobileFile = mobileFileWeb;
 				} else
-					Console.error(LogMessage.getMessage("green-0014", page.mobile().path()));
+					throw new GreencodeError(LogMessage.getMessage("green-0014", page.mobile().path()));
 			}
 
 			if(!page.jsModule().isEmpty()) {
@@ -392,7 +389,7 @@ public final class FileWeb {
 				if(GreenCodeConfig.Server.View.bootable)
 					loadStructure(file, pReference, true);
 			} else
-				Console.error(LogMessage.getMessage("green-0014", page.path()));
+				throw new GreencodeError(LogMessage.getMessage("green-0014", page.path()));
 		}
 	}
 
