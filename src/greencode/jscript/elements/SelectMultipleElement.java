@@ -19,7 +19,7 @@ public class SelectMultipleElement<T> extends SelectElementPrototype {
 		
 		this.typeValue = (Class<T>) (typeValue == null ?  ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0] : typeValue);
 		
-		if(!this.typeValue.isArray())
+		if(this.typeValue.isArray())
 			throw new GreencodeError(LogMessage.getMessage("green-0050", getClass().getSimpleName()));
 	}
 

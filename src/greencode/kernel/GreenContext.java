@@ -1,5 +1,6 @@
 package greencode.kernel;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
 import java.util.HashSet;
@@ -24,10 +25,10 @@ import greencode.kernel.serialization.DOMDeserializer;
 import greencode.kernel.serialization.DOMSerializer;
 
 public final class GreenContext {
-	private final static ThreadLocal<GreenContext> greenContext = new ThreadLocal<GreenContext>();
+	private final static ThreadLocal<WeakReference<GreenContext>> greenContext = new ThreadLocal<WeakReference<GreenContext>>();
 		
 	public static BootActionImplementation getBootAction() { return Cache.bootAction; }
-	public static GreenContext getInstance() { return greenContext.get(); }
+	public static GreenContext getInstance() { return greenContext.get().get(); }
 	
 	private boolean destroyed;
 	
@@ -54,7 +55,7 @@ public final class GreenContext {
 	HashSet<String> listAttrSyncCache;
 	
 	GreenContext(HttpServletRequest request, HttpServletResponse response, FileWeb currentPage) {
-		GreenContext.greenContext.set(this);
+		GreenContext.greenContext.set(new WeakReference<GreenContext>(this)); 
 		
 		boolean sessionInitialized = request.getSession(false) != null;
 				
@@ -179,9 +180,9 @@ public final class GreenContext {
 				this.databaseConnection.close();
 			} catch (SQLException e) {
 				e.printStackTrace();
+			} finally {
+				this.databaseConnection = null;
 			}
-			
-			this.databaseConnection = null;
 		}
 		
 		this.currentMessagePropertie = null;
@@ -191,9 +192,8 @@ public final class GreenContext {
 		this.userLocale = null;
 		this.listAttrSync = null;
 		this.listAttrSyncCache = null;
+		this.destroyed = true;
 		
 		greenContext.remove();
-		
-		destroyed = true;
 	}
 }
