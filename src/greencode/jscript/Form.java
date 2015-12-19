@@ -50,11 +50,9 @@ public abstract class Form extends Element implements ContainerElementImplementa
 			DOMHandle.registerElementByCommand(window.principalElement(), this, "@crossbrowser.querySelector", "form[name=\"" + name + "\"]");
 		else
 			DOMHandle.registerElementByCommand(window.principalElement(), this, "@customMethod.querySelector", "form[name=\"" + name + "\"]", "return (this.offsetHeight " + (visibleAnnotation.value() ? "!" : "=") + "== 0);");
-		
-		processAnnotation();
 	}
 
-	private void processAnnotation() {
+	void processAnnotation() {
 		Field[] fields = GenericReflection.getDeclaredFieldsByConditionId(getClass(), "form:fieldsWithFindElement");
 		if(fields == null)
 			fields = GenericReflection.getDeclaredFieldsByCondition(getClass(), "form:fieldsWithFindElement", fieldsWithFindElement, true);

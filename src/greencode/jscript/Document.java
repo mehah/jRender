@@ -28,6 +28,7 @@ public class Document extends Node {
 		if(form == null) {
 			try {
 				forms.put((Class<? extends Form>) formClass, form = formClass.newInstance());
+				form.processAnnotation();
 			} catch(Exception e) {
 				throw new RuntimeException(e);
 			}
