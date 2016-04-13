@@ -89,10 +89,13 @@ public abstract class Form extends Element implements ContainerElementImplementa
 					ElementValue aev = f.getAnnotation(ElementValue.class);
 					String selector = "[name='" + (aev.name().isEmpty() ? f.getName() : aev.name()) + "']";
 				
+					Class<?> typeValue = null;
+					
 					if(greencode.jscript.elements.$Element.isElementWithValue(type)) {
-						v = this.querySelector(selector, type, (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0]);
-					}else
-						v = this.querySelector(selector, type);
+						typeValue = f.getGenericType() instanceof ParameterizedType ? (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0] : String.class;						
+					}
+					
+					v = this.querySelector(selector, type, typeValue);
 				}
 
 			}

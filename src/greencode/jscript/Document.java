@@ -87,8 +87,9 @@ public class Document extends Node {
 	}
 
 	public <E extends Element> E getElementById(String id, Class<E> cast) {
-		if(cast.getTypeParameters().length > 0)
-			throw new GreencodeError(LogMessage.getMessage("green-0043"));
+		if(cast.getTypeParameters().length > 0) {
+			return getElementById(id, cast, String.class);
+		}
 		
 		E e = ElementHandle.getInstance(cast, window);
 		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
@@ -100,18 +101,16 @@ public class Document extends Node {
 		Element e;
 		if(cast == null) {
 			e = new Element(this.window);
-		}else if(typeValue == null) {
-			if(cast.getTypeParameters().length > 0)
-				throw new GreencodeError(LogMessage.getMessage("green-0043"));
-			
-			e = ElementHandle.getInstance(cast, window);
 		} else {
-			if(cast.getTypeParameters().length == 0)
+			if(typeValue == null) {
+				if(cast.getTypeParameters().length > 0)
+					typeValue = String.class;			
+			} else if(cast.getTypeParameters().length == 0)
 				throw new GreencodeError(LogMessage.getMessage("green-0048"));
-			
-			e = ElementHandle.getInstance(cast, window, typeValue);
+		
+			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
 		}
-
+		
 		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
 		return (E) e;
 	}
@@ -152,20 +151,16 @@ public class Document extends Node {
 		return querySelector(selector, cast, null);
 	}
 	
-	public <E extends Element> E querySelector(String selector, Class<E> cast, Class<?> typeValue) {
+	public <E extends Element> E querySelector(String selector, Class<E> cast, Class<?> typeValue /* Default: String */) {
 		Element e;
 		if(cast == null) {
 			e = new Element(this.window);
 		} else {
-			if(typeValue == null) {
-				if(cast.getTypeParameters().length > 0)
-					throw new GreencodeError(LogMessage.getMessage("green-0043", cast.getSimpleName()));
-
-				e = ElementHandle.getInstance(cast, window);
-			} else {
-				e = ElementHandle.getInstance(cast, window, typeValue);
-			}			
-		} 
+			if(typeValue == null && cast.getTypeParameters().length > 0)
+				typeValue = String.class;
+			
+			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
+		}
 		
 		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
 		

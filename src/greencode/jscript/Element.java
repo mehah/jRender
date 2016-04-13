@@ -1,10 +1,8 @@
 package greencode.jscript;
 
-import greencode.exception.GreencodeError;
 import greencode.http.Conversation;
 import greencode.jscript.window.annotation.Page;
 import greencode.kernel.GreenContext;
-import greencode.kernel.LogMessage;
 public class Element extends Node {
 	
 	protected Element(Window window) { super(window); }
@@ -72,17 +70,13 @@ public class Element extends Node {
 	public <E extends Element> E querySelector(String selector, Class<E> cast, Class<?> typeValue) {
 		Element e;
 		if(cast == null) {
-			e = new Element(this.window);
+			e = new Element(this.window);		
 		} else {
-			if(typeValue == null) {
-				if(cast.getTypeParameters().length > 0)
-					throw new GreencodeError(LogMessage.getMessage("green-0043", cast.getSimpleName()));
-				
-				e = ElementHandle.getInstance(cast, window);
-			} else {
-				e = ElementHandle.getInstance(cast, window, typeValue);
-			}			
-		} 
+			if(typeValue == null && cast.getTypeParameters().length > 0)
+				typeValue = String.class;
+			
+			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
+		}
 		
 		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
 		
