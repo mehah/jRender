@@ -185,7 +185,7 @@ final class Form {
 							}
 						}
 
-						if(greencode.jscript.elements.$Element.isValueText(fieldType)) {
+						if(greencode.jscript.elements.$Element.isElementWithValue(fieldType)) {
 							DOMHandle.setVariableValue((Element) f.get(container), "value", valor);
 						} else {
 							f.set(container, valor);

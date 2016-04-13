@@ -23,6 +23,7 @@ import java.sql.Struct;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Executor;
 
 public final class DatabaseConnection implements Connection {
 	private Connection connection;
@@ -302,5 +303,30 @@ public final class DatabaseConnection implements Connection {
 
 	public void setTypeMap(Map<String, Class<?>> map) throws SQLException {
 		getConnection().setTypeMap(map);
+	}
+
+	@Override
+	public void setSchema(String schema) throws SQLException {
+		getConnection().setSchema(schema);
+	}
+
+	@Override
+	public String getSchema() throws SQLException {
+		return getConnection().getSchema();
+	}
+
+	@Override
+	public void abort(Executor executor) throws SQLException {
+		getConnection().abort(executor);
+	}
+
+	@Override
+	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
+		getConnection().setNetworkTimeout(executor, milliseconds);
+	}
+
+	@Override
+	public int getNetworkTimeout() throws SQLException {
+		return getConnection().getNetworkTimeout();
 	}
 }

@@ -299,4 +299,14 @@ public final class DatabasePreparedStatement implements PreparedStatement {
 	public void setBlob(int parameterIndex, InputStream inputStream) throws SQLException { ps.setBlob(parameterIndex, inputStream); }
 
 	public void setNClob(int parameterIndex, Reader reader) throws SQLException { ps.setNClob(parameterIndex, reader); }
+
+	@Override
+	public void closeOnCompletion() throws SQLException {
+		ps.closeOnCompletion();
+	}
+
+	@Override
+	public boolean isCloseOnCompletion() throws SQLException {
+		return ps.isCloseOnCompletion();
+	}
 }
