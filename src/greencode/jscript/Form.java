@@ -67,17 +67,19 @@ public abstract class Form extends Element implements ContainerElementImplementa
 
 			if(a != null) {
 				Element context;
-				if(!a.context().isEmpty()) {
-					for(Field f2: fields) {
-						if(f2.getName().equals(a.context())) {
-							context = (Element) GenericReflection.NoThrow.getValue(f2, this);
-							break;
+				searchContext: {
+					if(!a.context().isEmpty()) {
+						for(Field f2: fields) {
+							if(f2.getName().equals(a.context())) {
+								context = (Element) GenericReflection.NoThrow.getValue(f2, this);
+								break searchContext;
+							}
 						}
-					}
-					
-					throw new GreencodeError(LogMessage.getMessage("green-0041", a.context(), f.getName(), getClass().getSimpleName()));
-				}else
-					context = this;
+						
+						throw new GreencodeError(LogMessage.getMessage("green-0041", a.context(), f.getName(), getClass().getSimpleName()));
+					}else
+						context = this;
+				}
 				
 				if(type.isArray()) {
 					v = ElementHandle.cast(context.querySelectorAll(a.selector()), (Class<? extends Element>) type.getComponentType());

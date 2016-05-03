@@ -45,12 +45,23 @@ public class Document extends Node {
 
 		return e;
 	}
-
+	
 	public <E extends Element> E createElement(Class<E> element) {
+		return createElement(element, null);
+	}
+
+	public <E extends Element> E createElement(Class<E> element, Class<?> typeValue) {
 		try {
+			
 			E e;
 			try {
-				e = GenericReflection.NoThrow.getDeclaredConstrutor(element, Window.class).newInstance(this.window);
+				if(typeValue == null) {
+					if(element.getTypeParameters().length > 0)
+						typeValue = String.class;			
+				} else if(element.getTypeParameters().length == 0)
+					throw new GreencodeError(LogMessage.getMessage("green-0048"));
+			
+				e = typeValue == null ? ElementHandle.getInstance(element, window) : ElementHandle.getInstance(element, window, typeValue);
 			} catch(Exception ex) {
 				e = GenericReflection.NoThrow.getDeclaredConstrutor(element).newInstance();
 			}
