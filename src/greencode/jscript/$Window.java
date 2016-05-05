@@ -27,8 +27,4 @@ public class $Window {
 	public static Page getCurrentPageAnnotation(Window window) {
 		return window.currentPageAnnotation;
 	}
-	
-	public static void setCurrentPageAnnotation(Window window, Page page) {
-		window.currentPageAnnotation = page;
-	}
 }

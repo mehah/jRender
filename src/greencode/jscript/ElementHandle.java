@@ -7,6 +7,7 @@ import java.util.HashMap;
 import com.google.gson.Gson;
 
 import greencode.exception.GreencodeError;
+import greencode.jscript.elements.SelectElementPrototype;
 import greencode.kernel.LogMessage;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
@@ -79,6 +80,9 @@ public final class ElementHandle {
 
 	public static void empty(Element e) {
 		DOMHandle.CustomMethod.call(e, "empty");
+		if(e instanceof SelectElementPrototype) {
+			((SelectElementPrototype) e).options(false);
+		}
 	}
 
 	public static Element getOrCreateElementByTagName(Element owner, String tagName) {
@@ -140,6 +144,16 @@ public final class ElementHandle {
 
 	public static Node prepend(Element e, Node node) {
 		DOMHandle.CustomMethod.call(e, "prepend", node);
+		return node;
+	}
+
+	public static Node insertBefore(Element e, Node node) {
+		DOMHandle.CustomMethod.call(e, "insertBefore", node);
+		return node;
+	}
+	
+	public static Node insertAfter(Element e, Node node) {
+		DOMHandle.CustomMethod.call(e, "insertAfter", node);
 		return node;
 	}
 }

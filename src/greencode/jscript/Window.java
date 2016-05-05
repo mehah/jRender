@@ -19,7 +19,7 @@ public abstract class Window extends EventTarget implements HttpAction {
 	public final Location location;
 	public final History history;
 	public final Navigator navigator;
-	Page currentPageAnnotation;
+	final Page currentPageAnnotation;
 	
 	private final Element principalElement; 
 	
@@ -31,7 +31,8 @@ public abstract class Window extends EventTarget implements HttpAction {
 		if(context.currentWindow() == null) {
 			greencode.kernel.$GreenContext.setCurrentWindow(context, this);
 			this.currentPageAnnotation = context.currentPageAnnotation();
-		}
+		} else
+			this.currentPageAnnotation = null;
 		
 		uid = 2; // WINDOW ID
 		
