@@ -116,6 +116,8 @@ public class Element extends Node {
 	
 	public Element cloneNode() { return (Element) super.cloneNode(); }
 	
+	public Element cloneNode(boolean deep) { return (Element) super.cloneNode(deep); }
+	
 	public void replaceWith(String html) {
 		innerHTML(html);
 	}

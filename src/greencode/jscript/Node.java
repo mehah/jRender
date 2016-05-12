@@ -13,7 +13,9 @@ public class Node extends EventTarget {
 		return node;
 	}
 	
-	public Node cloneNode() { return cloneNode(getClass()); }
+	public Node cloneNode() { return cloneNode(getClass(), false); }
+	
+	public Node cloneNode(boolean deep) { return cloneNode(getClass(), deep); }
 	
 	public Node nextSibling() { return nextSibling(Node.class); }
 	
@@ -76,18 +78,19 @@ public class Node extends EventTarget {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private<N extends Node> N cloneNode(Class<N> classNode) {
+	private<N extends Node> N cloneNode(Class<N> classNode, boolean deep) {
 		try {
 			N node = GenericReflection.getDeclaredConstrutor(classNode, Window.class).newInstance(this.window);
-			node.variables = (HashMap<String, Object>) this.variables.clone();
 			
-			DOMHandle.registerElementByCommand(this, node, "cloneNode");
+			if(deep)
+				node.variables = (HashMap<String, Object>) this.variables.clone();
+			
+			DOMHandle.registerElementByCommand(this, node, "cloneNode", deep);
+			
 			return node;
 		} catch (Exception e1) {
 			throw new RuntimeException(e1);
-		}
-
-		
+		}		
 	}
 	
 	public int compareDocumentPosition(Element node) {
