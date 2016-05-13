@@ -30,10 +30,22 @@ import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.websocket.CloseReason;
+import javax.websocket.EndpointConfig;
+import javax.websocket.OnClose;
+import javax.websocket.OnError;
+import javax.websocket.OnMessage;
+import javax.websocket.OnOpen;
+import javax.websocket.RemoteEndpoint.Basic;
+import javax.websocket.Session;
+import javax.websocket.server.ServerEndpoint;
 
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.RequestFacade;
+import org.apache.tomcat.websocket.server.WsHandshakeRequest;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -74,12 +86,11 @@ import greencode.util.FileUtils.FileRead;
 import greencode.util.GenericReflection;
 import greencode.util.PackageUtils;
 
+@ServerEndpoint(value="/coreWebSocket", configurator=WebSocketConfigurator.class)
 @WebFilter(displayName = "core", urlPatterns = "/*")
 public final class Core implements Filter {
-	final static String CONTEXT_PATH = null, projectName = null, defaultLogMsg = null;
-	final static String SRC_CORE_JS_FOR_SCRIPT_HTML = null;
+	private final static String INIT_METHOD_NAME = "init";
 	private final static Boolean HAS_ERROR = true;
-
 	private final static String[] JS_SUPPORT_FILES = {
 		"json3.js",
 		"sizzle.js"
@@ -97,46 +108,77 @@ public final class Core implements Filter {
 		"init.js"
 	};
 	
-	public void destroy() {
-		if(Cache.bootAction != null) {
-			System.out.print(defaultLogMsg + "Destroying BootAction...");
-			Cache.bootAction.destroy();
-			System.out.print(" [done]\n");
+	final static String CONTEXT_PATH = null, projectName = null, defaultLogMsg = null;
+	final static String SRC_CORE_JS_FOR_SCRIPT_HTML = null;	
+	final static Field _HandshakeRequest = GenericReflection.NoThrow.getDeclaredField(WsHandshakeRequest.class, "request");
+	final static Field requestContextField = GenericReflection.NoThrow.getDeclaredField(Request.class, "context");
+	final static Field requestcoyoteRequestField = GenericReflection.NoThrow.getDeclaredField(Request.class, "coyoteRequest");
+	final static Field requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request");
+	
+	
+	private HttpServletRequest request;
+	private HttpServletResponse response;
+	private HttpSession session;
+	
+	@OnOpen
+	public void onOpen(Session session, EndpointConfig config) {
+		try {
+			this.request = (HttpServletRequest) config.getUserProperties().get("httpRequest");
+			this.response = (HttpServletResponse) config.getUserProperties().get("httpResponse");
+			this.session = (HttpSession) config.getUserProperties().get("httpSession");
+			
+			Request _request =  (Request) GenericReflection.NoThrow.getValue(Core.requestField, this.request);
+			
+			GenericReflection.setValue(Request.class, "context", config.getUserProperties().get("context"), _request);
+		} catch (Exception ex) {
+			ex.printStackTrace();
 		}
+	}
 
-		if(Cache.plugins != null) {
-			System.out.print(defaultLogMsg + "Destroying Plugins...");
-			for(PluginImplementation plugin: Cache.plugins)
-				plugin.destroy();
-			System.out.print(" [done]\n");
-		}
-
-		if(!greencode.http.$HttpRequest.getGlobalViewList().isEmpty()) {
-			System.out.print(defaultLogMsg + "Destroying " + greencode.http.$HttpRequest.getGlobalViewList().size() + " View(s)...");
-			while(!greencode.http.$HttpRequest.getGlobalViewList().isEmpty())
-				greencode.http.$HttpRequest.getGlobalViewList().get(0).invalidate();
-			System.out.print(" [done]\n");
-		}
-
-		Enumeration<Driver> drivers = DriverManager.getDrivers();
-		while(drivers.hasMoreElements()) {
-			Driver driver = drivers.nextElement();
-			try {
-				DriverManager.deregisterDriver(driver);
-				System.out.print(defaultLogMsg + String.format("Deregistering jdbc driver: %s\n", driver));
-			} catch(SQLException e) {
-				e.printStackTrace();
+	@OnMessage
+	public void onMessage(String message, Session session) throws IOException, ServletException {
+		final WebSocketData wsData = new Gson().fromJson(message, WebSocketData.class);
+		
+		wsData.httpSession = this.session;
+		wsData.session = session;
+		
+		wsData.localPort = (Integer) session.getUserProperties().get("localPort");
+		wsData.remoteHost = (String) session.getUserProperties().get("remoteHost");
+		wsData.requestURI = wsData.url;
+		wsData.requestURL = new StringBuffer("http://").append(wsData.remoteHost).append(":").append(wsData.localPort).append(wsData.url);
+		
+		try {
+			final String servletPath = wsData.url.substring(Core.CONTEXT_PATH.length()+1);
+			if(servletPath.equals("$synchronize")) {
+				Core.coreInit(servletPath, request, response, null, wsData);
+			} else {
+				new Thread(new Runnable() {
+					public void run() {
+						try {
+							Core.coreInit(servletPath, request, response, null, wsData);
+						} catch (Exception e) {
+							throw new RuntimeException(e);
+						}
+					}
+				}).start();
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+	}
+
+	@OnClose
+	public void onClose(Session session, CloseReason closeReason) {
+	}
+	
+	@OnError
+	public void onError(Session session, Throwable thr) {		
 	}
 
 	private static boolean acceptsGZipEncoding(HttpServletRequest httpRequest) {
 		String acceptEncoding = httpRequest.getHeader("Accept-Encoding");
 		return acceptEncoding != null && acceptEncoding.indexOf("gzip") != -1;
 	}
-
-	private final static Field requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request");
-	private final static String INIT_METHOD_NAME = "init";
 	
 	@Override
 	public void doFilter(final ServletRequest request, ServletResponse response, final FilterChain chain) throws IOException, ServletException {
@@ -151,21 +193,31 @@ public final class Core implements Filter {
 
 		final String servletPath = ((HttpServletRequest) request).getServletPath().substring(1);
 
+		if(servletPath.equals("coreWebSocket")) {
+			request.setAttribute("httpResponse", response);
+		}
+		
+		coreInit(servletPath, request, response, chain, null);
+	}
+	
+	static void coreInit(final String servletPath, final ServletRequest request, ServletResponse response, final FilterChain chain, final WebSocketData webSocketData) throws IOException, ServletException {		
 		if(servletPath.equals("$synchronize")) {
-			GreenContext context = new GreenContext(new HttpRequest((HttpServletRequest) request, (HttpServletResponse)response), (HttpServletResponse) response, null);
+			GreenContext context = new GreenContext((HttpServletRequest) request, (HttpServletResponse) response, null, webSocketData);
 
-			final Integer uid = Integer.parseInt(request.getParameter("uid"));
+			final Integer uid = Integer.parseInt(context.request.getParameter("uid"));
 
-			HashMap<Integer, DOM> DOMList = greencode.jscript.$DOMHandle.getDOMSync(context.getRequest().getViewSession());
+			HttpRequest __request = context.getRequest();
+			
+			HashMap<Integer, DOM> DOMList = greencode.jscript.$DOMHandle.getDOMSync(__request.getViewSession());
 
 			DOM dom = DOMList.get(uid);
 
 			synchronized (dom) {
 				DOMList.remove(uid);
 
-				final String varName = request.getParameter("varName");
+				final String varName = __request.getParameter("varName");
 				if(varName != null) {
-					Object value = varName.indexOf("$$_file_") == 0 ? context.getRequest().getPart(varName) : request.getParameter("var");
+					Object value = varName.indexOf("$$_file_") == 0 ? __request.getPart(varName) : __request.getParameter("var");
 
 					DOMHandle.setVariableValue(dom, varName, value);
 
@@ -176,7 +228,8 @@ public final class Core implements Filter {
 				dom.notify();
 			}
 
-			response.getWriter().close();
+			if(webSocketData == null)
+				response.getWriter().close();
 			return;
 		}
 
@@ -256,7 +309,10 @@ public final class Core implements Filter {
 		}
 
 		Console.log(":: Request Processing ::");
-		GreenContext context = new GreenContext((HttpServletRequest) request, (HttpServletResponse) response, page);
+		final GreenContext context = new GreenContext((HttpServletRequest) request, (HttpServletResponse) response, page, webSocketData);
+		
+		final Basic basicRemote = webSocketData != null ? webSocketData.getSession().getBasicRemote() : null;
+		
 		try {
 			Class<?>[] listArgsClass = null;
 			if(page != null) {
@@ -266,7 +322,7 @@ public final class Core implements Filter {
 
 				if(!(page.pageAnnotation.parameters().length == 1 && page.pageAnnotation.parameters()[0].name().isEmpty())) {
 					for(PageParameter p: page.pageAnnotation.parameters())
-						greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), p.value());
+						greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), new String[]{p.value()});
 				}
 
 				String content;
@@ -276,12 +332,15 @@ public final class Core implements Filter {
 					content = page.getSelectedContent(page.pageAnnotation.selector(), context);
 				else
 					content = page.getContent(context);
-
-				if(greencode.http.$HttpRequest.__contentIsHtml(context.request)) {
-					content = "<ajaxcontent>"+content+"</ajaxcontent>";
+				if(basicRemote != null) {
+					basicRemote.sendText(content);
+				} else {
+					if(greencode.http.$HttpRequest.__contentIsHtml(context.request)) {
+						content = "<ajaxcontent>"+content+"</ajaxcontent>";
+					}
+					
+					context.getResponse().getWriter().write(content);
 				}
-
-			    context.getResponse().getWriter().write(content);
 			}
 
 			HttpAction requestController = WindowHandle.getInstance((Class<Window>) requestClass, context.getRequest().getConversation());
@@ -369,7 +428,7 @@ public final class Core implements Filter {
 				context.forceSynchronization = true;
 				context.listAttrSync = fs.value();
 				if(fs.onlyOnce())
-					context.listAttrSyncCache = new HashSet<String>();
+					context.listAttrSyncCache = new HashMap<Integer, HashSet<String>>();
 			}
 
 			if(hasBootaction) {
@@ -591,7 +650,7 @@ public final class Core implements Filter {
 			for(String fileName: JS_CORE_FILES)
 				coreFileJS.append(classLoader.getResource("greencode/jscript/files/" + fileName));
 
-			coreFileJS.append("Greencode.className = {").append("greenContext: '" + GreenContext.class.getName() + "',").append("containerElement: '" + ContainerElement.class.getName() + "',").append("containerEventObject: '" + ContainerEventObject.class.getName() + "',").append("element: '" + Element.class.getName() + "'").append("};").append("Greencode.CONTEXT_PATH = '" + fConfig.getServletContext().getContextPath() + "';").append("Greencode.DEBUG_MODE = " + GreenCodeConfig.Browser.consoleDebug + ";");
+			coreFileJS.append("Greencode.className = {").append("greenContext: '" + GreenContext.class.getName() + "',").append("containerElement: '" + ContainerElement.class.getName() + "',").append("containerEventObject: '" + ContainerEventObject.class.getName() + "',").append("element: '" + Element.class.getName() + "'").append("};").append("Greencode.CONTEXT_PATH = '" + Core.CONTEXT_PATH + "';").append("Greencode.DEBUG_MODE = " + GreenCodeConfig.Browser.consoleDebug + ";");
 
 			coreFileJS.save();
 
@@ -713,6 +772,39 @@ public final class Core implements Filter {
 			GenericReflection.NoThrow.setFinalStaticValue(Core.class, "HAS_ERROR", false);
 		} catch(Exception e) {
 			throw new GreencodeError(e);
+		}
+	}
+	
+	public void destroy() {
+		if(Cache.bootAction != null) {
+			System.out.print(defaultLogMsg + "Destroying BootAction...");
+			Cache.bootAction.destroy();
+			System.out.print(" [done]\n");
+		}
+
+		if(Cache.plugins != null) {
+			System.out.print(defaultLogMsg + "Destroying Plugins...");
+			for(PluginImplementation plugin: Cache.plugins)
+				plugin.destroy();
+			System.out.print(" [done]\n");
+		}
+
+		if(!greencode.http.$HttpRequest.getGlobalViewList().isEmpty()) {
+			System.out.print(defaultLogMsg + "Destroying " + greencode.http.$HttpRequest.getGlobalViewList().size() + " View(s)...");
+			while(!greencode.http.$HttpRequest.getGlobalViewList().isEmpty())
+				greencode.http.$HttpRequest.getGlobalViewList().get(0).invalidate();
+			System.out.print(" [done]\n");
+		}
+
+		Enumeration<Driver> drivers = DriverManager.getDrivers();
+		while(drivers.hasMoreElements()) {
+			Driver driver = drivers.nextElement();
+			try {
+				DriverManager.deregisterDriver(driver);
+				System.out.print(defaultLogMsg + String.format("Deregistering jdbc driver: %s\n", driver));
+			} catch(SQLException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 }

@@ -272,9 +272,9 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 			cometReceber.forceConnectType(Comet().IframeHttpRequest);
 
 			cometReceber.send(param, function(data) {
-				Bootstrap.init(mainElement, data, __arguments);
+				Bootstrap.init(this, mainElement, data, __arguments);
 			}, function(data) {
-				Bootstrap.init(mainElement, data, __arguments);
+				Bootstrap.init(this, mainElement, data, __arguments);
 
 				objectEvent.processing = false;
 
@@ -369,7 +369,7 @@ Bootstrap.readCommand = function(mainElement) {
 	}
 };
 
-Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
+Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 	if (mainElement == null)
 		mainElement = document.body;
 
@@ -383,7 +383,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 				try {
 					var txt = Greencode.crossbrowser.text.call(jsonDiv);
 					if (txt.length > 0) {
-						Bootstrap.init(mainElement, JSON.parse(txt));
+						Bootstrap.init(request, mainElement, JSON.parse(txt));
 						Greencode.executeEvent('init');
 					}
 				} catch (e) {
@@ -429,11 +429,20 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 			}
 
 			if (jsonObject.sync != null) {
-				var sync = jsonObject.sync, e = Greencode.cache.getById(sync.uid, mainElement), cometReceber = new Comet(Greencode.CONTEXT_PATH + '/$synchronize');
+				var sync = jsonObject.sync, e = Greencode.cache.getById(sync.uid, mainElement), __request, newURL;
+				
+				var url = Greencode.CONTEXT_PATH + '/$synchronize';
+				
+				if(request != null && request.isWebSocket()) {
+					__request = request;
+					newURL = url
+				} else {
+					__request = new Comet(url);
 
-				cometReceber.setMethodRequest("post");
-				cometReceber.setCometType(Comet().LONG_POLLING);
-				cometReceber.reconnect(false);
+					__request.setMethodRequest("post");
+					__request.setCometType(Comet().LONG_POLLING);
+					__request.reconnect(false);
+				}
 
 				if (e != null) {
 					Bootstrap.analizeJSON(mainElement, sync.command.parameters, e);
@@ -442,7 +451,7 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 
 					if (sync.command.name.indexOf('__partFile') > -1) {
 						value = e;
-						cometReceber.forceConnectType(Comet().IframeHttpRequest);
+						__request.forceConnectType(Comet().IframeHttpRequest);
 					} else {
 						if (sync.command.name === "#") {
 							value = {};
@@ -479,19 +488,21 @@ Bootstrap.init = function(mainElement, __jsonObject, argsEvent) {
 						else if (typeof value === "object")
 							value = Greencode.util.objectToString(value, filter);
 					}
-					cometReceber.send({
+
+					__request.send({
 						viewId : viewId,
 						uid : sync.uid,
 						varName : sync.varName,
 						'var' : value
-					});
-				} else
-					cometReceber.send({
+					}, null, null, newURL);
+				} else {
+					__request.send({
 						viewId : viewId,
 						uid : sync.uid
-					});
+					}, null, null, newURL);
+				}
 
-				cometReceber = null;
+				__request = null;
 
 				if (!Greencode.DEBUG_MODE)
 					delete jsonObject.sync;

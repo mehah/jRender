@@ -72,7 +72,8 @@ public abstract class Window extends EventTarget implements HttpAction {
 	
 	public boolean connectionAborted() {
 		try {
-			GreenContext context = GreenContext.getInstance();			
+			GreenContext context = GreenContext.getInstance();
+			//TODO: Verificar aborto de conexão com sistema de websocket
 			greencode.kernel.$ElementsScan.send(context, null);			
 			context.getResponse().flushBuffer();
 			

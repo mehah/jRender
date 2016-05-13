@@ -6,7 +6,7 @@ if(__isIE8orLess)
 
 var startInterval = function() {
 	setTimeout(function() {
-		Bootstrap.init(document);
+		Bootstrap.init(null, document);
 		if(startInterval)
 			startInterval();
 	}, 15);

@@ -13,7 +13,7 @@ public final class $HttpRequest {
 		return request.__contentIsHtml;
 	}
 
-	public static HashMap<String, String> getParameters(HttpRequest request) {
+	public static HashMap<String, String[]> getParameters(HttpRequest request) {
 		return request.params;
 	}
 

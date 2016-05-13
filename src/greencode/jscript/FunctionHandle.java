@@ -193,7 +193,7 @@ public final class FunctionHandle {
 	}
 	
 	private void setUrl(String url) {
-		this.url = (context != null ? context.getRequest().getContextPath(): "") +"/"+url;
+		this.url = (context != null ? greencode.kernel.$GreenContext.getContextPath() : "") +"/"+url;
 	}
 	
 	public static void destroy(Window window, Function anonymousClass) {

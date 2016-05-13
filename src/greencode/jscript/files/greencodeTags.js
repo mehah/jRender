@@ -199,7 +199,7 @@ Greencode.tags = {
 									window.eval(Greencode.crossbrowser.text.call(scriptElement));
 							}
 	
-							Bootstrap.init(o);
+							Bootstrap.init(this, o);
 	
 							if (changeURL) {
 								if (history.pushState == null)
@@ -263,9 +263,9 @@ Greencode.tags = {
 						}
 
 						element.insertAdjacentHTML('beforeEnd', data);
-						Bootstrap.init(element);
+						Bootstrap.init(this, element);
 					} else if (data != null && data != "")
-						Bootstrap.init(form, JSON.parse(data));
+						Bootstrap.init(this, form, JSON.parse(data));
 				});
 
 				cometReceber = null;

@@ -6,6 +6,7 @@ var Comet = function(url) {
 		return {
 			LONG_POLLING : 1,
 			STREAMING : 2,
+			WEBSOCKET : 3,
 
 			IframeHttpRequest : 1,
 			XMLHttpRequest : 2
@@ -13,7 +14,7 @@ var Comet = function(url) {
 	}
 
 	var o = this,
-		ajaxRequest = null,
+		_request = null,
 		data = null,
 		async = true,
 		methodRequest = "GET",
@@ -89,7 +90,7 @@ var Comet = function(url) {
 	};
 
 	this.abort = function() {
-		ajaxRequest.abort();
+		_request.abort();
 		this.onAbort();
 	};
 
@@ -100,75 +101,142 @@ var Comet = function(url) {
 	this.forceConnectType = function(type) {
 		forceConnectType = type;
 	};
+	
+	this.isWebSocket = function() {
+		return _request instanceof WebSocket;
+	};
 
-	this.send = function(p, c1, c2) {
-		if (ajaxRequest === null) {
-			var useIframe = false;
-			if (forceConnectType != null) {
-				if (forceConnectType === Comet().IframeHttpRequest)
+	var __WebSocketSupport = window.WebSocket != null;
+	
+	var processData = function(data, url, newURL) {
+        for(var i in data) {
+        	var v = data[i];
+        	if(!isArray(v)) {
+        		data[i] = [v]
+        	}	            	
+        }
+        
+        data = JSON.stringify({
+        	params: data,
+        	url: newURL ? newURL : url
+        });
+        
+        return data;
+	}
+	
+	this.send = function(p, c1, c2, newURL) {
+		if (_request === null) {
+			if(__WebSocketSupport) {
+				_request = new WebSocket("ws://"+window.location.host+Greencode.CONTEXT_PATH+"/coreWebSocket");
+			} else {
+				var useIframe = false;
+				if (forceConnectType != null) {
+					if (forceConnectType === Comet().IframeHttpRequest)
+						useIframe = true;					
+				} else if (this.getCometType() === Comet().STREAMING && window.ActiveXObject != null)
 					useIframe = true;
-			} else if (this.getCometType() === Comet().STREAMING && window.ActiveXObject != null)
-				useIframe = true;
 
-			if (useIframe)
-				ajaxRequest = new IframeHttpRequest();
-			else {
-				try {
-					ajaxRequest = new XMLHttpRequest();
-				} catch (e) {
+				if (useIframe)
+					_request = new IframeHttpRequest();
+				else {
 					try {
-						ajaxRequest = new ActiveXObject("Microsoft.XMLHTTP");
+						_request = new XMLHttpRequest();
 					} catch (e) {
-						alert("Não foi possivel abrir uma instancia de conexão!");
-						return false;
+						try {
+							_request = new ActiveXObject("Microsoft.XMLHTTP");
+						} catch (e) {
+							alert("Não foi possivel abrir uma instancia de conexão!");
+							return false;
+						}
 					}
-				}
+				}				
 			}
 		}
-
-		data = p != null && data == null ? p : {};
+		
+		data = p != null ? p : {};
 
 		data.__contentIsHtml = !jsonContentType;
 
 		if (closed === true) {
-			var hasContent = !(/^(?:GET|HEAD)$/.test(methodRequest)), parameters = "";
-			if (!(ajaxRequest instanceof IframeHttpRequest) && data != null) {
-				if (data instanceof Object) {
-					data = Greencode.jQuery.param(data);
-					if (!hasContent)
-						parameters = (parameters.indexOf('?') === -1 ? '?' : '&') + data;
+			if(!__WebSocketSupport) {
+				var hasContent = !(/^(?:GET|HEAD)$/.test(methodRequest)), parameters = "";
+				if (!(_request instanceof IframeHttpRequest)) {
+					if (data instanceof Object) {
+						data = Greencode.jQuery.param(data);
+						if (!hasContent)
+							parameters = (parameters.indexOf('?') === -1 ? '?' : '&') + data;
+					}
 				}
+				_request.open(methodRequest, url + parameters, async);
+				if (hasContent)
+					_request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=" + charset);
+	
+				_request.setRequestHeader("X-Requested-With", "XMLHttpRequest");
 			}
-			var newURL = url + parameters;
-
-			ajaxRequest.open(methodRequest, newURL, async);
-			if (hasContent)
-				ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=" + charset);
-
-			ajaxRequest.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-			newURL = null;
+			
 			closed = false;
 		}
 
-		if (c1 != null)
-			this.onMessage(c1, c2);
-
-		ajaxRequest.send(data != null ? data : null);
+		if (c1 != null) {
+			if(__WebSocketSupport) {
+				_request.onmessage = function(_){
+					var data = _.data ? (jsonContentType ? JSON.parse(_.data) :  _.data) : "";
+					c1.call(o, data);
+	            };
+	            
+	            _request.onclose = function(_) {
+	            	var data = _.data ? (jsonContentType ? JSON.parse(_.data) :  _.data) : "";
+	            	c2.call(o, data);
+	            };
+	            
+	            data = processData(data, url, newURL)
+			} else
+				this.onMessage(c1, c2);
+		} else {
+			if(__WebSocketSupport) {
+				data = processData(data, url, newURL)
+			}
+		}
+		
+		if(__WebSocketSupport) {
+			var f = function() {
+				setTimeout(function() {
+					if(_request.readyState == WebSocket.CONNECTING) {
+						f();
+					}else if(_request.readyState == WebSocket.OPEN) {
+						_request.send(data != null ? data : null);
+					}
+				}, 15);
+			};
+			
+			f();
+		} else {
+			_request.send(data != null ? data : null);
+		}
 	};
 
 	this.onAbort = function(c) {
-		if (c == null) {
-			clearTimeout(eventReconnect);
-			eventReconnect = null;
+		if(__WebSocketSupport) {
+			_request.onclose = c;
+		}else {
+			if (c == null) {
+				clearTimeout(eventReconnect);
+				eventReconnect = null;
 
-			closed = true;
-			if (onAbort != null)
-				onAbort.call(o);
-		} else
-			onAbort = c;
+				closed = true;
+				if (onAbort != null)
+					onAbort.call(o);
+			} else
+				onAbort = c;
+		}
+
 	};
+	
 	this.onError = function(c) {
-		onError = c;
+		if(__WebSocketSupport) {
+			_request.onerror = c;
+		}else
+			onError = c;
 	};
 
 	var erroEvent = function() {
@@ -185,14 +253,14 @@ var Comet = function(url) {
 	}
 
 	this.onMessage = function(c1, c2) {
-		ajaxRequest.onreadystatechange = null;
+		_request.onreadystatechange = null;
 		var ultLength = 0, o = this;
 
 		Greencode.crossbrowser.registerEvent.call(window, 'unload', function() {
 			o.abort();
 		});
 
-		ajaxRequest.onreadystatechange = function() {
+		_request.onreadystatechange = function() {
 			state = this.readyState;
 
 			if (this.readyState === UNSENT)
@@ -201,7 +269,7 @@ var Comet = function(url) {
 				if (this.status !== 200)
 					erroEvent();
 				else {
-					var reconnectByReturn = c1.call(o, jsonContentType ? JSON.parse(ajaxRequest.responseText) : ajaxRequest.responseText);
+					var reconnectByReturn = c1.call(o, jsonContentType ? JSON.parse(_request.responseText) : _request.responseText);
 
 					closed = true;
 					if (o.reconnect() === true && reconnectByReturn !== false) {
@@ -212,7 +280,7 @@ var Comet = function(url) {
 					}
 				}
 			} else if (o.getCometType() === Comet().STREAMING) {
-				var txt = ajaxRequest.responseText, isIframe = ajaxRequest instanceof IframeHttpRequest, data = null, isArray = false;
+				var txt = _request.responseText, isIframe = _request instanceof IframeHttpRequest, data = null, isArray = false;
 
 				if (!isIframe && ultLength) {
 					txt = txt.substring(ultLength);
@@ -229,7 +297,7 @@ var Comet = function(url) {
 					return;
 				
 				if (!isIframe) {
-					ultLength = ajaxRequest.responseText.length;
+					ultLength = _request.responseText.length;
 				}
 				
 				/*
@@ -259,7 +327,7 @@ var Comet = function(url) {
 								console.log(e);
 								console.log(txt);
 							}
-							ajaxRequest.abort();
+							_request.abort();
 							return;
 						}
 					}

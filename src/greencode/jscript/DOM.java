@@ -50,12 +50,9 @@ public abstract class DOM {
 	}
 	
 	static void sendByte(GreenContext context) throws IOException {
-		if(!greencode.http.$HttpRequest.contentIsHtml(context.getRequest()) || context.getRequest().isIFrameHttpRequest()) {
+		if(!context.getRequest().isWebSocket() && (!greencode.http.$HttpRequest.contentIsHtml(context.getRequest()) || context.getRequest().isIFrameHttpRequest())) {
 			if(!greencode.kernel.$GreenContext.flushed(context))  {
-				//TODO: fazer tb para Safari
-				//boolean isInternetExplorer = context.getRequest().getHeader("User-Agent").indexOf("MSIE") > -1;
-				//if(isInternetExplorer)
-					context.getResponse().getWriter().write(txt2kb);
+				context.getResponse().getWriter().write(txt2kb);
 			}
 		}
 	}
@@ -68,7 +65,7 @@ public abstract class DOM {
 
 			ElementsScan.sendElements(context);
 			
-			if(buffer) context.getResponse().flushBuffer();
+			if(buffer && !context.getRequest().isWebSocket()) context.getResponse().flushBuffer();
 			
 			greencode.kernel.$GreenContext.flushed(context, true);
 		} catch (IOException e) {

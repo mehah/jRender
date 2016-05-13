@@ -2,6 +2,8 @@ package greencode.kernel;
 
 import java.io.IOException;
 
+import javax.websocket.RemoteEndpoint.Basic;
+
 import greencode.http.ViewSession;
 import greencode.jscript.JSCommand;
 

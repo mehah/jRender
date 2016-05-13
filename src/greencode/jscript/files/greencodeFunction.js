@@ -135,7 +135,7 @@ Greencode.customMethod = {
 					Greencode.customMethod.empty.call(This);
 				}
 				This.insertAdjacentHTML('beforeEnd', data);
-				Bootstrap.init(This);
+				Bootstrap.init(this, This);
 			}
 		};
 		
@@ -182,14 +182,14 @@ Greencode.customMethod = {
 			var o = a[i];
 			
 			var elements = Greencode.crossbrowser.querySelectorAll.call(this, '[name="'+o.name+'"]');
-			if(elements == null)
+			if(elements.length == 0)
 				continue;
 			
 			if(!Greencode.jQuery.isArray(o.values))
 				o.values = [o.values];
 			
 			var first = elements[0];
-			
+						
 			var container = Greencode.customMethod.getParentByTagName.call(first, 'container');
 			if(container != null && container != this)
 				continue;

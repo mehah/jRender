@@ -1,8 +1,10 @@
 package greencode.kernel;
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Properties;
@@ -18,6 +20,7 @@ import greencode.database.DatabaseConnection;
 import greencode.exception.OperationNotAllowedException;
 import greencode.http.HttpRequest;
 import greencode.jscript.DOM;
+import greencode.jscript.DOMHandle;
 import greencode.jscript.Form;
 import greencode.jscript.Window;
 import greencode.kernel.implementation.BootActionImplementation;
@@ -34,6 +37,7 @@ public final class GreenContext {
 	
 	final HttpRequest request;
 	final HttpServletResponse response;
+	final WebSocketData webSocketData;
 	final public Gson gsonInstance = getGsonInstance();
 	
 	boolean userLocaleChanged = false;	
@@ -52,25 +56,26 @@ public final class GreenContext {
 	
 	boolean forceSynchronization = false;
 	String[] listAttrSync;
-	HashSet<String> listAttrSyncCache;
+	HashMap<Integer, HashSet<String>> listAttrSyncCache;
 	
-	GreenContext(HttpServletRequest request, HttpServletResponse response, FileWeb currentPage) {
+	GreenContext(HttpServletRequest request, HttpServletResponse response, FileWeb currentPage, WebSocketData wsData) {
 		GreenContext.greenContext.set(new WeakReference<GreenContext>(this)); 
-		
-		boolean sessionInitialized = request.getSession(false) != null;
+
+		boolean sessionInitialized = wsData != null || request.getSession(false) != null;
 				
+		this.webSocketData = wsData;
 		this.response = response;
-		this.request = new HttpRequest(request, response);
+		this.request = new HttpRequest(request, response, wsData);
 		this.currentPageAnnotation = currentPage == null ? null : currentPage.pageAnnotation;
 		
 		if(!sessionInitialized && getBootAction() != null)
 			getBootAction().initUserContext(this);
 		
-		Locale locale = (Locale) request.getSession().getAttribute("USER_LOCALE");
+		Locale locale = (Locale) this.request.getSession().getAttribute("USER_LOCALE");
 		
 		if(locale != null) {
 			this.userLocale = locale;
-			this.currentMessagePropertie = (Properties) request.getSession().getAttribute("CURRENT_MESSAGE_PROPERTIE");
+			this.currentMessagePropertie = (Properties) this.request.getSession().getAttribute("CURRENT_MESSAGE_PROPERTIE");
 			if(!this.request.isAjax())
 				userLocaleChanged = true;	
 		} else {
@@ -147,26 +152,32 @@ public final class GreenContext {
 			throw new OperationNotAllowedException(LogMessage.getMessage("green-0034"));
 	}
 	
-	boolean isForcingSynchronization(final String property) {
+	boolean isForcingSynchronization(final DOM dom, final String property) {
 		boolean sync;
 		if(sync = this.forceSynchronization) {			
 			if(this.listAttrSync != null) {
-				final boolean hasListAttrSyncCache = this.listAttrSyncCache != null;
+				HashSet<String> props = this.listAttrSyncCache.get(DOMHandle.getUID(dom));
+				if(props == null) {
+					this.listAttrSyncCache.put(DOMHandle.getUID(dom), props = new HashSet<String>());
+				}
+				
+				final boolean hasListAttrSyncCache = props != null;
 				if(this.listAttrSync.length > 0) {
 					sync = false;
-					if(!hasListAttrSyncCache || !this.listAttrSyncCache.contains(property)) {
+					
+					if(!hasListAttrSyncCache || !props.contains(property)) {
 						for (String attr : this.listAttrSync) {
 							if(attr.equals(property)) {
 								sync = true;
 								if(hasListAttrSyncCache)
-									listAttrSyncCache.add(property);
+									props.add(property);
 								break;
 							}
 						}
 					}
 				}else if(hasListAttrSyncCache) {
-					if(sync = !listAttrSyncCache.contains(property))
-						listAttrSyncCache.add(property);
+					if(sync = !props.contains(property))
+						props.add(property);
 				}
 			}
 		}
@@ -175,6 +186,14 @@ public final class GreenContext {
 	}
 	
 	void destroy() {
+		if(this.webSocketData != null) {
+			try {
+				this.webSocketData.getSession().close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		if(this.databaseConnection != null) {
 			try {
 				this.databaseConnection.close();

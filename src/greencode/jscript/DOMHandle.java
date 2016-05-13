@@ -99,7 +99,7 @@ public final class DOMHandle {
 	private static<C> C getVariableValue(final DOM owner, final String varName, Class<C> cast, boolean isMethod, final String _name, Object... parameters) {
 		GreenContext context = GreenContext.getInstance();
 		
-		if(greencode.kernel.$GreenContext.isForcingSynchronization(context, _name) || !owner.variables.containsKey(varName)) {
+		if(greencode.kernel.$GreenContext.isForcingSynchronization(context, owner, _name) || !owner.variables.containsKey(varName)) {
 			Object v = getSyncValue(context, owner, varName, isMethod, _name, parameters);
 			
 			if(cast != null && !cast.equals(String.class) && !cast.equals(Part.class)) {
@@ -166,8 +166,8 @@ public final class DOMHandle {
 		return getVariableValue(owner, varName, JsonArray.class, false, "#[]"+propertyName, (Object[])propertyNames);
 	}
 	
-	public static boolean isForcingSynchronization(GreenContext context, String property) {
-		return greencode.kernel.$GreenContext.isForcingSynchronization(context, property);
+	public static boolean isForcingSynchronization(GreenContext context, final DOM dom, String property) {
+		return greencode.kernel.$GreenContext.isForcingSynchronization(context, dom, property);
 	}
 	
 	public static class CustomMethod {
