@@ -264,14 +264,13 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 		};
 
 		if (Greencode.executeEvent('beforeEvent', _data) !== false) {
-			var cometReceber = new Comet(p.url);
-			cometReceber.setMethodRequest(p.requestMethod);
-			cometReceber.setCometType(Comet().STREAMING);
-			cometReceber.reconnect(false);
-			cometReceber.setAsync(p.async);
-			cometReceber.forceConnectType(Comet().IframeHttpRequest);
+			var request = new Request(p.url, Greencode.EVENT_REQUEST_TYPE);
+			request.setMethodRequest(p.requestMethod);
+			request.setCometType(Request.STREAMING);
+			request.reconnect(false);
+			request.setAsync(p.async);
 
-			cometReceber.send(param, function(data) {
+			request.send(param, function(data) {
 				Bootstrap.init(this, mainElement, data, __arguments);
 			}, function(data) {
 				Bootstrap.init(this, mainElement, data, __arguments);
@@ -291,7 +290,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 				Greencode.executeEvent('afterEvent', _data);
 			});
 
-			cometReceber = null;
+			request = null;
 		}
 
 		param = null;
@@ -437,10 +436,10 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 					__request = request;
 					newURL = url
 				} else {
-					__request = new Comet(url);
+					__request = new Request(url, Greencode.EVENT_REQUEST_TYPE == "websocket" ? "iframe" : Greencode.EVENT_REQUEST_TYPE);
 
 					__request.setMethodRequest("post");
-					__request.setCometType(Comet().LONG_POLLING);
+					__request.setCometType(Request.LONG_POLLING);
 					__request.reconnect(false);
 				}
 
@@ -451,7 +450,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 
 					if (sync.command.name.indexOf('__partFile') > -1) {
 						value = e;
-						__request.forceConnectType(Comet().IframeHttpRequest);
+						__request.forceConnectType(Request.IframeHttpRequest);
 					} else {
 						if (sync.command.name === "#") {
 							value = {};

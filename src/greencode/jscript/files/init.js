@@ -20,8 +20,6 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 		return;
 	}
 	
-	/*var oldWrite = document.write;*/
-	
 	window.document.write = function(node){
 		var temp = document.createElement('div');
 		temp.innerHTML = node;

@@ -6,6 +6,7 @@ import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.form.annotation.Name;
 import greencode.jscript.function.implementation.Function;
 import greencode.jscript.window.annotation.Form;
+import greencode.kernel.GreenCodeConfig;
 import greencode.kernel.GreenContext;
 import greencode.kernel.LogMessage;
 import greencode.util.ClassUtils;
@@ -32,7 +33,7 @@ public final class FunctionHandle {
 	
 	private JsonElement methodParameters;
 	
-	private RequestMethod requestMethod = RequestMethod.GET;
+	private String requestMethod = GreenCodeConfig.Server.Request.Event.methodtype.toUpperCase();
 	
 	private JsonObject[] args;
 	
@@ -54,9 +55,9 @@ public final class FunctionHandle {
 	
 	public FunctionHandle(Class<? extends Window> controller, String method, Class<? extends DOM>... args) { this.setUrl(controller, method, args); }
 
-	public RequestMethod getRequestMethod() { return requestMethod; }
+	public RequestMethod getRequestMethod() { return RequestMethod.valueOf(requestMethod); }
 
-	public void setRequestMethod(RequestMethod requestMethod) { this.requestMethod = requestMethod; }
+	public void setRequestMethod(RequestMethod requestMethod) { this.requestMethod = requestMethod.name(); }
 	
 	public String getUrl() { return url; }
 	

@@ -55,13 +55,14 @@ public final class GreenCodeConfig {
 
 			currentElement = server.getElementsByTag("request").first();
 			{
-				currentElement = currentElement.getElementsByTag("multipart").first();
-				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "autodectetion", Boolean.parseBoolean(currentElement.attr("autodectetion").trim()));
-				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "maxRequestSize", Integer.parseInt(currentElement.attr("max-request-size").trim()));
+				Element subCurrentElement = currentElement.getElementsByTag("multipart").first();
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "autodectetion", Boolean.parseBoolean(subCurrentElement.attr("autodectetion").trim()));
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "maxRequestSize", Integer.parseInt(subCurrentElement.attr("max-request-size").trim()));
+				
+				subCurrentElement = currentElement.getElementsByTag("event").first();
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Event.class, "requestType", subCurrentElement.attr("requestType").trim().toLowerCase());
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Event.class, "methodtype", subCurrentElement.attr("methodtype").trim());
 			}
-
-			currentElement = server.getElementsByTag("response").first();
-			GenericReflection.NoThrow.setFinalStaticValue(Server.Response.class, "gzipSupport", Boolean.parseBoolean(currentElement.attr("gzip").trim()));
 
 			currentElement = server.getElementsByTag("view").first();
 			{
@@ -154,6 +155,11 @@ public final class GreenCodeConfig {
 			public final static class Multipart {
 				public final static Boolean autodectetion = false;
 				public final static Integer maxRequestSize = -1;
+			}
+			
+			public final static class Event {
+				public final static String requestType = null;
+				public final static String methodtype = null;
 			}
 		}
 

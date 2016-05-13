@@ -6,9 +6,12 @@
 	<server writeLog="true">
 		<request>
 			<multipart autodectetion="false" max-request-size="-1" />
+			<!--
+				requestType: auto, websocket, iframe, ajax
+				methodType: post, get
+			-->
+			<event requestType="auto" methodtype="get" />
 		</request>
-
-		<response gzip="false" />
 
 		<!--
 			bootable: Cache de página. (True: Na inicialização do servidor / False: Na inicialização da página solicitada.

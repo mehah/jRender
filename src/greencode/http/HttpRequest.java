@@ -57,7 +57,7 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 			this.httpSession = wsData.getHttpSession();
 			this.isIFrameHttpRequest = false;
 			this.isAjax = true;
-			this.methodType = RequestMethod.WEBSOCKET.name();
+			this.methodType = RequestMethod.GET.name();
 			this.remoteHost = wsData.getRemoteHost();
 			this.requestURL = wsData.getRequestURL();
 			this.requestURI = wsData.getRequestURI();
@@ -231,8 +231,8 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 
 	public String[] getParameterValues(String name) {
 		String[] value;
-		int pos = name.indexOf("[]");
-		if (pos != -1 && isMethod(RequestMethod.WEBSOCKET)) {
+		int pos;
+		if (isWebSocket() && (pos = name.indexOf("[]")) != -1) {
 			value = params.get(name.substring(0, pos));
 		} else {
 			value = params.get(name);

@@ -119,14 +119,13 @@ Greencode.customMethod = {
 	},
 	replaceWithPageURL: function(url, cid) {
 		var This = this,
-			cometReceber = new Comet(url),
+			request = new Request(url, Greencode.EVENT_REQUEST_TYPE),
 			first = false;
 		
-		cometReceber.setMethodRequest("POST");
-		cometReceber.setCometType(Comet().STREAMING);
-		cometReceber.reconnect(false);
-		cometReceber.forceConnectType(Comet().IframeHttpRequest);
-		cometReceber.jsonContentType(false);
+		request.setMethodRequest("POST");
+		request.setCometType(Request.STREAMING);
+		request.reconnect(false);
+		request.jsonContentType(false);
 		
 		var f = function(data) {
 			if(data) {
@@ -139,13 +138,13 @@ Greencode.customMethod = {
 			}
 		};
 		
-		cometReceber.send({cid: cid, viewId: viewId}, f, function(data) {
+		request.send({cid: cid, viewId: viewId}, f, function(data) {
 			f(data);
 			var _data = {mainElement: This}
 			Greencode.executeEvent('pageLoad', _data);
 		});
 		
-		cometReceber = null;
+		request = null;
 		return this;
 	},
 	resetForm: function() {
@@ -365,20 +364,21 @@ Greencode.customMethod = {
 Greencode.util = {
 	isArray: function(o) { return o && typeof o === 'object' && Object.prototype.toString.call(o) == '[object Array]'; },
 	loadScript: function(src, asyc, charset) {
-		var cometReceber = new Comet(src);
-		cometReceber.setMethodRequest("GET");
-		cometReceber.setCometType(Comet().LONG_POLLING);
-		cometReceber.reconnect(false);
-		cometReceber.setAsync(asyc);
-		cometReceber.jsonContentType(false);
-		if(charset)
-			cometReceber.setCharset(charset);
+		var request = new Request(src, Greencode.EVENT_REQUEST_TYPE);
+		request.setMethodRequest("GET");
+		request.setCometType(Request.LONG_POLLING);
+		request.reconnect(false);
+		request.setAsync(asyc);
+		request.jsonContentType(false);
 		
-		cometReceber.send(null, function(data) {
+		if(charset)
+			request.setCharset(charset);
+		
+		request.send(null, function(data) {
 			eval(data);
 		});
 		
-		cometReceber = null;
+		request = null;
 	},
 	objectToString: function(v, filter) {
 		var str = "{",

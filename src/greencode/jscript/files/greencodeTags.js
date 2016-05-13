@@ -130,17 +130,16 @@ Greencode.tags = {
 						keepViewId = Greencode.crossbrowser.hasAttribute.call(this, 'keepViewId'),
 						href = this.getAttribute('href'),
 						data = {__contentIsHtml : true},
-						cometReceber = new Comet(this.getAttribute('href'));
+						request = new Request(this.getAttribute('href'), Greencode.EVENT_REQUEST_TYPE);
 
 					if (keepViewId)
 						data.viewId = viewId;
 
-					cometReceber.setMethodRequest('GET');
-					cometReceber.setCometType(Comet().STREAMING);
-					cometReceber.reconnect(false);
-					cometReceber.setAsync(true);
-					cometReceber.jsonContentType(false);
-					//cometReceber.forceConnectType(Comet().IframeHttpRequest);
+					request.setMethodRequest('GET');
+					request.setCometType(Request.STREAMING);
+					request.reconnect(false);
+					request.setAsync(true);
+					request.jsonContentType(false);
 
 					var _data = {
 						mainElement : o,
@@ -155,7 +154,7 @@ Greencode.tags = {
 
 					if (Greencode.executeEvent('beforePageRequest', _data) !== false) {					
 						var dataComplete = "";					
-						cometReceber.send(data, function(data) {
+						request.send(data, function(data) {
 							dataComplete += data;
 						}, function(data) {
 							var tags = new Array();
@@ -220,7 +219,7 @@ Greencode.tags = {
 							Greencode.executeEvent('afterPageRequest', _data);
 							Greencode.executeEvent('pageLoad', _data);
 						});
-						cometReceber = null;
+						request = null;
 					}					
 
 					return false;
@@ -237,20 +236,19 @@ Greencode.tags = {
 			this.type = "button";
 
 			Greencode.crossbrowser.registerEvent.call(element, 'click', function() {
-				var data = {}, form = this.form, _es = Greencode.crossbrowser.querySelectorAll.call(form, 'input, textarea, select'), cometReceber = new Comet(this.getAttribute('action'));
+				var data = {}, form = this.form, _es = Greencode.crossbrowser.querySelectorAll.call(form, 'input, textarea, select'), request = new Request(this.getAttribute('action'), Greencode.EVENT_REQUEST_TYPE);
 
 				if (_es != null) {
 					for ( var e in _es)
 						data[this.id || this.name] = this.value;
 				}
 
-				cometReceber.setMethodRequest(this.getAttribute('method') != null && this.getAttribute('method').toUpperCase() === 'POST' ? 'POST' : 'GET');
-				cometReceber.setCometType(Comet().LONG_POLLING);
-				cometReceber.reconnect(false);
-				cometReceber.setAsync(true);
-				cometReceber.forceConnectType(Comet().IframeHttpRequest);
+				request.setMethodRequest(this.getAttribute('method') != null && this.getAttribute('method').toUpperCase() === 'POST' ? 'POST' : 'GET');
+				request.setCometType(Request.LONG_POLLING);
+				request.reconnect(false);
+				request.setAsync(true);
 
-				cometReceber.send(data, function(data) {
+				request.send(data, function(data) {
 				}, function(data) {
 					if (element.getAttribute('appendTo') != null) {
 						var o = Greencode.crossbrowser.querySelector.call(mainElement, element.getAttribute('appendTo'));
@@ -268,7 +266,7 @@ Greencode.tags = {
 						Bootstrap.init(this, form, JSON.parse(data));
 				});
 
-				cometReceber = null;
+				request = null;
 			});
 		}
 
