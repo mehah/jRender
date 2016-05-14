@@ -1,6 +1,6 @@
 var Greencode = {
+	MAIN_ELEMENT_ID: 1, WINDOW_ID: 2, DOCUMENT_ID: 3, HEAD_ID: 4, BODY_ID: 5,
 	cache : {
-		MAIN_ELEMENT_ID: 1, WINDOW_ID: 2, DOCUMENT_ID: 3, HEAD_ID: 4, BODY_ID: 5,
 		lastUID: 1000,
 		references : {},
 		generateUID: function() {
@@ -8,15 +8,15 @@ var Greencode = {
 			return Greencode.cache.lastUID;
 		},
 		getById : function(id, mainElement) {
-			if (id === Greencode.cache.MAIN_ELEMENT_ID)
+			if (id === Greencode.MAIN_ELEMENT_ID)
 				return mainElement;
-			else if (id === Greencode.cache.WINDOW_ID)
+			else if (id === Greencode.WINDOW_ID)
 				return window;
-			else if (id === Greencode.cache.DOCUMENT_ID)
+			else if (id === Greencode.DOCUMENT_ID)
 				return document;
-			else if (id === Greencode.cache.HEAD_ID)
+			else if (id === Greencode.HEAD_ID)
 				return document.head;
-			else if (id === Greencode.cache.BODY_ID)
+			else if (id === Greencode.BODY_ID)
 				return document.body;
 			
 			return Greencode.cache.references[id];
@@ -37,5 +37,8 @@ var Greencode = {
 		remove: function(uid) {
 			delete Greencode.cache.references[uid];
 		}
+	},
+	isRequestSingleton: function() {
+		return Greencode.REQUEST_SINGLETON && (Greencode.EVENT_REQUEST_TYPE == 'auto' && window.WebSocket != null || Greencode.EVENT_REQUEST_TYPE == 'websocket');
 	}
 };

@@ -4,17 +4,19 @@
 
 <!ELEMENT browser EMPTY>
 	<!ATTLIST browser consoleDebug ( true | false ) "true" >
+	<!ATTLIST browser websocket-singleton ( true | false ) "true">
 	
 <!ELEMENT server (request, view, database?, internationalization?, plugins?)>
 	<!ATTLIST server writeLog ( true | false ) "true" >
 	
 	<!ELEMENT request (multipart, event)>
+		<!ELEMENT multipart EMPTY>
+			<!ATTLIST multipart autodectetion ( true | false ) "false" >
+			<!ATTLIST multipart max-request-size CDATA "-1">
+			
 		<!ELEMENT event EMPTY>
-		<!ATTLIST event requestType ( auto | websocket | iframe | ajax ) "auto">
-		<!ATTLIST event methodtype ( post | get ) "get">	
-	<!ELEMENT multipart EMPTY>
-		<!ATTLIST multipart autodectetion ( true | false ) "false" >
-		<!ATTLIST multipart max-request-size CDATA "-1">
+			<!ATTLIST event requestType ( auto | websocket | iframe | ajax ) "auto">
+			<!ATTLIST event methodType ( post | get ) "get">
 			
 	<!ELEMENT view (templates?, session)>
 		<!ATTLIST view bootable ( true | false ) "false" >

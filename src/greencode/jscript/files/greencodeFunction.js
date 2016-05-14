@@ -119,7 +119,7 @@ Greencode.customMethod = {
 	},
 	replaceWithPageURL: function(url, cid) {
 		var This = this,
-			request = new Request(url, Greencode.EVENT_REQUEST_TYPE),
+			request = new Request(url, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton()),
 			first = false;
 		
 		request.setMethodRequest("POST");
@@ -364,7 +364,7 @@ Greencode.customMethod = {
 Greencode.util = {
 	isArray: function(o) { return o && typeof o === 'object' && Object.prototype.toString.call(o) == '[object Array]'; },
 	loadScript: function(src, asyc, charset) {
-		var request = new Request(src, Greencode.EVENT_REQUEST_TYPE);
+		var request = new Request(src, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
 		request.setMethodRequest("GET");
 		request.setCometType(Request.LONG_POLLING);
 		request.reconnect(false);

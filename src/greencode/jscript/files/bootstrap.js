@@ -264,7 +264,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 		};
 
 		if (Greencode.executeEvent('beforeEvent', _data) !== false) {
-			var request = new Request(p.url, Greencode.EVENT_REQUEST_TYPE);
+			var request = new Request(p.url, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
 			request.setMethodRequest(p.requestMethod);
 			request.setCometType(Request.STREAMING);
 			request.reconnect(false);
@@ -434,7 +434,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 				
 				if(request != null && request.isWebSocket()) {
 					__request = request;
-					newURL = url
+					__request.setURL(url)
 				} else {
 					__request = new Request(url, Greencode.EVENT_REQUEST_TYPE == "websocket" ? "iframe" : Greencode.EVENT_REQUEST_TYPE);
 
@@ -493,12 +493,12 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 						uid : sync.uid,
 						varName : sync.varName,
 						'var' : value
-					}, null, null, newURL);
+					}, null, null);
 				} else {
 					__request.send({
 						viewId : viewId,
 						uid : sync.uid
-					}, null, null, newURL);
+					}, null, null);
 				}
 
 				__request = null;

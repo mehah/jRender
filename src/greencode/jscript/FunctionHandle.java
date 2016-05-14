@@ -33,7 +33,7 @@ public final class FunctionHandle {
 	
 	private JsonElement methodParameters;
 	
-	private String requestMethod = GreenCodeConfig.Server.Request.Event.methodtype.toUpperCase();
+	private String requestMethod = GreenCodeConfig.Server.Request.Event.methodType.toUpperCase();
 	
 	private JsonObject[] args;
 	

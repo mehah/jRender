@@ -130,7 +130,7 @@ Greencode.tags = {
 						keepViewId = Greencode.crossbrowser.hasAttribute.call(this, 'keepViewId'),
 						href = this.getAttribute('href'),
 						data = {__contentIsHtml : true},
-						request = new Request(this.getAttribute('href'), Greencode.EVENT_REQUEST_TYPE);
+						request = new Request(this.getAttribute('href'), Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
 
 					if (keepViewId)
 						data.viewId = viewId;
@@ -236,7 +236,7 @@ Greencode.tags = {
 			this.type = "button";
 
 			Greencode.crossbrowser.registerEvent.call(element, 'click', function() {
-				var data = {}, form = this.form, _es = Greencode.crossbrowser.querySelectorAll.call(form, 'input, textarea, select'), request = new Request(this.getAttribute('action'), Greencode.EVENT_REQUEST_TYPE);
+				var data = {}, form = this.form, _es = Greencode.crossbrowser.querySelectorAll.call(form, 'input, textarea, select'), request = new Request(this.getAttribute('action'), Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
 
 				if (_es != null) {
 					for ( var e in _es)

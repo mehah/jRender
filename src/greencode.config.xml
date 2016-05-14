@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE HTML PUBLIC "Greencode" "https://raw.githubusercontent.com/mehah/Greencode-Framework/master/src/greencode.dtd">
 <greencode-config>
-	<browser consoleDebug="false" />
+	<browser consoleDebug="false" websocket-singleton="true" />
 
 	<server writeLog="true">
 		<request>
@@ -10,7 +10,7 @@
 				requestType: auto, websocket, iframe, ajax
 				methodType: post, get
 			-->
-			<event requestType="auto" methodtype="get" />
+			<event requestType="auto" methodType="get" />
 		</request>
 
 		<!--

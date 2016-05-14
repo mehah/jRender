@@ -45,6 +45,7 @@ public final class GreenCodeConfig {
 
 		Element browser = greencodeCofig.getElementsByTag("browser").first();
 		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "consoleDebug", Boolean.parseBoolean(browser.attr("consoleDebug").trim()));
+		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "websocketSingleton", Boolean.parseBoolean(browser.attr("websocket-singleton").trim()));
 
 		Element server = greencodeCofig.getElementsByTag("server").first();
 		{
@@ -61,7 +62,7 @@ public final class GreenCodeConfig {
 				
 				subCurrentElement = currentElement.getElementsByTag("event").first();
 				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Event.class, "requestType", subCurrentElement.attr("requestType").trim().toLowerCase());
-				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Event.class, "methodtype", subCurrentElement.attr("methodtype").trim());
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Event.class, "methodType", subCurrentElement.attr("methodType").trim());
 			}
 
 			currentElement = server.getElementsByTag("view").first();
@@ -146,6 +147,7 @@ public final class GreenCodeConfig {
 
 	public final static class Browser {
 		public final static Boolean consoleDebug = false;
+		public final static Boolean websocketSingleton = false;
 	}
 
 	public final static class Server {
@@ -159,7 +161,7 @@ public final class GreenCodeConfig {
 			
 			public final static class Event {
 				public final static String requestType = null;
-				public final static String methodtype = null;
+				public final static String methodType = null;
 			}
 		}
 

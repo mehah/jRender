@@ -1,9 +1,12 @@
 /*
  * - Simulador de Socket Real-Time. Por: Renato Machado dos Santos
  */
-var Request = function(url, type) {
+
+
+var Request = function(url, type, isSingleton) {
 	var o = this,
 		_request = null,
+		eventId = null,
 		data = null,
 		async = true,
 		methodRequest = "GET",
@@ -93,7 +96,7 @@ var Request = function(url, type) {
 		return _request instanceof WebSocket;
 	};
 	
-	var processData = function(data, url, newURL) {
+	var processData = function(data) {
         for(var i in data) {
         	var v = data[i];
         	if(!isArray(v)) {
@@ -103,19 +106,99 @@ var Request = function(url, type) {
         
         data = JSON.stringify({
         	params: data,
-        	url: newURL ? newURL : url
+        	url: url,
+        	eventId: eventId
         });
         
         return data;
 	}
 	
-	this.send = function(p, c1, c2, newURL) {
-		if (_request === null) {
-			var isAutoDetection = type == 'auto';
+	var sendRequestWebsocket = function(data) {
+		setTimeout(function() {
+			if(_request.readyState == WebSocket.CONNECTING) {
+				sendRequestWebsocket(data);
+			}else if(_request.readyState == WebSocket.OPEN) {
+				_request.send(data != null ? data : null);
+			}
+		}, 1);
+	};
+	
+	var websocket_url = "ws://"+window.location.host+Greencode.CONTEXT_PATH+"/coreWebSocket";
+	
+	this.send = function(p, c1, c2) {
+		data = p != null ? p : {};
+		data.__contentIsHtml = !jsonContentType;
+				
+		var isAutoDetection = type == 'auto';
+
+		if(window.WebSocket != null && (isAutoDetection || type == 'websocket')) {
+			if(isSingleton) {
+				if((_request = Request.instance) == null) {
+					Request.instance = _request = new WebSocket(websocket_url);
+					
+					_request.listEvents = {};
+					
+					var _strRequestClose = "{-websocket-close-:";
+					var _strRequestMsg = "{-websocket-msg-:";
+					
+					_request.onmessage = function(_) {
+						var closed, eventId, data;
+						if(closed = (_.data.indexOf(_strRequestClose) != -1)) {
+							eventId = _.data.substring(_strRequestClose.length);
+							eventId = eventId.substring(0, eventId.indexOf('}'));
+							data = "";
+						} else {
+							eventId = _.data.substring(_strRequestMsg.length);
+							eventId = eventId.substring(0, eventId.indexOf('}'));
+							data = _.data.substring(_.data.indexOf('}')+1);
+						}
 						
-			if(window.WebSocket != null && (isAutoDetection || type == 'websocket')) {
-				_request = new WebSocket("ws://"+window.location.host+Greencode.CONTEXT_PATH+"/coreWebSocket");
-			} else if(isAutoDetection || type == 'iframe') {
+						try {
+							data = JSON.parse(data);
+						}	catch(e) {
+						}
+						
+						var event = _request.listEvents[eventId];
+						
+						if(closed) {
+							if(event.close) {
+								event.close.call(o, data);
+							}
+							
+							delete _request.listEvents[data.eventId];
+							
+							event.request.closed = true;
+						}else if(event.msg) {
+							event.msg.call(o, data);
+						}
+		            };
+				}
+				
+				_request.listEvents[eventId = ++Request.lastEventId] = {request: o, msg: c1, close: c2};					
+			} else {
+				_request = new WebSocket(websocket_url);					
+				
+				if(c1 != null) {
+					_request.onmessage = function(_){
+						var data = _.data ? (jsonContentType ? JSON.parse(_.data) :  _.data) : "";
+						c1.call(o, data);
+		            };
+				}
+				
+				if(c2 != null) {
+		            _request.onclose = function(_) {
+		            	var data = _.data ? (jsonContentType ? JSON.parse(_.data) :  _.data) : "";
+		            	c2.call(o, data);
+		            };	
+				}
+			}
+
+			sendRequestWebsocket(processData(data));
+			return;
+		}
+			
+		if (_request === null) {	
+			if(isAutoDetection || type == 'iframe') {
 				_request = new IframeHttpRequest();
 			} else {
 				try {
@@ -130,10 +213,6 @@ var Request = function(url, type) {
 				}
 			}
 		}
-				
-		data = p != null ? p : {};
-
-		data.__contentIsHtml = !jsonContentType;
 
 		if (closed === true) {
 			if(!this.isWebSocket()){
@@ -156,41 +235,10 @@ var Request = function(url, type) {
 		}
 
 		if (c1 != null) {
-			if(this.isWebSocket()) {
-				_request.onmessage = function(_){
-					var data = _.data ? (jsonContentType ? JSON.parse(_.data) :  _.data) : "";
-					c1.call(o, data);
-	            };
-	            
-	            _request.onclose = function(_) {
-	            	var data = _.data ? (jsonContentType ? JSON.parse(_.data) :  _.data) : "";
-	            	c2.call(o, data);
-	            };
-	            
-	            data = processData(data, url, newURL)
-			} else
-				this.onMessage(c1, c2);
-		} else {
-			if(this.isWebSocket()) {
-				data = processData(data, url, newURL)
-			}
+			this.onMessage(c1, c2);
 		}
 		
-		if(this.isWebSocket()) {
-			var f = function() {
-				setTimeout(function() {
-					if(_request.readyState == WebSocket.CONNECTING) {
-						f();
-					}else if(_request.readyState == WebSocket.OPEN) {
-						_request.send(data != null ? data : null);
-					}
-				}, 15);
-			};
-			
-			f();
-		} else {
-			_request.send(data != null ? data : null);
-		}
+		_request.send(data != null ? data : null);
 	};
 
 	this.onAbort = function(c) {
@@ -345,6 +393,9 @@ var Request = function(url, type) {
 		};
 	};
 };
+
+Request.lastEventId = 0;
+Request.instance = null
 
 Request.LONG_POLLING = 1;
 Request.STREAMING = 2;

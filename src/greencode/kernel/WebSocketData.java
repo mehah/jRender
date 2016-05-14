@@ -8,6 +8,8 @@ import javax.websocket.Session;
 public class WebSocketData {
 	private HashMap<String, String[]> params;
 	
+	int eventId;
+	
 	String url;
 	HttpSession httpSession;
 	Session session;

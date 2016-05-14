@@ -308,7 +308,7 @@ public final class Core implements Filter {
 				else
 					content = page.getContent(context);
 				if (basicRemote != null) {
-					basicRemote.sendText(content);
+					basicRemote.sendText(ElementsScan.getMsgEventId(context.webSocketData)+content);
 				} else {
 					if (greencode.http.$HttpRequest.__contentIsHtml(context.request)) {
 						content = "<ajaxcontent>" + content + "</ajaxcontent>";
@@ -617,6 +617,7 @@ public final class Core implements Filter {
 				json.addProperty("CONTEXT_PATH", Core.CONTEXT_PATH);
 				json.addProperty("DEBUG_MODE", GreenCodeConfig.Browser.consoleDebug);
 				json.addProperty("EVENT_REQUEST_TYPE", GreenCodeConfig.Server.Request.Event.requestType);
+				json.addProperty("REQUEST_SINGLETON", GreenCodeConfig.Browser.websocketSingleton);
 
 				coreFileJS.append("Greencode.jQuery.extend(Greencode,").append(json).append(");");
 
