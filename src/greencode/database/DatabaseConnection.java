@@ -305,27 +305,22 @@ public final class DatabaseConnection implements Connection {
 		getConnection().setTypeMap(map);
 	}
 
-	@Override
 	public void setSchema(String schema) throws SQLException {
 		getConnection().setSchema(schema);
 	}
 
-	@Override
 	public String getSchema() throws SQLException {
 		return getConnection().getSchema();
 	}
 
-	@Override
 	public void abort(Executor executor) throws SQLException {
 		getConnection().abort(executor);
 	}
 
-	@Override
 	public void setNetworkTimeout(Executor executor, int milliseconds) throws SQLException {
 		getConnection().setNetworkTimeout(executor, milliseconds);
 	}
 
-	@Override
 	public int getNetworkTimeout() throws SQLException {
 		return getConnection().getNetworkTimeout();
 	}

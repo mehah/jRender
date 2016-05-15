@@ -915,22 +915,18 @@ public final class DatabaseCallableStatement implements CallableStatement {
 		return cs.wasNull();
 	}
 
-	@Override
 	public void closeOnCompletion() throws SQLException {
 		cs.closeOnCompletion();
 	}
 
-	@Override
 	public boolean isCloseOnCompletion() throws SQLException {
 		return cs.isCloseOnCompletion();
 	}
 
-	@Override
 	public <T> T getObject(int parameterIndex, Class<T> type) throws SQLException {
 		return cs.getObject(parameterIndex, type);
 	}
 
-	@Override
 	public <T> T getObject(String parameterName, Class<T> type) throws SQLException {
 		return cs.getObject(parameterName, type);
 	}

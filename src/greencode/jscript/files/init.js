@@ -4,17 +4,7 @@ var listTags = {},
 if(__isIE8orLess)
 	Greencode.util.loadScript(Greencode.CONTEXT_PATH + "/jscript/greencode/sizzle.js", false);
 
-var startInterval = function() {
-	setTimeout(function() {
-		Bootstrap.init(null, document);
-		if(startInterval)
-			startInterval();
-	}, 15);
-}();
-
 Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
-	delete window.startInterval;
-
 	if(window.location.hash.indexOf('#!') === 0) {
 		window.location.href = Greencode.CONTEXT_PATH + '/' + window.location.hash.substring(2);
 		return;

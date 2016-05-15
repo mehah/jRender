@@ -9,7 +9,7 @@ public final class JSCommand {
 	private final Object[] parameters;
 	
 	public JSCommand(DOM owner, String name, Object... args) {
-		this.uid = owner.uid;
+		this.uid = owner == null ? 2 : owner.uid;
 		this.name = name;
 		this.parameters = args.length > 0 ? args : null;
 	}

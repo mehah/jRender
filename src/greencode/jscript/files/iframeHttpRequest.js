@@ -37,7 +37,7 @@ var IframeHttpRequest = function() {
 		clearInterval(intervalId);
 	};
 
-	this.open = function(method, url, async) {
+	this.open = function(method, url) {
 		this.url = url;
 		this.readyState = this.OPENED;
 		this.methodRequest = method;
@@ -145,7 +145,7 @@ var IframeHttpRequest = function() {
 			}
 		}
 		appendInput(form, {
-			key : "isAjax",
+			key : "isIframe",
 			value : true
 		});
 		

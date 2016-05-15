@@ -138,7 +138,6 @@ Greencode.tags = {
 					request.setMethodRequest('GET');
 					request.setCometType(Request.STREAMING);
 					request.reconnect(false);
-					request.setAsync(true);
 					request.jsonContentType(false);
 
 					var _data = {
@@ -246,7 +245,6 @@ Greencode.tags = {
 				request.setMethodRequest(this.getAttribute('method') != null && this.getAttribute('method').toUpperCase() === 'POST' ? 'POST' : 'GET');
 				request.setCometType(Request.LONG_POLLING);
 				request.reconnect(false);
-				request.setAsync(true);
 
 				request.send(data, function(data) {
 				}, function(data) {

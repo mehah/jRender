@@ -52,7 +52,6 @@ import greencode.database.DatabaseConnection;
 import greencode.database.implementation.DatabaseConnectionEvent;
 import greencode.exception.ConnectionLost;
 import greencode.exception.GreencodeError;
-import greencode.exception.OperationNotAllowedException;
 import greencode.exception.StopProcess;
 import greencode.http.HttpAction;
 import greencode.http.HttpRequest;
@@ -61,6 +60,7 @@ import greencode.jscript.DOMHandle;
 import greencode.jscript.Element;
 import greencode.jscript.ElementHandle;
 import greencode.jscript.Form;
+import greencode.jscript.FunctionHandle;
 import greencode.jscript.Window;
 import greencode.jscript.WindowHandle;
 import greencode.jscript.elements.custom.ContainerElement;
@@ -167,7 +167,6 @@ public final class Core implements Filter {
 	public void onError(Session session, Throwable thr) {
 	}
 
-	@Override
 	public void doFilter(final ServletRequest request, ServletResponse response, final FilterChain chain) throws IOException, ServletException {
 		request.setCharacterEncoding(GreenCodeConfig.Server.View.charset);
 		response.setCharacterEncoding(GreenCodeConfig.Server.View.charset);
@@ -193,7 +192,7 @@ public final class Core implements Filter {
 
 			final Integer uid = Integer.parseInt(context.request.getParameter("uid"));
 
-			HttpRequest __request = context.getRequest();
+			HttpRequest __request = context.request;
 
 			HashMap<Integer, DOM> DOMList = greencode.jscript.$DOMHandle.getDOMSync(__request.getViewSession());
 
@@ -215,7 +214,7 @@ public final class Core implements Filter {
 				dom.notify();
 			}
 
-			if (webSocketData == null)
+			if (!context.request.isWebSocket())
 				response.getWriter().close();
 			return;
 		}
@@ -247,9 +246,6 @@ public final class Core implements Filter {
 				controllerName = r[0];
 				methodName = r[1];
 
-				if (methodName.equals(INIT_METHOD_NAME))
-					throw new OperationNotAllowedException();
-
 				requestClass = Cache.registeredWindows.get(controllerName);
 			} else {
 				page = FileWeb.pathAnalyze(servletPath, FileWeb.files.get(servletPath), (HttpServletRequest) request);
@@ -268,10 +264,6 @@ public final class Core implements Filter {
 			}
 		}
 
-		long processTime = 0;
-
-		DatabaseConnectionEvent databaseConnectionEvent = null;
-
 		// Multipart System
 		{
 			MultipartConfig multipartConfig = null;
@@ -286,39 +278,51 @@ public final class Core implements Filter {
 		Console.log(":: Request Processing ::");
 		final GreenContext context = new GreenContext((HttpServletRequest) request, (HttpServletResponse) response, page, webSocketData);
 
-		final Basic basicRemote = webSocketData != null ? webSocketData.getSession().getBasicRemote() : null;
+		final Basic basicRemote = context.request.isWebSocket() ? webSocketData.session.getBasicRemote() : null;
+		
+		Class<?>[] listArgsClass = null;
+		if (page != null) {
+			listArgsClass = new Class<?>[] { GreenContext.class };
 
-		try {
-			Class<?>[] listArgsClass = null;
-			if (page != null) {
-				listArgsClass = new Class<?>[] { GreenContext.class };
+			Rule.forClass(context, page);
 
-				Rule.forClass(context, page);
-
-				if (!(page.pageAnnotation.parameters().length == 1 && page.pageAnnotation.parameters()[0].name().isEmpty())) {
-					for (PageParameter p : page.pageAnnotation.parameters())
-						greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), new String[] { p.value() });
-				}
-
-				String content;
-				if (context.request.isAjax())
-					content = page.pageAnnotation.ajaxSelector().isEmpty() ? page.getContent(context) : page.getAjaxSelectedContent(page.pageAnnotation.ajaxSelector(), context);
-				else if (!page.pageAnnotation.selector().isEmpty())
-					content = page.getSelectedContent(page.pageAnnotation.selector(), context);
-				else
-					content = page.getContent(context);
-				if (basicRemote != null) {
-					basicRemote.sendText(ElementsScan.getMsgEventId(context.webSocketData)+content);
-				} else {
-					if (greencode.http.$HttpRequest.__contentIsHtml(context.request)) {
-						content = "<ajaxcontent>" + content + "</ajaxcontent>";
-					}
-
-					context.getResponse().getWriter().write(content);
-				}
+			if (!(page.pageAnnotation.parameters().length == 1 && page.pageAnnotation.parameters()[0].name().isEmpty())) {
+				for (PageParameter p : page.pageAnnotation.parameters())
+					greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), new String[] { p.value() });
 			}
 
-			HttpAction requestController = WindowHandle.getInstance((Class<Window>) requestClass, context.getRequest().getConversation());
+			String content;
+			if (!context.request.isFirst())
+				content = page.pageAnnotation.ajaxSelector().isEmpty() ? page.getContent(context) : page.getAjaxSelectedContent(page.pageAnnotation.ajaxSelector(), context);
+			else if (!page.pageAnnotation.selector().isEmpty())
+				content = page.getSelectedContent(page.pageAnnotation.selector(), context);
+			else
+				content = page.getContent(context);
+			
+			if (context.request.isWebSocket()) {
+				basicRemote.sendText(ElementsScan.getMsgEventId(context.webSocketData)+content);
+			} else {
+				if (greencode.http.$HttpRequest.__contentIsHtml(context.request)) {
+					content = "<ajaxcontent>" + content + "</ajaxcontent>";
+				}
+
+				context.response.getWriter().write(content);
+				if(context.request.isFirst()) {
+					ElementsScan.registerCommand(context, "#viewId", context.request.getViewSession().getId());
+					ElementsScan.registerCommand(context, "Greencode.exec", new FunctionHandle((Class<Window>) requestClass, "init"));
+					ElementsScan.sendElements(context);
+					context.destroy();
+					return;
+				}
+			}
+		}
+		
+		long processTime = 0;
+
+		DatabaseConnectionEvent databaseConnectionEvent = null;
+		
+		try {
+			HttpAction requestController = WindowHandle.getInstance((Class<Window>) requestClass, context.request.getConversation());
 			if (context.currentWindow == null)
 				context.currentWindow = (Window) requestController;
 
@@ -340,12 +344,12 @@ public final class Core implements Filter {
 			greencode.kernel.Form.processRequestedForm(context);
 
 			try {
-				if (context.request.isAjax() && listArgsClass == null) {
+				if (!context.request.isFirst() && listArgsClass == null) {
 					String[] _args = context.request.getParameterValues("_args[]");
 					if (_args != null) {
 						final int _argsSize = _args.length;
 
-						ElementsScan eArg = ElementsScan.getElements(context.getRequest().getViewSession());
+						ElementsScan eArg = ElementsScan.getElements(context.request.getViewSession());
 
 						eArg.args = new Integer[_argsSize];
 						listArgs = new Object[_argsSize];
@@ -398,12 +402,16 @@ public final class Core implements Filter {
 
 			String classNameBootAction = null;
 
-			ForceSync fs = requestMethod.getAnnotation(ForceSync.class);
-			if (fs != null) {
+			if(context.request.isWebSocket()) {
 				context.forceSynchronization = true;
-				context.listAttrSync = fs.value();
-				if (fs.onlyOnce())
-					context.listAttrSyncCache = new HashMap<Integer, HashSet<String>>();
+			} else {
+				ForceSync fs = requestMethod.getAnnotation(ForceSync.class);
+				if (fs != null) {
+					context.forceSynchronization = true;
+					context.listAttrSync = fs.value();
+					if (fs.onlyOnce())
+						context.listAttrSyncCache = new HashMap<Integer, HashSet<String>>();
+				}
 			}
 
 			if (hasBootaction) {
@@ -431,7 +439,7 @@ public final class Core implements Filter {
 
 							if (page.moduleName != null) {
 								DOMHandle.execCommand(context.currentWindow, "Greencode.util.loadScript", Core.CONTEXT_PATH + "/jscript/greencode/modules/" + page.moduleName + ".js", false, GreenCodeConfig.Server.View.charset);
-								DOMHandle.execCommand(context.currentWindow, "Greencode.modules." + page.moduleName + ".call", context.currentWindow.principalElement(), context.currentWindow.principalElement(), context.getRequest().getViewSession().getId(), context.getRequest().getConversationId());
+								DOMHandle.execCommand(context.currentWindow, "Greencode.modules." + page.moduleName + ".call", context.currentWindow.principalElement(), context.currentWindow.principalElement(), context.request.getViewSession().getId(), context.request.getConversationId());
 							}
 						} else if (requestController instanceof EventFunction)
 							((EventFunction) requestController).init((EventObject) listArgs[0]);
@@ -468,7 +476,7 @@ public final class Core implements Filter {
 				if (registeredFunctions != null)
 					registeredFunctions.remove(hashcodeRequestMethod);
 				else if (!methodName.equals(INIT_METHOD_NAME))
-					WindowHandle.removeInstance((Class<? extends Window>) requestClass, context.getRequest().getConversation());
+					WindowHandle.removeInstance((Class<? extends Window>) requestClass, context.request.getConversation());
 			}
 
 		} catch (StopProcess e) {

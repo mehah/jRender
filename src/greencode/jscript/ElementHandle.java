@@ -49,14 +49,19 @@ public final class ElementHandle {
 				throw new GreencodeError(LogMessage.getMessage("green-0037", castTo.getSimpleName()));
 
 			E e;
-			if (typeValue != null) {
+			
+			if(typeValue == null) {
+				if(castTo.getTypeParameters().length > 0)
+					typeValue = String.class;
+			} else if(castTo.getTypeParameters().length == 0)
+				throw new GreencodeError(LogMessage.getMessage("green-0048"));
+			else {
 				if (!ClassUtils.isWrapperType(typeValue))
 					throw new GreencodeError(LogMessage.getMessage("green-0047"));
-
-				e = getInstance(castTo, element.window, typeValue);
-			} else {
-				e = getInstance(castTo, element.window);
 			}
+			
+			e = typeValue == null ? ElementHandle.getInstance(castTo, element.window) : ElementHandle.getInstance(castTo, element.window, typeValue);
+
 
 			dataTransfer(element, e);
 

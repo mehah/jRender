@@ -26,18 +26,12 @@ public final class FunctionHandle {
 	private final transient GreenContext context = GreenContext.getInstance();
 	
 	private final Integer cid = context == null ? null : context.getRequest().getConversationId();
-		
-	boolean isFunction = true;
-		
-	private String url, formName;
+				
+	private String url, formName, requestMethod = GreenCodeConfig.Server.Request.Event.methodType.toUpperCase();
 	
 	private JsonElement methodParameters;
-	
-	private String requestMethod = GreenCodeConfig.Server.Request.Event.methodType.toUpperCase();
-	
+		
 	private JsonObject[] args;
-	
-	private boolean async = true;
 	
 	public FunctionHandle(String commandName, Object... parameters) {
 		this.url = '#'+commandName;
@@ -58,9 +52,7 @@ public final class FunctionHandle {
 	public RequestMethod getRequestMethod() { return RequestMethod.valueOf(requestMethod); }
 
 	public void setRequestMethod(RequestMethod requestMethod) { this.requestMethod = requestMethod.name(); }
-	
-	public String getUrl() { return url; }
-	
+		
 	private static final HashMap<Integer, JsonObject[]> argsCached = new HashMap<Integer, JsonObject[]>();
 	
 	private FunctionHandle setArguments(final Class<?>... args) {		
@@ -109,17 +101,6 @@ public final class FunctionHandle {
 			argsCached.put(Arrays.hashCode(args), this.args);
 		}
 		
-		return this;
-	}
-	
-	public boolean isAsync() { return async; }
-
-	/**
-	 * Se usar requisição sincronizada(false), dependendo do browser, irá travar até terminar a requisição.
-	 * @Default true
-	 */
-	public FunctionHandle setAsync(boolean async) {
-		this.async = async;
 		return this;
 	}
 	

@@ -143,12 +143,10 @@ public final class DatabaseStatement implements Statement {
 
 	public boolean isPoolable() throws SQLException { return st.isPoolable(); }
 
-	@Override
 	public void closeOnCompletion() throws SQLException {
 		st.isPoolable();
 	}
-
-	@Override
+	
 	public boolean isCloseOnCompletion() throws SQLException {
 		return st.isCloseOnCompletion();
 	}

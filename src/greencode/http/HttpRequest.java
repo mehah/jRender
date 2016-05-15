@@ -56,7 +56,7 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 			this.params = wsData.getParameters();
 			this.httpSession = wsData.getHttpSession();
 			this.isIFrameHttpRequest = false;
-			this.isAjax = true;
+			this.isAjax = false;
 			this.methodType = RequestMethod.GET.name();
 			this.remoteHost = wsData.getRemoteHost();
 			this.requestURL = wsData.getRequestURL();
@@ -66,8 +66,8 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 			this.webSocketSession = null;
 			this.params = new HashMap<String, String[]>();
 			this.httpSession = request.getSession();
-			this.isIFrameHttpRequest = request.getParameterMap().containsKey("isAjax");
-			this.isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With")) || isIFrameHttpRequest;
+			this.isIFrameHttpRequest = request.getParameterMap().containsKey("isIframe");
+			this.isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
 			this.methodType = request.getMethod();
 			this.remoteHost = request.getRemoteHost();
 			this.requestURL = request.getRequestURL();
@@ -80,7 +80,7 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 
 		__contentIsHtml = Boolean.parseBoolean(getParameter("__contentIsHtml"));
 
-		contentIsHtml = !isAjax || __contentIsHtml;
+		contentIsHtml = isFirst() || __contentIsHtml;
 
 		String v = getParameter("viewId");
 		if (v != null && !v.isEmpty()) {
@@ -99,6 +99,10 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 		this.conversation = new Conversation(getViewSession(), cid);
 
 		this.userPrincipal = (UserPrincipal) getSession().getAttribute("__USER_PRINCIPAL__");
+	}
+	
+	public boolean isFirst() {
+		return !(isAjax || isIFrameHttpRequest || isWebSocket());
 	}
 	
 	public Session getWebSocketSession() {

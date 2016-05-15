@@ -13,7 +13,7 @@ Bootstrap.analizeJSON = function(mainElement, j, target) {
 
 	Greencode.jQuery.each(j, function(i) {
 		var p = this;
-		if (p.isFunction === true) {
+		if (p.url && p.requestMethod) {
 			j[i] = function(event) {
 				if (event == null)
 					event = {
@@ -268,7 +268,6 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 			request.setMethodRequest(p.requestMethod);
 			request.setCometType(Request.STREAMING);
 			request.reconnect(false);
-			request.setAsync(p.async);
 
 			request.send(param, function(data) {
 				Bootstrap.init(this, mainElement, data, __arguments);
@@ -436,7 +435,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 					__request = request;
 					__request.setURL(url)
 				} else {
-					__request = new Request(url, Greencode.EVENT_REQUEST_TYPE == "websocket" ? "iframe" : Greencode.EVENT_REQUEST_TYPE);
+					__request = new Request(url, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
 
 					__request.setMethodRequest("post");
 					__request.setCometType(Request.LONG_POLLING);

@@ -8,7 +8,6 @@ var Request = function(url, type, isSingleton) {
 		_request = null,
 		eventId = null,
 		data = null,
-		async = true,
 		methodRequest = "GET",
 		reconnectDelay = 500,
 		cometType = Request.LONG_POLLING,
@@ -59,13 +58,6 @@ var Request = function(url, type, isSingleton) {
 	};
 	this.getMethodRequest = function() {
 		return methodRequest;
-	};
-
-	this.setAsync = function(v) {
-		async = v;
-	};
-	this.isAsync = function() {
-		return async;
 	};
 
 	this.getURL = function() {
@@ -224,7 +216,7 @@ var Request = function(url, type, isSingleton) {
 							parameters = (parameters.indexOf('?') === -1 ? '?' : '&') + data;
 					}
 				}
-				_request.open(methodRequest, url + parameters, async);
+				_request.open(methodRequest, url + parameters, true);
 				if (hasContent)
 					_request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=" + charset);
 	

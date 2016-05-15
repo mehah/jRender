@@ -17,7 +17,6 @@ public final class OptionElementCollection extends DOM implements Iterable<Optio
 	List<OptionElement> list;
 	private OptionIterator iterator;
 	
-	@Override
 	public Iterator<OptionElement> iterator() {
 		if(iterator == null)
 			iterator = new OptionIterator();
@@ -81,13 +80,10 @@ public final class OptionElementCollection extends DOM implements Iterable<Optio
 		
 		public void reset() { currentIndex = 0; };
 		
-		@Override
 		public boolean hasNext() { return currentIndex < list.size(); }
 
-		@Override
 		public OptionElement next() { return item(currentIndex++); }
 
-		@Override
 		public void remove() {}
 	}
 }

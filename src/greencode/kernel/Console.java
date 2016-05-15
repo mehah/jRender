@@ -20,6 +20,10 @@ public abstract class Console {
 
 	public static void log(String msg) {
 		if(GreenCodeConfig.Server.writeLog)
-			System.out.println("[" + Core.projectName + "] " + msg);
+			print(msg);
+	}
+	
+	public static void print(String msg) {
+		System.out.println("[" + Core.projectName + "] " + msg);
 	}
 }

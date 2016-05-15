@@ -32,6 +32,10 @@ public class ElementsScan {
 	public static void registerCommand(DOM e, String name, Object... args) {
 		getElements(greencode.jscript.$DOMHandle.getViewSession(e)).comm.add(new JSCommand(e, name, args));
 	}
+	
+	public static void registerCommand(GreenContext context, String name, Object... args) {
+		getElements(context.getRequest().getViewSession()).comm.add(new JSCommand(null, name, args));
+	}
 
 	static void setSync(GreenContext context, int uid, String varName, JSCommand jsCommand) {
 		JsonObject json = new JsonObject();

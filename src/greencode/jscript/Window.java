@@ -39,7 +39,7 @@ public abstract class Window extends EventTarget implements HttpAction {
 		final HttpRequest request = context.getRequest();
 		final Conversation currentConversation = request.getConversation();
 		
-		if(currentConversation.getAttribute("location") == null || !request.isAjax()) {
+		if(currentConversation.getAttribute("location") == null || request.isFirst()) {
 			this.location = new Location(context.getRequest(), this);
 			this.history = new History(this);
 			this.navigator = new Navigator(context.getRequest(), this);
@@ -59,9 +59,6 @@ public abstract class Window extends EventTarget implements HttpAction {
 			this.document = (Document) currentConversation.getAttribute("document");
 			this.principalElement = (Element) currentConversation.getAttribute("principalElement");
 		}
-		
-		if(request.getViewSession().isNew())
-			DOMHandle.setProperty(this, "viewId", request.getViewSession().getId());
 	}
 	
 	public Element principalElement() { return principalElement; }

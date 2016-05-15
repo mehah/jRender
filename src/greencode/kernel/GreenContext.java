@@ -76,7 +76,7 @@ public final class GreenContext {
 		if(locale != null) {
 			this.userLocale = locale;
 			this.currentMessagePropertie = (Properties) this.request.getSession().getAttribute("CURRENT_MESSAGE_PROPERTIE");
-			if(!this.request.isAjax())
+			if(this.request.isFirst())
 				userLocaleChanged = true;	
 		} else {
 			locale = Locale.getDefault();

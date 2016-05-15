@@ -300,12 +300,10 @@ public final class DatabasePreparedStatement implements PreparedStatement {
 
 	public void setNClob(int parameterIndex, Reader reader) throws SQLException { ps.setNClob(parameterIndex, reader); }
 
-	@Override
 	public void closeOnCompletion() throws SQLException {
 		ps.closeOnCompletion();
 	}
 
-	@Override
 	public boolean isCloseOnCompletion() throws SQLException {
 		return ps.isCloseOnCompletion();
 	}

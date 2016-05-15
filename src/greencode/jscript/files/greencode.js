@@ -1,5 +1,8 @@
 var Greencode = {
 	MAIN_ELEMENT_ID: 1, WINDOW_ID: 2, DOCUMENT_ID: 3, HEAD_ID: 4, BODY_ID: 5,
+	exec: function(f) {
+		f();
+	},
 	cache : {
 		lastUID: 1000,
 		references : {},
