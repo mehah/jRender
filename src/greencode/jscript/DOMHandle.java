@@ -18,6 +18,10 @@ import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
 
 public final class DOMHandle {
+	public static enum UIDReference {
+		MAIN_ELEMENT_ID, WINDOW_ID, DOCUMENT_ID, HEAD_ID, BODY_ID;
+	}	
+	
 	private DOMHandle() {}
 	
 	public static Integer getUID(DOM d) { return d.uid; }

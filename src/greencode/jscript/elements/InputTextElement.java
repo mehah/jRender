@@ -13,7 +13,11 @@ public class InputTextElement<T> extends InputElementTextField<T> {
 		super("text", window, typeValue);
 	}
 
-	public static <T> InputTextElement<T> cast(Element e) {
+	public static<T> InputTextElement<String> cast(Element e) {
 		return ElementHandle.cast(e, InputTextElement.class);
+	}
+	
+	public static<T> InputTextElement<T> cast(Element e, Class<T> type) {
+		return ElementHandle.cast(e, InputTextElement.class, type);
 	}
 }

@@ -14,7 +14,7 @@ import greencode.jscript.DOM;
 import greencode.jscript.JSCommand;
 
 public class ElementsScan {
-	private final List<JSCommand> comm = new ArrayList<JSCommand>(); /* commands */
+	private final List<JSCommand> comm = new ArrayList<JSCommand>();
 	JsonObject sync;
 	Integer[] args;
 
@@ -82,12 +82,12 @@ public class ElementsScan {
 			
 			String eventId = getMsgEventId(context.webSocketData);
 			
-			if(greencode.http.$HttpRequest.contentIsHtml(context.getRequest())) {
+			if(greencode.http.$HttpRequest.contentIsHtml(context.request)) {
 				basicRemote.sendText(eventId+json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());
 			} else {
 				basicRemote.sendText(eventId+json.toString());
 			}			
 		} else
-			context.getResponse().getWriter().write(json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());
+			context.response.getWriter().write(json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());
 	}
 }

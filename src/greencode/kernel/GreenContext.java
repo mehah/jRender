@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Properties;
 
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -58,13 +59,13 @@ public final class GreenContext {
 	String[] listAttrSync;
 	HashMap<Integer, HashSet<String>> listAttrSyncCache;
 	
-	GreenContext(HttpServletRequest request, HttpServletResponse response, FileWeb currentPage, WebSocketData wsData) {
+	GreenContext(HttpServletRequest request, ServletResponse response, FileWeb currentPage, WebSocketData wsData) {
 		GreenContext.greenContext.set(new WeakReference<GreenContext>(this)); 
 
 		boolean sessionInitialized = wsData != null || request.getSession(false) != null;
 				
 		this.webSocketData = wsData;
-		this.response = response;
+		this.response = (HttpServletResponse) response;
 		this.request = new HttpRequest(request, response, wsData);
 		this.currentPageAnnotation = currentPage == null ? null : currentPage.pageAnnotation;
 		

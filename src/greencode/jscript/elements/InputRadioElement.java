@@ -13,7 +13,11 @@ public class InputRadioElement<T> extends InputElementCheckable<T> {
 		super("radio", window, typeValue);
 	}
 
-	public static InputRadioElement cast(Element e) {
+	public static<T> InputRadioElement<String> cast(Element e) {
 		return ElementHandle.cast(e, InputRadioElement.class);
+	}
+	
+	public static<T> InputRadioElement<T> cast(Element e, Class<T> type) {
+		return ElementHandle.cast(e, InputRadioElement.class, type);
 	}
 }

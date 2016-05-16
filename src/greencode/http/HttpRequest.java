@@ -1,7 +1,11 @@
 package greencode.http;
 
 import java.security.Principal;
+import java.text.SimpleDateFormat;
+import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletResponse;
@@ -11,6 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.websocket.Session;
 
+import org.apache.tomcat.util.http.FastHttpDateFormat;
+import org.apache.tomcat.util.http.MimeHeaders;
+
 import greencode.exception.OperationNotAllowedException;
 import greencode.http.enumeration.RequestMethod;
 import greencode.http.security.UserPrincipal;
@@ -18,39 +25,46 @@ import greencode.kernel.LogMessage;
 import greencode.kernel.WebSocketData;
 import greencode.util.FileUtils;
 
-public final class HttpRequest extends HttpServletRequestWrapper {
-	final HashMap<String, String[]> params;
-	final boolean contentIsHtml;
-	final boolean __contentIsHtml;
-
-	private final boolean isAjax, isIFrameHttpRequest;
-	private final int cid, viewId;
-	private final String methodType;
-
-	private Boolean isMobile = null;
-
-	private final Conversation conversation;
-	private final ServletResponse response;
-	private final Session webSocketSession;
+public final class HttpRequest extends HttpServletRequestWrapper implements HttpServletRequest {
+	private static final TimeZone GMT_ZONE = TimeZone.getTimeZone("GMT");
+	private static final SimpleDateFormat formats[] = {
+        new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US),
+        new SimpleDateFormat("EEEEEE, dd-MMM-yy HH:mm:ss zzz", Locale.US),
+        new SimpleDateFormat("EEE MMMM d HH:mm:ss yyyy", Locale.US)
+    };
 	
-	private HttpSession httpSession;
+	private ViewSession viewSession;
 
 	private Extension extension;
-	private ViewSession viewSession = null;
 	private UserPrincipal userPrincipal;
+	private Boolean isMobile = null;
 	
-	private final String remoteHost;
+	private final boolean isAjax, isIFrameHttpRequest;
+	private final int cid, viewId, localPort;
+	private final String methodType, remoteHost, requestURI;
+	
+	private final Conversation conversation;
+	private final ServletResponse response;
+	private final HttpSession httpSession;
+	private final Session webSocketSession;
+
 	private final StringBuffer requestURL;
-	private final String requestURI;
-	private final int localPort;
+	private final MimeHeaders headers;
+	
+	final HashMap<String, String[]> params;
+	final boolean contentIsHtml;
 
 	public HttpRequest(HttpServletRequest request, HttpServletResponse response) {
 		this(request, response, null);
 	}
 
-	public HttpRequest(HttpServletRequest request, HttpServletResponse response, WebSocketData wsData) {
+	public HttpRequest(HttpServletRequest request, ServletResponse response, WebSocketData wsData) {
 		super(request);
 
+        formats[0].setTimeZone(GMT_ZONE);
+        formats[1].setTimeZone(GMT_ZONE);
+        formats[2].setTimeZone(GMT_ZONE);
+		
 		if (wsData != null) {
 			this.webSocketSession = wsData.getSession();
 			this.params = wsData.getParameters();
@@ -62,6 +76,7 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 			this.requestURL = wsData.getRequestURL();
 			this.requestURI = wsData.getRequestURI();
 			this.localPort = wsData.getLocalPort();
+			this.headers = wsData.getHeaders();
 		} else {
 			this.webSocketSession = null;
 			this.params = new HashMap<String, String[]>();
@@ -73,14 +88,12 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 			this.requestURL = request.getRequestURL();
 			this.requestURI = request.getRequestURI();
 			this.localPort = request.getLocalPort();
-			
+			this.headers = null;
 		}
 
 		this.response = response;
 
-		__contentIsHtml = Boolean.parseBoolean(getParameter("__contentIsHtml"));
-
-		contentIsHtml = isFirst() || __contentIsHtml;
+		contentIsHtml = Boolean.parseBoolean(getParameter("__contentIsHtml")) || isFirst();
 
 		String v = getParameter("viewId");
 		if (v != null && !v.isEmpty()) {
@@ -99,6 +112,54 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 		this.conversation = new Conversation(getViewSession(), cid);
 
 		this.userPrincipal = (UserPrincipal) getSession().getAttribute("__USER_PRINCIPAL__");
+	}
+	
+	public String getHeader(String name) {
+		if(this.headers != null) {
+			return this.headers.getHeader(name);
+		}
+		return super.getHeader(name);
+	}
+	
+	public Enumeration<String> getHeaderNames() {
+		if(this.headers != null) {
+			return this.headers.names();
+		}
+		return super.getHeaderNames();
+	}
+	
+	public Enumeration<String> getHeaders(String name) {
+		if(this.headers != null) {
+			return this.headers.values(name);
+		}
+		return super.getHeaders(name);
+	}
+	
+	public long getDateHeader(String name) {
+		if(this.headers != null) {
+	        String value = getHeader(name);
+	        if (value == null)
+	            return (-1L);
+
+	        long result = FastHttpDateFormat.parseDate(value, formats);
+	        if (result != (-1L)) {
+	            return result;
+	        }
+	        throw new IllegalArgumentException(value);
+		}
+		return super.getDateHeader(name);
+	}
+	
+	public int getIntHeader(String name) {
+		if(this.headers != null) {
+	        String value = getHeader(name);
+	        if (value == null) {
+	            return (-1);
+	        }
+
+	        return Integer.parseInt(value);
+		}
+		return super.getIntHeader(name);
 	}
 	
 	public boolean isFirst() {
@@ -141,13 +202,13 @@ public final class HttpRequest extends HttpServletRequestWrapper {
 	}
 
 	private static final Pattern pattern = Pattern.compile("up.browser|up.link|windows ce|iphone|iemobile|mini|mmp|symbian|midp|wap|phone|pocket|mobile|pda|psp", Pattern.CASE_INSENSITIVE);
-
-	static boolean isMobile(String userAgent) {
-		return pattern.matcher(userAgent).find();
+	
+	static boolean isMobile(HttpServletRequest request) {
+		return pattern.matcher(request.getHeader("user-agent")).find();
 	}
 
 	public boolean isMobile() {
-		return isMobile == null ? isMobile = isMobile(this.getHeader("user-agent")) : isMobile;
+		return isMobile == null ? isMobile = isMobile(this) : isMobile;
 	}
 
 	public boolean isMethod(RequestMethod methodType) {

@@ -43,6 +43,7 @@ import javax.websocket.server.ServerEndpoint;
 
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.RequestFacade;
+import org.apache.tomcat.util.http.MimeHeaders;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -57,6 +58,7 @@ import greencode.http.HttpAction;
 import greencode.http.HttpRequest;
 import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
+import greencode.jscript.DOMHandle.UIDReference;
 import greencode.jscript.Element;
 import greencode.jscript.ElementHandle;
 import greencode.jscript.Form;
@@ -105,8 +107,14 @@ public final class Core implements Filter {
 		"bootstrap.js",
 		"init.js"
 	};
+	
+	
 	final static String CONTEXT_PATH = null, projectName = null, defaultLogMsg = null, SRC_CORE_JS_FOR_SCRIPT_HTML = null;
-	final static Field requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request");
+	final static Field
+		requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request"),
+		coyoteRequestField = GenericReflection.NoThrow.getDeclaredField(Request.class, "coyoteRequest"),
+		contextRequestField =  GenericReflection.NoThrow.getDeclaredField(Request.class, "context"),
+		headersField =  GenericReflection.NoThrow.getDeclaredField(org.apache.coyote.Request.class, "headers");
 
 	private HttpServletRequest request;
 	private HttpServletResponse response;
@@ -120,8 +128,7 @@ public final class Core implements Filter {
 			this.session = (HttpSession) config.getUserProperties().get("httpSession");
 
 			Request _request = (Request) GenericReflection.NoThrow.getValue(Core.requestField, this.request);
-
-			GenericReflection.setValue(Request.class, "context", config.getUserProperties().get("context"), _request);
+			GenericReflection.NoThrow.setValue(contextRequestField, config.getUserProperties().get("context"), _request);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -133,14 +140,14 @@ public final class Core implements Filter {
 
 		wsData.httpSession = this.session;
 		wsData.session = session;
-
+		wsData.headers = (MimeHeaders) session.getUserProperties().get("headers");
 		wsData.localPort = (Integer) session.getUserProperties().get("localPort");
 		wsData.remoteHost = (String) session.getUserProperties().get("remoteHost");
 		wsData.requestURI = wsData.url;
 		wsData.requestURL = new StringBuffer("http://").append(wsData.remoteHost).append(":").append(wsData.localPort).append(wsData.url);
 
 		try {
-			final String servletPath = wsData.url.substring(Core.CONTEXT_PATH.length() + 1);
+			final String servletPath = wsData.url.indexOf(Core.CONTEXT_PATH) == 0 ? wsData.url.substring(Core.CONTEXT_PATH.length() + 1) : wsData.url;
 			if (servletPath.equals("$synchronize")) {
 				Core.coreInit(servletPath, request, response, null, wsData);
 			} else {
@@ -176,19 +183,22 @@ public final class Core implements Filter {
 			response.getWriter().write(LogMessage.getMessage("green-0000"));
 			return;
 		}
+		
+		HttpServletRequest _request = ((HttpServletRequest) request);
 
-		final String servletPath = ((HttpServletRequest) request).getServletPath().substring(1);
+		final String servletPath = _request.getServletPath().substring(1);
 
 		if (servletPath.equals("coreWebSocket")) {
 			request.setAttribute("httpResponse", response);
 		}
 
-		coreInit(servletPath, request, response, chain, null);
+		coreInit(servletPath, _request, response, chain, null);
 	}
 
-	static void coreInit(final String servletPath, final ServletRequest request, ServletResponse response, final FilterChain chain, final WebSocketData webSocketData) throws IOException, ServletException {
+	static void coreInit(final String servletPath, final HttpServletRequest httpServletRequest, ServletResponse response, final FilterChain chain, final WebSocketData webSocketData) throws IOException, ServletException {
+				
 		if (servletPath.equals("$synchronize")) {
-			GreenContext context = new GreenContext((HttpServletRequest) request, (HttpServletResponse) response, null, webSocketData);
+			GreenContext context = new GreenContext(httpServletRequest, response, null, webSocketData);
 
 			final Integer uid = Integer.parseInt(context.request.getParameter("uid"));
 
@@ -222,7 +232,7 @@ public final class Core implements Filter {
 		final boolean hasBootaction = Cache.bootAction != null;
 
 		if (hasBootaction)
-			Cache.bootAction.onRequest((HttpServletRequest) request, (HttpServletResponse) response);
+			Cache.bootAction.onRequest(httpServletRequest, (HttpServletResponse) response);
 
 		final String controllerName, methodName;
 		final FileWeb page;
@@ -248,11 +258,11 @@ public final class Core implements Filter {
 
 				requestClass = Cache.registeredWindows.get(controllerName);
 			} else {
-				page = FileWeb.pathAnalyze(servletPath, FileWeb.files.get(servletPath), (HttpServletRequest) request);
+				page = FileWeb.pathAnalyze(servletPath, FileWeb.files.get(servletPath), webSocketData == null ? httpServletRequest : new HttpRequest(httpServletRequest, response, webSocketData));
 
 				if (page == null || page.window == null) {
 					if (page == null)
-						chain.doFilter(request, response);
+						chain.doFilter(httpServletRequest, response);
 					else
 						response.getWriter().write(page.getContent(null));
 					return;
@@ -267,16 +277,16 @@ public final class Core implements Filter {
 		// Multipart System
 		{
 			MultipartConfig multipartConfig = null;
-			if (((GreenCodeConfig.Server.Request.Multipart.autodectetion) || ((multipartConfig = requestClass.getAnnotation(MultipartConfig.class)) != null)) && request.getContentType() != null && request.getContentType().indexOf("multipart/form-data") > -1) {
+			if (((GreenCodeConfig.Server.Request.Multipart.autodectetion) || ((multipartConfig = requestClass.getAnnotation(MultipartConfig.class)) != null)) && httpServletRequest.getContentType() != null && httpServletRequest.getContentType().indexOf("multipart/form-data") > -1) {
 
-				Request _request = (Request) GenericReflection.NoThrow.getValue(requestField, request);
+				Request _request = (Request) GenericReflection.NoThrow.getValue(requestField, httpServletRequest);
 				_request.getContext().setAllowCasualMultipartParsing(true);
 				_request.getConnector().setMaxPostSize((int) (multipartConfig != null ? multipartConfig.maxRequestSize() : GreenCodeConfig.Server.Request.Multipart.maxRequestSize));
 			}
 		}
 
 		Console.log(":: Request Processing ::");
-		final GreenContext context = new GreenContext((HttpServletRequest) request, (HttpServletResponse) response, page, webSocketData);
+		final GreenContext context = new GreenContext(httpServletRequest, (HttpServletResponse) response, page, webSocketData);
 
 		final Basic basicRemote = context.request.isWebSocket() ? webSocketData.session.getBasicRemote() : null;
 		
@@ -302,7 +312,7 @@ public final class Core implements Filter {
 			if (context.request.isWebSocket()) {
 				basicRemote.sendText(ElementsScan.getMsgEventId(context.webSocketData)+content);
 			} else {
-				if (greencode.http.$HttpRequest.__contentIsHtml(context.request)) {
+				if (!context.request.isFirst() && greencode.http.$HttpRequest.contentIsHtml(context.request)) {
 					content = "<ajaxcontent>" + content + "</ajaxcontent>";
 				}
 
@@ -425,7 +435,7 @@ public final class Core implements Filter {
 			}
 
 			if (context.executeAction) {
-				final String eventType = request.getParameter("eventType");
+				final String eventType = httpServletRequest.getParameter("eventType");
 				Console.log("Calling Action: [" + controllerName + ":" + methodName + "]" + (eventType == null ? "" : "[EventType: " + eventType + "]"));
 
 				try {
@@ -626,6 +636,10 @@ public final class Core implements Filter {
 				json.addProperty("DEBUG_MODE", GreenCodeConfig.Browser.consoleDebug);
 				json.addProperty("EVENT_REQUEST_TYPE", GreenCodeConfig.Server.Request.Event.requestType);
 				json.addProperty("REQUEST_SINGLETON", GreenCodeConfig.Browser.websocketSingleton);
+				
+				for (UIDReference uid : UIDReference.values()) {
+					json.addProperty(uid.name(), uid.ordinal());
+				}
 
 				coreFileJS.append("Greencode.jQuery.extend(Greencode,").append(json).append(");");
 

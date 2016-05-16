@@ -1,15 +1,15 @@
 package greencode.jscript;
 
+import java.util.HashMap;
+
 import greencode.http.Conversation;
 import greencode.http.HttpAction;
 import greencode.http.HttpRequest;
+import greencode.jscript.DOMHandle.UIDReference;
 import greencode.jscript.function.implementation.Function;
 import greencode.jscript.function.implementation.SimpleFunction;
 import greencode.jscript.window.annotation.Page;
 import greencode.kernel.GreenContext;
-
-import java.io.IOException;
-import java.util.HashMap;
 
 public abstract class Window extends EventTarget implements HttpAction {
 	
@@ -34,18 +34,18 @@ public abstract class Window extends EventTarget implements HttpAction {
 		} else
 			this.currentPageAnnotation = null;
 		
-		uid = 2; // WINDOW ID
+		uid = UIDReference.WINDOW_ID.ordinal();
 		
 		final HttpRequest request = context.getRequest();
 		final Conversation currentConversation = request.getConversation();
 		
-		if(currentConversation.getAttribute("location") == null || request.isFirst()) {
+		if(request.isFirst() || greencode.http.$HttpRequest.contentIsHtml(request)) {
 			this.location = new Location(context.getRequest(), this);
 			this.history = new History(this);
 			this.navigator = new Navigator(context.getRequest(), this);
 			this.document = new Document(this);
 			this.principalElement = new Element(this);
-			this.principalElement.uid = 1; // MainElement UID
+			this.principalElement.uid = UIDReference.MAIN_ELEMENT_ID.ordinal();
 		
 			currentConversation.setAttribute("location", location);
 			currentConversation.setAttribute("history", history);
@@ -70,12 +70,16 @@ public abstract class Window extends EventTarget implements HttpAction {
 	public boolean connectionAborted() {
 		try {
 			GreenContext context = GreenContext.getInstance();
-			//TODO: Verificar aborto de conexão com sistema de websocket
-			greencode.kernel.$ElementsScan.send(context, null);			
-			context.getResponse().flushBuffer();
+						
+			if(context.getRequest().isWebSocket()) {
+				return !context.getRequest().getWebSocketSession().isOpen();
+			} else {
+				greencode.kernel.$ElementsScan.send(context, null);
+				context.getResponse().flushBuffer();
+			}	
 			
 			return false;
-		} catch(IOException e) {
+		} catch(Exception e) {
 			return true;
 		}
 	}

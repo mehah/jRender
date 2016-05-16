@@ -88,23 +88,6 @@ var Request = function(url, type, isSingleton) {
 		return _request instanceof WebSocket;
 	};
 	
-	var processData = function(data) {
-        for(var i in data) {
-        	var v = data[i];
-        	if(!isArray(v)) {
-        		data[i] = [v]
-        	}	            	
-        }
-        
-        data = JSON.stringify({
-        	params: data,
-        	url: url,
-        	eventId: eventId
-        });
-        
-        return data;
-	}
-	
 	var sendRequestWebsocket = function(data) {
 		setTimeout(function() {
 			if(_request.readyState == WebSocket.CONNECTING) {
@@ -185,7 +168,20 @@ var Request = function(url, type, isSingleton) {
 				}
 			}
 
-			sendRequestWebsocket(processData(data));
+	        for(var i in data) {
+	        	var v = data[i];
+	        	if(!isArray(v)) {
+	        		data[i] = [v]
+	        	}	            	
+	        }
+	        
+	        data = JSON.stringify({
+	        	params: data,
+	        	url: url,
+	        	eventId: eventId
+	        });
+			
+			sendRequestWebsocket(data);
 			return;
 		}
 			
@@ -216,6 +212,7 @@ var Request = function(url, type, isSingleton) {
 							parameters = (parameters.indexOf('?') === -1 ? '?' : '&') + data;
 					}
 				}
+				
 				_request.open(methodRequest, url + parameters, true);
 				if (hasContent)
 					_request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=" + charset);
@@ -287,7 +284,10 @@ var Request = function(url, type, isSingleton) {
 				if (this.status !== 200)
 					erroEvent();
 				else {
-					var reconnectByReturn = c1.call(o, jsonContentType ? JSON.parse(_request.responseText) : _request.responseText);
+					var data = jsonContentType ? JSON.parse(_request.responseText) : _request.responseText;
+					c1.call(o, data);
+					
+					var reconnectByReturn = c2.call(o, data);
 
 					closed = true;
 					if (o.reconnect() === true && reconnectByReturn !== false) {
@@ -373,6 +373,10 @@ var Request = function(url, type, isSingleton) {
 					}
 				} else if (this.readyState === LOADING || this.readyState === HEADERS_RECEIVED) {
 					if (data.length > 0) {
+						if(isIframe) {
+							_request.clear();
+						}
+						
 						if (isArray) {
 							for (var i = -1; ++i < data.length;) {
 								c1.call(o, data[i]);

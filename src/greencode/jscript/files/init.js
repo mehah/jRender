@@ -1,6 +1,3 @@
-var listTags = {},
-	viewId;
-
 if(__isIE8orLess)
 	Greencode.util.loadScript(Greencode.CONTEXT_PATH + "/jscript/greencode/sizzle.js", false);
 
@@ -52,7 +49,7 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 			Greencode.executeEvent('beforePopstate');
 			var o = e.state.selector == 'body' ? document.body : Greencode.crossbrowser.querySelector.call(document.body, e.state.selector);
 			Greencode.customMethod.empty.call(o);
-			var tags = listTags[window.location.href];
+			var tags = Greencode.cache.tags[window.location.href];
 			for(var i in tags)
 				o.appendChild(tags[i]);
 			Greencode.executeEvent('afterPopstate');

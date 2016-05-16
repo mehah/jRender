@@ -5,7 +5,8 @@ var IframeHttpRequest = function() {
 		intervalId = null,
 		aborted = false,
 		frame = null,
-		head = new Array();
+		head = new Array(),
+		fContent = null;
 
 	this.UNSENT = 0;
 	this.OPENED = 1;
@@ -165,14 +166,13 @@ var IframeHttpRequest = function() {
 
 		intervalId = setInterval(function() {
 			try {
-				var fContent = Greencode.crossbrowser.content.call(frame);
+				fContent = Greencode.crossbrowser.content.call(frame);
 
 				if(fContent.body == null || fContent.readyState === "uninitialized" || fContent.URL === 'about:blank')
 					return;
 
 				o.responseText = fContent.body.innerHTML;
-
-				fContent.body.innerHTML = "";
+				
 				if(o.responseText != null) {
 					if(fContent.readyState === "loading")
 						o.readyState = o.HEADERS_RECEIVED;
@@ -193,6 +193,10 @@ var IframeHttpRequest = function() {
 				o.abort();
 			}
 		}, 15);
+	};
+	
+	this.clear = function() {
+		fContent.body.innerHTML = "";
 	};
 
 	this.abort = function() {

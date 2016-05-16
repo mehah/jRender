@@ -58,8 +58,7 @@ public abstract class DOM {
 	}
 	
 	final void flush(boolean buffer) {
-		GreenContext context = GreenContext.getInstance();
-				
+		GreenContext context = GreenContext.getInstance();				
 		try {			
 			sendByte(context);
 
@@ -68,7 +67,7 @@ public abstract class DOM {
 			if(buffer && !context.getRequest().isWebSocket()) context.getResponse().flushBuffer();
 			
 			greencode.kernel.$GreenContext.flushed(context, true);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new ConnectionLost(LogMessage.getMessage("green-0011"));
 		}
 	}

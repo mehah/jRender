@@ -1,14 +1,13 @@
 var Greencode = {
-	MAIN_ELEMENT_ID: 1, WINDOW_ID: 2, DOCUMENT_ID: 3, HEAD_ID: 4, BODY_ID: 5,
-	exec: function(f) {
-		f();
-	},
+	viewId: null,
+	exec: function(f) {f();},
 	cache : {
 		lastUID: 1000,
 		references : {},
+		tags: {},
 		generateUID: function() {
-			while(Greencode.cache.references[++Greencode.cache.lastUID]);		
-			return Greencode.cache.lastUID;
+			while(this.references[++this.lastUID]);		
+			return this.lastUID;
 		},
 		getById : function(id, mainElement) {
 			if (id === Greencode.MAIN_ELEMENT_ID)
@@ -22,7 +21,7 @@ var Greencode = {
 			else if (id === Greencode.BODY_ID)
 				return document.body;
 			
-			return Greencode.cache.references[id];
+			return this.references[id];
 		},		
 		register: function(uid, o) {
 			if(uid instanceof Node) {
@@ -34,14 +33,17 @@ var Greencode = {
 				o.setAttribute('uid', uid)
 			}
 			
-			Greencode.cache.references[uid] = o;			
+			this.references[uid] = o;			
 			return uid;
 		},
 		remove: function(uid) {
-			delete Greencode.cache.references[uid];
+			delete this.references[uid];
 		}
 	},
+	isWebsocket: function() {
+		return this.EVENT_REQUEST_TYPE == 'auto' && window.WebSocket != null || this.EVENT_REQUEST_TYPE == 'websocket'
+	},
 	isRequestSingleton: function() {
-		return Greencode.REQUEST_SINGLETON && (Greencode.EVENT_REQUEST_TYPE == 'auto' && window.WebSocket != null || Greencode.EVENT_REQUEST_TYPE == 'websocket');
+		return this.REQUEST_SINGLETON && this.isWebsocket();
 	}
 };

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import javax.servlet.http.HttpSession;
 import javax.websocket.Session;
 
+import org.apache.tomcat.util.http.MimeHeaders;
+
 public class WebSocketData {
 	private HashMap<String, String[]> params;
 	
@@ -18,6 +20,11 @@ public class WebSocketData {
 	StringBuffer requestURL;
 	String requestURI;
 	int localPort;
+	MimeHeaders headers;
+	
+	public MimeHeaders getHeaders() {
+		return headers;
+	}
 	
 	public String getRemoteHost() {
 		return remoteHost;

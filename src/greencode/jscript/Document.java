@@ -3,6 +3,7 @@ package greencode.jscript;
 import java.util.HashMap;
 
 import greencode.exception.GreencodeError;
+import greencode.jscript.DOMHandle.UIDReference;
 import greencode.jscript.elements.BodyElement;
 import greencode.jscript.elements.HeadElement;
 import greencode.kernel.LogMessage;
@@ -16,10 +17,10 @@ public class Document extends Node {
 	Document(Window window) {
 		super(window);
 
-		this.uid = 3; // Document UID
+		this.uid = UIDReference.DOCUMENT_ID.ordinal();
 
-		greencode.jscript.$DOMHandle.setUID(head, 4);
-		greencode.jscript.$DOMHandle.setUID(body, 5);
+		greencode.jscript.$DOMHandle.setUID(head, UIDReference.HEAD_ID.ordinal());
+		greencode.jscript.$DOMHandle.setUID(body, UIDReference.BODY_ID.ordinal());
 	}
 
 	@SuppressWarnings("unchecked")

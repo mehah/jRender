@@ -25,7 +25,9 @@ import com.google.gson.JsonObject;
 public final class FunctionHandle {
 	private final transient GreenContext context = GreenContext.getInstance();
 	
-	private final Integer cid = context == null ? null : context.getRequest().getConversationId();
+	private final Integer
+		cid = context.getRequest().getConversationId(),
+		viewId = context.getRequest().getViewSession().getId();
 				
 	private String url, formName, requestMethod = GreenCodeConfig.Server.Request.Event.methodType.toUpperCase();
 	

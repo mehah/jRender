@@ -403,7 +403,7 @@ public final class FileWeb {
 			if(fileWeb != null) {
 				if(fileWeb.content != null) {
 					if(GreenCodeConfig.Server.View.seekChange) {
-						(fileWeb.mobileFile != null && greencode.http.$HttpRequest.isMobile(request.getHeader("user-agent")) ? fileWeb.mobileFile : fileWeb).verifyChanges();
+						(fileWeb.mobileFile != null && greencode.http.$HttpRequest.isMobile(request) ? fileWeb.mobileFile : fileWeb).verifyChanges();
 					}
 
 					return fileWeb;

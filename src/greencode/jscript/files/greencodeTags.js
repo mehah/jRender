@@ -93,7 +93,7 @@ Greencode.tags = {
 					e.repeat(true, true);
 			}
 		}
-
+		
 		Greencode.tags.buttons(ref);
 	},
 	buttons : function(mainElement) {
@@ -119,22 +119,46 @@ Greencode.tags = {
 			var element = elements[i], appendTo = element.getAttribute('appendTo').toLowerCase(), o = appendTo == "body" ? document.body : Greencode.crossbrowser.querySelector.call(mainElement, appendTo);
 
 			element.setAttribute('swept', 'swept');
+			
+			if(o == null) {				
+				o = Greencode.crossbrowser.querySelector.call(document.body, appendTo);
+			}
 
 			if (o != null) {
 				Greencode.crossbrowser.registerEvent.call(element, 'click', function(e) {
 					e.preventDefault();
-
+					
+					var hrefOriginal = this.getAttribute('href');
 					var appendTo = this.getAttribute('appendTo'),
 						empty = Greencode.crossbrowser.hasAttribute.call(this, 'empty'),
 						changeURL = Greencode.crossbrowser.hasAttribute.call(this, 'changeURL'),
 						keepViewId = Greencode.crossbrowser.hasAttribute.call(this, 'keepViewId'),
-						href = this.getAttribute('href'),
-						data = {__contentIsHtml : true},
-						request = new Request(this.getAttribute('href'), Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
+						href = hrefOriginal,
+						data = {__contentIsHtml : true};						
 
 					if (keepViewId)
 						data.viewId = viewId;
 
+					if(Greencode.isWebsocket() && href.indexOf(Greencode.CONTEXT_PATH) == -1) {
+						var _href = window.location.pathname.substring(Greencode.CONTEXT_PATH.length+1);
+						var folders = _href.substring(0, _href.lastIndexOf('/')+1);
+						href = folders + href;
+						
+						if(href.indexOf('../') != -1) {
+							folders = href.split('/');
+							for (var i = -1; ++i < folders.length;) {
+								var folder = folders[i];
+								if(folder === '..') {
+									folders.splice(--i, 2);
+									--i;
+								}
+							}
+							href = folders.join('/');
+						}
+					}
+										
+					request = new Request(href, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
+					
 					request.setMethodRequest('GET');
 					request.setCometType(Request.STREAMING);
 					request.reconnect(false);
@@ -158,8 +182,8 @@ Greencode.tags = {
 						}, function(data) {
 							var tags = new Array();
 	
-							delete listTags[window.location.href];
-							listTags[window.location.href] = tags;
+							delete Greencode.cache.tags[window.location.href];
+							Greencode.cache.tags[window.location.href] = tags;
 	
 							for (var ii = -1; ++ii < o.childNodes.length;)
 								tags.push(o.childNodes[ii]);
@@ -168,6 +192,7 @@ Greencode.tags = {
 								Greencode.customMethod.empty.call(o);
 	
 							dataComplete += data;
+							
 							o.insertAdjacentHTML('beforeEnd', dataComplete);
 							var scripts = Greencode.crossbrowser.querySelectorAll.call(o, 'script');
 							for (var s = -1; ++s < scripts.length;) {
@@ -204,11 +229,11 @@ Greencode.tags = {
 									window.location.hash = "#!" + href;
 								else {
 									history.replaceState({selector : appendTo}, null, location.href);
-									history.pushState({selector : appendTo}, null, href);
+									history.pushState({selector : appendTo}, null, hrefOriginal);
 	
 									tags = new Array();
-									delete listTags[window.location.href];
-									listTags[window.location.href] = tags;
+									delete Greencode.cache.tags[window.location.href];
+									Greencode.cache.tags[window.location.href] = tags;
 	
 									for (var ii = -1; ++ii < o.childNodes.length;)
 										tags.push(o.childNodes[ii]);

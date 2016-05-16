@@ -20,8 +20,12 @@ public class SelectElement<T> extends SelectElementPrototype {
 		this.typeValue = (Class<T>) (typeValue == null ?  ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0] : typeValue);
 	}
 
-	public static SelectElement cast(Element e) {
+	public static<T> SelectElement<String> cast(Element e) {
 		return ElementHandle.cast(e, SelectElement.class);
+	}
+	
+	public static<T> SelectElement<T> cast(Element e, Class<T> type) {
+		return ElementHandle.cast(e, SelectElement.class, type);
 	}
 
 	/**
