@@ -286,54 +286,62 @@ public final class Core implements Filter {
 		}
 
 		final GreenContext context = new GreenContext(httpServletRequest, (HttpServletResponse) response, page, webSocketData);
-
-		final Basic basicRemote = context.request.isWebSocket() ? webSocketData.session.getBasicRemote() : null;
-		
-		Class<?>[] listArgsClass = null;
-		if (page != null) {
-			listArgsClass = new Class<?>[] { GreenContext.class };
-
-			Rule.forClass(context, page);
-
-			if (!(page.pageAnnotation.parameters().length == 1 && page.pageAnnotation.parameters()[0].name().isEmpty())) {
-				for (PageParameter p : page.pageAnnotation.parameters())
-					greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), new String[] { p.value() });
-			}
-
-			String content;
-			if (!context.request.isFirst())
-				content = page.pageAnnotation.ajaxSelector().isEmpty() ? page.getContent(context) : page.getAjaxSelectedContent(page.pageAnnotation.ajaxSelector(), context);
-			else if (!page.pageAnnotation.selector().isEmpty())
-				content = page.getSelectedContent(page.pageAnnotation.selector(), context);
-			else
-				content = page.getContent(context);
-			
-			if (context.request.isWebSocket()) {
-				basicRemote.sendText(ElementsScan.getMsgEventId(context.webSocketData)+content);
-			} else {
-				if (!context.request.isFirst() && greencode.http.$HttpRequest.contentIsHtml(context.request)) {
-					content = "<ajaxcontent>" + content + "</ajaxcontent>";
-				}
-
-				context.response.getWriter().write(content);
-				if(context.request.isFirst()) {
-					ElementsScan.registerCommand(context, "#viewId", context.request.getViewSession().getId());
-					ElementsScan.registerCommand(context, "Greencode.exec", new FunctionHandle((Class<Window>) requestClass, "init"));
-					ElementsScan.sendElements(context);
-					context.destroy();
-					return;
-				}
-			}
-		}
-		
-		Console.log(":: Request Processing ::");
 		long processTime = 0;
 		DatabaseConnectionEvent databaseConnectionEvent = null;
-		
-		try {
+		try {			
+			Console.log(":: Request Processing ::");
+			if (GreenCodeConfig.Server.writeLog)
+				processTime = System.currentTimeMillis();
+			
+			final Basic basicRemote = context.request.isWebSocket() ? webSocketData.session.getBasicRemote() : null;
+			final boolean haveAccess, isFirstRequest = context.request.isFirst();
+			
+			Class<?>[] listArgsClass = null;
+			if (page != null) {
+				haveAccess = Rule.forClass(context, page);
+				
+				if (!(page.pageAnnotation.parameters().length == 1 && page.pageAnnotation.parameters()[0].name().isEmpty())) {
+					for (PageParameter p : page.pageAnnotation.parameters())
+						greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), new String[] { p.value() });
+				}
+				
+				if(haveAccess) {
+					listArgsClass = new Class<?>[] { GreenContext.class };
+					String content;
+					if (!isFirstRequest)
+						content = page.pageAnnotation.ajaxSelector().isEmpty() ? page.getContent(context) : page.getAjaxSelectedContent(page.pageAnnotation.ajaxSelector(), context);
+					else if (!page.pageAnnotation.selector().isEmpty())
+						content = page.getSelectedContent(page.pageAnnotation.selector(), context);
+					else
+						content = page.getContent(context);
+					
+					if (context.request.isWebSocket()) {
+						basicRemote.sendText(ElementsScan.getMsgEventId(context.webSocketData)+content);
+					} else {
+						if (!isFirstRequest && greencode.http.$HttpRequest.contentIsHtml(context.request)) {
+							content = "<ajaxcontent>" + content + "</ajaxcontent>";
+						}
+	
+						context.response.getWriter().write(content);
+						if(isFirstRequest) {
+							ElementsScan.registerCommand(context, "#viewId", context.request.getViewSession().getId());
+							ElementsScan.registerCommand(context, "Greencode.exec", new FunctionHandle((Class<Window>) requestClass, INIT_METHOD_NAME));
+							throw new StopProcess();
+						}
+					}
+				} else {
+					Console.log(LogMessage.getMessage("green-0043", servletPath));
+				}
+			} else {
+				haveAccess = true;
+			}
+			
 			HttpAction requestController = WindowHandle.getInstance((Class<Window>) requestClass, context.request.getConversation());
 			if (context.currentWindow == null)
 				context.currentWindow = (Window) requestController;
+			
+			if(!haveAccess)
+				Rule.runAuthorizationMethod(context);
 
 			final Map<Integer, Function> registeredFunctions;
 			if (hashcodeRequestMethod != null) {
@@ -353,7 +361,7 @@ public final class Core implements Filter {
 			greencode.kernel.Form.processRequestedForm(context);
 
 			try {
-				if (!context.request.isFirst() && listArgsClass == null) {
+				if (!isFirstRequest && listArgsClass == null) {
 					String[] _args = context.request.getParameterValues("_args[]");
 					if (_args != null) {
 						final int _argsSize = _args.length;
@@ -405,9 +413,6 @@ public final class Core implements Filter {
 			} catch (NoSuchMethodException e1) {
 				throw new NoSuchMethodException(LogMessage.getMessage("green-0007", methodName, controllerName));
 			}
-
-			if (GreenCodeConfig.Server.writeLog)
-				processTime = System.currentTimeMillis();
 
 			String classNameBootAction = null;
 

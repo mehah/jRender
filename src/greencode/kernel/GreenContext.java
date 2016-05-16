@@ -187,7 +187,7 @@ public final class GreenContext {
 	}
 	
 	void destroy() {
-		if(this.webSocketData != null && this.webSocketData.session.isOpen()) {
+		if(this.webSocketData != null) {
 			try {
 				if(GreenCodeConfig.Browser.websocketSingleton) {
 					this.webSocketData.session.getBasicRemote().sendText(ElementsScan.getCloseEventId(webSocketData));
