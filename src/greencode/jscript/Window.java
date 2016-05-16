@@ -39,7 +39,7 @@ public abstract class Window extends EventTarget implements HttpAction {
 		final HttpRequest request = context.getRequest();
 		final Conversation currentConversation = request.getConversation();
 		
-		if(request.isFirst() || greencode.http.$HttpRequest.contentIsHtml(request)) {
+		if(currentConversation.getAttribute("location") == null || request.isFirst() || greencode.http.$HttpRequest.contentIsHtml(request)) {
 			this.location = new Location(context.getRequest(), this);
 			this.history = new History(this);
 			this.navigator = new Navigator(context.getRequest(), this);

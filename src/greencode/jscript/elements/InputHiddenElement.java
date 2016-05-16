@@ -13,7 +13,7 @@ public class InputHiddenElement<T> extends InputElement<T> {
 		super("hidden", window, typeValue);
 	}
 
-	public static<T> InputHiddenElement<String> cast(Element e) {
+	public static InputHiddenElement<String> cast(Element e) {
 		return ElementHandle.cast(e, InputHiddenElement.class);
 	}
 	

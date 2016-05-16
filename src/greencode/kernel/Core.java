@@ -285,7 +285,6 @@ public final class Core implements Filter {
 			}
 		}
 
-		Console.log(":: Request Processing ::");
 		final GreenContext context = new GreenContext(httpServletRequest, (HttpServletResponse) response, page, webSocketData);
 
 		final Basic basicRemote = context.request.isWebSocket() ? webSocketData.session.getBasicRemote() : null;
@@ -327,8 +326,8 @@ public final class Core implements Filter {
 			}
 		}
 		
+		Console.log(":: Request Processing ::");
 		long processTime = 0;
-
 		DatabaseConnectionEvent databaseConnectionEvent = null;
 		
 		try {

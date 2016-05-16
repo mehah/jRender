@@ -32,7 +32,7 @@ public class ElementsScan {
 	public static void registerCommand(DOM e, String name, Object... args) {
 		getElements(greencode.jscript.$DOMHandle.getViewSession(e)).comm.add(new JSCommand(e, name, args));
 	}
-	
+
 	public static void registerCommand(GreenContext context, String name, Object... args) {
 		getElements(context.getRequest().getViewSession()).comm.add(new JSCommand(null, name, args));
 	}
@@ -57,13 +57,13 @@ public class ElementsScan {
 	static void send(GreenContext context, Object o) throws IOException {
 		send(context, o, context.gsonInstance);
 	}
-	
+
 	static String getMsgEventId(WebSocketData wsData) {
-		return GreenCodeConfig.Browser.websocketSingleton ? "{-websocket-msg-:"+wsData.eventId+"}" : "";
+		return GreenCodeConfig.Browser.websocketSingleton ? "{-websocket-msg-:" + wsData.eventId + "}" : "";
 	}
-	
+
 	static String getCloseEventId(WebSocketData wsData) {
-		return GreenCodeConfig.Browser.websocketSingleton ? "{-websocket-close-:"+wsData.eventId+"}" : "";
+		return GreenCodeConfig.Browser.websocketSingleton ? "{-websocket-close-:" + wsData.eventId + "}" : "";
 	}
 
 	private static void send(GreenContext context, Object o, Gson gson) throws IOException {
@@ -71,22 +71,27 @@ public class ElementsScan {
 		if (o != null) {
 			try {
 				json.append(context.gsonInstance.toJson(o));
-			} catch (Exception e) { // java.util.ConcurrentModificationException || java.util.NoSuchElementException
+			} catch (Exception e) { // java.util.ConcurrentModificationException
+									// || java.util.NoSuchElementException
 				send(context, o, context.getGsonInstance());
 				return;
 			}
 		}
 
-		if (context.getRequest().isWebSocket()) {
-			Basic basicRemote = context.getRequest().getWebSocketSession().getBasicRemote();
-			
-			String eventId = getMsgEventId(context.webSocketData);
-			
-			if(greencode.http.$HttpRequest.contentIsHtml(context.request)) {
-				basicRemote.sendText(eventId+json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());
-			} else {
-				basicRemote.sendText(eventId+json.toString());
-			}			
+		if (context.request.isWebSocket()) {
+			try {
+				Basic basicRemote = context.request.getWebSocketSession().getBasicRemote();
+
+				String eventId = getMsgEventId(context.webSocketData);
+
+				if (greencode.http.$HttpRequest.contentIsHtml(context.request)) {
+					basicRemote.sendText(eventId + json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());
+				} else {
+					basicRemote.sendText(eventId + json.toString());
+				}
+			} catch (Exception e) {
+				// Ignore Errors
+			}
 		} else
 			context.response.getWriter().write(json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());
 	}
