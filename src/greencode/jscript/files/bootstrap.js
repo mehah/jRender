@@ -427,9 +427,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 			}
 
 			if (jsonObject.sync != null) {
-				var sync = jsonObject.sync, e = Greencode.cache.getById(sync.uid, mainElement), __request, newURL;
-				
-				var url = Greencode.CONTEXT_PATH + '/$synchronize';
+				var list = {}, __request, url = Greencode.CONTEXT_PATH + '/$synchronize';
 				
 				if(request != null && request.isWebSocket()) {
 					__request = request;
@@ -441,66 +439,82 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 					__request.setCometType(Request.LONG_POLLING);
 					__request.reconnect(false);
 				}
+				
+				for(var sI = -1; ++sI < jsonObject.sync.list.length;) {
+					var sync = jsonObject.sync.list[sI], e = Greencode.cache.getById(sync.uid, mainElement);
 
-				if (e != null) {
-					Bootstrap.analizeJSON(mainElement, sync.command.parameters, e);
+					if (e != null) {
+						Bootstrap.analizeJSON(mainElement, sync.command.parameters, e);
 
-					var p = sync.command.parameters, parameters = Bootstrap.analizeParameters(p, "p", mainElement), value, strEval = '', filter, forceArray = false;
+						var p = sync.command.parameters, parameters = Bootstrap.analizeParameters(p, "p", mainElement), value, strEval = '', filter, forceArray = false;
 
-					if (sync.command.name.indexOf('__partFile') > -1) {
-						value = e;
-						__request.forceConnectType(Request.IframeHttpRequest);
-					} else {
-						if (sync.command.name === "#") {
-							value = {};
-							for ( var i in p)
-								value[i] = e[p[i]];
+						if(!list[sync.uid+""])
+							list[sync.uid+""] = [];
+						
+						/*
+						 * TODO: Refazer sincronismo para arquivos
+						 */
+						if (sync.command.name.indexOf('__partFile') > -1) {
+							value = e;
 						} else {
-							if (sync.command.name.indexOf('#') === 0) {
-								var isGreencodeCommand = Bootstrap.isGreencodeCommand(sync.command.name);
-								if (!isGreencodeCommand)
-									strEval = "e.";
-								else {
-									sync.command.name = Bootstrap.toGreencodeCommand(sync.command.name);
-									var l = sync.command.name.indexOf('(');
-									sync.command.name = (sync.command.name.substring(0, l) + '.call(e,' + sync.command.name.substring(l + 1));
-								}
+							if (sync.command.name === "#") {
+								value = {};
+								for ( var i in p)
+									value[i] = e[p[i]];
+							} else {
+								if (sync.command.name.indexOf('#') === 0) {
+									var isGreencodeCommand = Bootstrap.isGreencodeCommand(sync.command.name);
+									if (!isGreencodeCommand)
+										strEval = "e.";
+									else {
+										sync.command.name = Bootstrap.toGreencodeCommand(sync.command.name);
+										var l = sync.command.name.indexOf('(');
+										sync.command.name = (sync.command.name.substring(0, l) + '.call(e,' + sync.command.name.substring(l + 1));
+									}
 
-								if (sync.command.name.indexOf('##[]') === 0) {
-									filter = p;
-									strEval += sync.command.name.substring(4);
-									forceArray = true;
-								} else if (sync.command.name.indexOf('##') === 0) {
-									filter = p;
-									strEval += sync.command.name.substring(2);
+									if (sync.command.name.indexOf('##[]') === 0) {
+										filter = p;
+										strEval += sync.command.name.substring(4);
+										forceArray = true;
+									} else if (sync.command.name.indexOf('##') === 0) {
+										filter = p;
+										strEval += sync.command.name.substring(2);
+									} else
+										strEval += sync.command.name.substring(1);
 								} else
-									strEval += sync.command.name.substring(1);
-							} else
-								strEval = Bootstrap.adaptiveCommand(sync.command.name, parameters);
+									strEval = Bootstrap.adaptiveCommand(sync.command.name, parameters);
 
-							value = __isFirefox ? new Function('var e = arguments[0]; var p = arguments[1]; return ' + strEval)(e, p) : eval(strEval);
+								value = __isFirefox ? new Function('var e = arguments[0]; var p = arguments[1]; return ' + strEval)(e, p) : eval(strEval);
+							}
+
+							if (forceArray || Greencode.jQuery.isArray(value))
+								value = Greencode.util.arrayToString(value, filter);
+							else if (typeof value === "object")
+								value = Greencode.util.objectToString(value, filter);
 						}
 
-						if (forceArray || Greencode.jQuery.isArray(value))
-							value = Greencode.util.arrayToString(value, filter);
-						else if (typeof value === "object")
-							value = Greencode.util.objectToString(value, filter);
+						list[sync.uid+""].push({
+							name : sync.varName,
+							'var' : value+"",
+							cast : sync.command.cast,
+						});
 					}
-
-					__request.send({
-						viewId : viewId,
-						uid : sync.uid,
-						varName : sync.varName,
-						'var' : value
-					}, null, null);
-				} else {
-					__request.send({
-						viewId : viewId,
-						uid : sync.uid
-					}, null, null);
 				}
+				
+				var data = {
+						viewId : jsonObject.sync.viewId,
+						cid : jsonObject.sync.cid,
+						set: jsonObject.sync.set,
+						list: JSON.stringify(list)
+					};
+				
+				if(!data.set) {
+					data.accessCode = jsonObject.sync.accessCode;
+				}
+				
+				__request.send(data, null, null);
 
-				__request = null;
+				__request = null; 
 
 				if (!Greencode.DEBUG_MODE)
 					delete jsonObject.sync;

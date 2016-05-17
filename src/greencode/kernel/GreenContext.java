@@ -7,7 +7,9 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -18,12 +20,15 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import greencode.database.DatabaseConnection;
+import greencode.exception.ConnectionLost;
 import greencode.exception.OperationNotAllowedException;
+import greencode.http.Conversation;
 import greencode.http.HttpRequest;
 import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.Form;
 import greencode.jscript.Window;
+import greencode.jscript.function.implementation.SimpleFunction;
 import greencode.kernel.implementation.BootActionImplementation;
 import greencode.kernel.serialization.DOMDeserializer;
 import greencode.kernel.serialization.DOMSerializer;
@@ -51,11 +56,7 @@ public final class GreenContext {
 	Method requestedMethod;
 	
 	private DatabaseConnection databaseConnection;
-	boolean executeAction = true;
-	
-	boolean flushed = false;
-	
-	boolean forceSynchronization = false;
+	boolean executeAction = true, flushed, forceSynchronization, immediateSync = true;
 	String[] listAttrSync;
 	HashMap<Integer, HashSet<String>> listAttrSyncCache;
 	
@@ -93,6 +94,33 @@ public final class GreenContext {
 		exceptionCheck();
 		
 		return this.currentWindow;
+	}
+	
+	static Map<Integer, Thread> getThreadList(Conversation conversation) {
+		Map<Integer, Thread> list = (Map<Integer, Thread>) conversation.getAttribute("LIST_THREADS");
+		if(list == null)
+			conversation.setAttribute("LIST_THREADS", list = new ConcurrentHashMap<Integer, Thread>());
+		
+		return list;
+	}
+	
+	public void synchronizeDOMGroup(SimpleFunction func) {
+		exceptionCheck();
+		
+		this.immediateSync = false;
+		try {
+			Thread th = Thread.currentThread();
+			getThreadList(request.getConversation()).put(th.hashCode(), th);
+			synchronized(Thread.currentThread()) {
+				func.init(this);
+				this.currentWindow.flush();
+				th.wait(120000);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new ConnectionLost(LogMessage.getMessage("green-0011"));
+		}
+		this.immediateSync = true;
 	}
 	
 	public Method getRequestedMethod() {
@@ -155,31 +183,29 @@ public final class GreenContext {
 	
 	boolean isForcingSynchronization(final DOM dom, final String property) {
 		boolean sync;
-		if(sync = this.forceSynchronization) {			
-			if(this.listAttrSync != null) {
-				HashSet<String> props = this.listAttrSyncCache.get(DOMHandle.getUID(dom));
-				if(props == null) {
-					this.listAttrSyncCache.put(DOMHandle.getUID(dom), props = new HashSet<String>());
-				}
+		if(sync = this.forceSynchronization && this.listAttrSyncCache != null) {
+			HashSet<String> props = this.listAttrSyncCache.get(DOMHandle.getUID(dom));
+			if(props == null) {
+				this.listAttrSyncCache.put(DOMHandle.getUID(dom), props = new HashSet<String>());
+			}
+			
+			final boolean hasListAttrSyncCache = props != null;
+			if(this.listAttrSync != null && this.listAttrSync.length > 0) {
+				sync = false;
 				
-				final boolean hasListAttrSyncCache = props != null;
-				if(this.listAttrSync.length > 0) {
-					sync = false;
-					
-					if(!hasListAttrSyncCache || !props.contains(property)) {
-						for (String attr : this.listAttrSync) {
-							if(attr.equals(property)) {
-								sync = true;
-								if(hasListAttrSyncCache)
-									props.add(property);
-								break;
-							}
+				if(!hasListAttrSyncCache || !props.contains(property)) {
+					for (String attr : this.listAttrSync) {
+						if(attr.equals(property)) {
+							sync = true;
+							if(hasListAttrSyncCache)
+								props.add(property);
+							break;
 						}
 					}
-				}else if(hasListAttrSyncCache) {
-					if(sync = !props.contains(property))
-						props.add(property);
 				}
+			}else if(hasListAttrSyncCache) {
+				if(sync = !props.contains(property))
+					props.add(property);
 			}
 		}
 		

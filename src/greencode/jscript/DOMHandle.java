@@ -75,28 +75,29 @@ public final class DOMHandle {
 	
 	public static boolean containVariableKey(DOM owner, String key) { return owner.variables.containsKey(key); }
 	
-	private static Object getSyncValue(GreenContext context, DOM owner, String varName, boolean isMethod, String methodOrPropName, Object... parameters) {
-		synchronized (owner) {			
+	private static Object getSyncValue(GreenContext context, DOM owner, String varName, Class<?> cast, boolean isMethod, String methodOrPropName, Object... parameters) {
+		final ViewSession viewSession = owner.viewSession;
+		synchronized (greencode.kernel.$GreenContext.isImmediateSync(context) ? owner : Thread.currentThread()) {			
 			if(!isMethod)
 				methodOrPropName = '#'+methodOrPropName;		
 			
-			JSCommand jsCommand = new JSCommand(owner, methodOrPropName, parameters);
+			JSCommand jsCommand = new JSCommand(owner, cast, methodOrPropName, parameters);
 			
 			try {
 				greencode.kernel.$ElementsScan.setSync(context, owner.uid, varName, jsCommand);
-				owner.flush();
-				
-				getDOMSync(owner.viewSession).put(owner.uid, owner);
-				
+				getDOMSync(viewSession).put(owner.uid, owner);
 				Console.log("Synchronizing: [varName="+varName+", command={uid="+owner.uid+", name="+methodOrPropName+", parameters="+context.gsonInstance.toJson(parameters)+"]");
 				
-				owner.wait(120000);
+				if(greencode.kernel.$GreenContext.isImmediateSync(context)) {
+					owner.flush();				
+					owner.wait(120000);
+				}
 			} catch (Exception e) {
 				throw new ConnectionLost(LogMessage.getMessage("green-0011"));
 			}		
 		}
 		
-		return owner.variables.get(varName);
+		return greencode.kernel.$GreenContext.isImmediateSync(context) ? owner.variables.get(varName) : null;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -104,25 +105,33 @@ public final class DOMHandle {
 		GreenContext context = GreenContext.getInstance();
 		
 		if(greencode.kernel.$GreenContext.isForcingSynchronization(context, owner, _name) || !owner.variables.containsKey(varName)) {
-			Object v = getSyncValue(context, owner, varName, isMethod, _name, parameters);
+			Object v = getSyncValue(context, owner, varName, cast, isMethod, _name, parameters);
 			
-			if(cast != null && !cast.equals(String.class) && !cast.equals(Part.class)) {
-				if(ClassUtils.isPrimitiveOrWrapper(cast)) {
-					try {
-						v = GenericReflection.getDeclaredMethod(cast, "valueOf", String.class).invoke(null, v);
-					} catch (Exception e) {
-						throw new GreencodeError(e);
-					}
-				}else
-					v = context.gsonInstance.fromJson((String) v, cast);
+			if(greencode.kernel.$GreenContext.isImmediateSync(context)) {
+				return setVariableValue(context, owner, varName, cast, v);
 			}
 			
-			// Substitua o antigo valor String para o novo valor com o formato certo.
-			owner.variables.put(varName, v);
-			return (C) v;
+			return null;
 		}
 		
 		return (C) owner.variables.get(varName);
+	}
+	
+	static<C> C setVariableValue(GreenContext context, final DOM owner, final String varName, Class<C> cast, Object v) {
+		if(cast != null && !cast.equals(String.class) && !cast.equals(Part.class)) {
+			if(ClassUtils.isPrimitiveOrWrapper(cast)) {
+				try {
+					v = GenericReflection.getDeclaredMethod(cast, "valueOf", String.class).invoke(null, v);
+				} catch (Exception e) {
+					throw new GreencodeError(e);
+				}
+			}else
+				v = context.gsonInstance.fromJson((String) v, cast);
+		}
+		
+		// Substitua o antigo valor String para o novo valor com o formato certo.
+		owner.variables.put(varName, v);
+		return (C) v;
 	}
 	
 	static HashMap<Integer, DOM> getDOMSync(ViewSession viewSession) {

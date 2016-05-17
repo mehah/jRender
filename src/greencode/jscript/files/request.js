@@ -18,7 +18,6 @@ var Request = function(url, type, isSingleton) {
 		onAbort = null,
 		eventReconnect = null,
 		state = 0,
-		forceConnectType = null,
 		jsonContentType = true,
 		charset = 'UTF-8',
 		UNSENT = 0,
@@ -78,10 +77,6 @@ var Request = function(url, type, isSingleton) {
 
 	this.isClosed = function() {
 		return closed;
-	};
-
-	this.forceConnectType = function(type) {
-		forceConnectType = type;
 	};
 	
 	this.isWebSocket = function() {

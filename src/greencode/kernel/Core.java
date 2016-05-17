@@ -56,6 +56,7 @@ import greencode.exception.GreencodeError;
 import greencode.exception.StopProcess;
 import greencode.http.HttpAction;
 import greencode.http.HttpRequest;
+import greencode.http.ViewSession;
 import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.DOMHandle.UIDReference;
@@ -198,34 +199,86 @@ public final class Core implements Filter {
 	static void coreInit(final String servletPath, final HttpServletRequest httpServletRequest, ServletResponse response, final FilterChain chain, final WebSocketData webSocketData) throws IOException, ServletException {
 				
 		if (servletPath.equals("$synchronize")) {
-			GreenContext context = new GreenContext(httpServletRequest, response, null, webSocketData);
-
-			final Integer uid = Integer.parseInt(context.request.getParameter("uid"));
-
-			HttpRequest __request = context.request;
-
-			HashMap<Integer, DOM> DOMList = greencode.jscript.$DOMHandle.getDOMSync(__request.getViewSession());
-
-			DOM dom = DOMList.get(uid);
-
-			synchronized (dom) {
-				DOMList.remove(uid);
-
-				final String varName = __request.getParameter("varName");
-				if (varName != null) {
-					Object value = varName.indexOf("$$_file_") == 0 ? __request.getPart(varName) : __request.getParameter("var");
-
-					DOMHandle.setVariableValue(dom, varName, value);
-
-					Console.log("Synchronized:  [uid=" + uid + ", varName=" + varName + ", value=" + value + "]");
-				} else
-					Console.log("Synchronized:  [uid=" + uid + ":Not Found]");
-
-				dom.notify();
+			final GreenContext context = new GreenContext(httpServletRequest, response, null, webSocketData);
+			
+			final HttpRequest __request = context.request;
+						
+			final ViewSession viewSession = __request.getViewSession();
+			final boolean set = Boolean.parseBoolean(__request.getParameter("set"));
+			final Map<Integer, DOM> DOMList = greencode.jscript.$DOMHandle.getDOMSync(viewSession);			
+			final Map<String, List<Map<String, String>>> list = context.gsonInstance.fromJson(__request.getParameter("list"), new HashMap<String, List<Map<String, String>>>().getClass());			
+			
+			Map<Integer, Thread> threadList = null;
+			Thread th = null;
+			Integer accessCode = null; 
+			if(!set) {
+				threadList = GreenContext.getThreadList(__request.getConversation());
+				accessCode = Integer.parseInt(__request.getParameter("accessCode"));
+				th = threadList.get(accessCode);
+			}
+			
+			synchronized(set ? Object.class : th) {
+				for (Entry<String, List<Map<String, String>>> o : list.entrySet()) {
+					final Integer uid = Integer.parseInt(o.getKey());
+					
+					DOM dom = DOMList.get(uid);
+	
+					synchronized (dom) {
+						DOMList.remove(uid);
+	
+						List<Map<String, String>> attrs = o.getValue();	
+						
+						StringBuilder strInforme = new StringBuilder("[Synchronized] {uid=" + uid);
+						
+						if(attrs.size() == 0) {
+							strInforme.append(":Not Found}");
+						} else {
+							strInforme.append(", attrs = [");
+							boolean first = true;
+							for (Map<String, String> attr : attrs) {
+								final String varName = attr.get("name");
+								final String value = attr.get("var");
+								
+								
+								if(!first) {
+									strInforme.append(", ");
+								} else {
+									first = false;
+								}
+	
+								if(set) {
+									DOMHandle.setVariableValue(dom, varName, value);	
+								} else {
+									try {
+										Class<?> cast = attr.get("cast") != null ? Class.forName(attr.get("cast")) : null;
+										DOMHandle.setVariableValue(dom, varName, greencode.jscript.$DOMHandle.setVariableValue(context, dom, varName, cast, value));
+									} catch (ClassNotFoundException e) {
+										e.printStackTrace();
+									}								
+								}
+	
+								strInforme.append("{varName=" + varName + ", value=" + value+"}");
+							}
+							strInforme.append("]}");
+						}
+						
+						Console.log(strInforme.toString());
+	
+						if(set) {
+							dom.notify();
+						}
+					}
+				}
+				
+				if(!set) {
+					th.notify();
+					threadList.remove(accessCode);
+				}
 			}
 
-			if (!context.request.isWebSocket())
+			if (!__request.isWebSocket())
 				response.getWriter().close();
+			
 			return;
 		}
 
@@ -294,18 +347,18 @@ public final class Core implements Filter {
 				processTime = System.currentTimeMillis();
 			
 			final Basic basicRemote = context.request.isWebSocket() ? webSocketData.session.getBasicRemote() : null;
-			final boolean haveAccess, isFirstRequest = context.request.isFirst();
+			final boolean hasAccess, isFirstRequest = context.request.isFirst();
 			
 			Class<?>[] listArgsClass = null;
 			if (page != null) {
-				haveAccess = Rule.forClass(context, page);
+				hasAccess = Rule.forClass(context, page);
 				
 				if (!(page.pageAnnotation.parameters().length == 1 && page.pageAnnotation.parameters()[0].name().isEmpty())) {
 					for (PageParameter p : page.pageAnnotation.parameters())
 						greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), new String[] { p.value() });
 				}
 				
-				if(haveAccess) {
+				if(hasAccess) {
 					listArgsClass = new Class<?>[] { GreenContext.class };
 					String content;
 					if (!isFirstRequest)
@@ -333,14 +386,14 @@ public final class Core implements Filter {
 					Console.log(LogMessage.getMessage("green-0043", servletPath));
 				}
 			} else {
-				haveAccess = true;
+				hasAccess = true;
 			}
 			
 			HttpAction requestController = WindowHandle.getInstance((Class<Window>) requestClass, context.request.getConversation());
 			if (context.currentWindow == null)
 				context.currentWindow = (Window) requestController;
 			
-			if(!haveAccess)
+			if(!hasAccess)
 				Rule.runAuthorizationMethod(context);
 
 			final Map<Integer, Function> registeredFunctions;
@@ -418,6 +471,7 @@ public final class Core implements Filter {
 
 			if(context.request.isWebSocket()) {
 				context.forceSynchronization = true;
+				context.listAttrSyncCache = new HashMap<Integer, HashSet<String>>();
 			} else {
 				ForceSync fs = requestMethod.getAnnotation(ForceSync.class);
 				if (fs != null) {

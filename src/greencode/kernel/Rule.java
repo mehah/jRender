@@ -26,18 +26,18 @@ final class Rule {
 	}
 	
 	private static boolean process(GreenContext context, String[] rules) throws IOException {
-		boolean haveAccess = false;
+		boolean hasAccess = false;
 		
 		if(context.request.getUserPrincipal() != null) {
 			for (String rule : rules) {
 				if(((UserPrincipal)context.request.getUserPrincipal()).hasRule(rule)) {
-					haveAccess = true;
+					hasAccess = true;
 					break;
 				}
 			}
 		}		
 	
-		return haveAccess;
+		return hasAccess;
 	}
 	
 	static void runAuthorizationMethod(GreenContext context) throws IOException {

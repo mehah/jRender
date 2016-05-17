@@ -13,4 +13,7 @@ public final class $GreenContext {
 	public static void setCurrentWindow(GreenContext context, Window window) { context.currentWindow = window; }
 	public static Form getRequestedForm(GreenContext context) { return context.requestedForm; }
 	public static String getContextPath() {return Core.CONTEXT_PATH; };
+	public static boolean isImmediateSync(GreenContext context) {
+		return context.immediateSync;
+	}
 }
