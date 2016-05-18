@@ -106,15 +106,15 @@ public class ElementsScan {
 
 		if (context.request.isWebSocket()) {
 			try {
-				Basic basicRemote = context.request.getWebSocketSession().getBasicRemote();
-
-				String eventId = getMsgEventId(context.webSocketData);
-
+				Basic basicRemote = context.request.getWebSocketSession().getBasicRemote();				
 				if (greencode.http.$HttpRequest.contentIsHtml(context.request)) {
-					basicRemote.sendText(eventId + json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());
-				} else {
-					basicRemote.sendText(eventId + json.toString());
+					json.insert(0, "<json style=\"display: none;\">").append("</json>");
 				}
+				
+				String msgText = getMsgEventId(context.webSocketData) + json.toString();				
+				basicRemote.sendText(msgText);
+				
+				System.out.println(msgText.length());
 			} catch (Exception e) {
 				// Ignore Errors
 			}

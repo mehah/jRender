@@ -49,20 +49,24 @@ public final class GreenCodeConfig {
 
 		Element server = greencodeCofig.getElementsByTag("server").first();
 		{
-			GenericReflection.NoThrow.setFinalStaticValue(Server.class, "writeLog", Boolean.parseBoolean(server.attr("writeLog").trim()));
+			GenericReflection.NoThrow.setFinalStaticValue(Server.class, "log", Boolean.parseBoolean(server.attr("log").trim()));
 
 			Element currentElement;
 			Elements listCurrentElement;
 
 			currentElement = server.getElementsByTag("request").first();
 			{
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.class, "type", currentElement.attr("type").trim().toLowerCase());
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.class, "methodType", currentElement.attr("methodType").trim());
+				
 				Element subCurrentElement = currentElement.getElementsByTag("multipart").first();
 				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "autodectetion", Boolean.parseBoolean(subCurrentElement.attr("autodectetion").trim()));
-				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "maxRequestSize", Integer.parseInt(subCurrentElement.attr("max-request-size").trim()));
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "maxRequestSize", Integer.parseInt(subCurrentElement.attr("maxRequestSize").trim()));
 				
-				subCurrentElement = currentElement.getElementsByTag("event").first();
-				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Event.class, "requestType", subCurrentElement.attr("requestType").trim().toLowerCase());
-				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Event.class, "methodType", subCurrentElement.attr("methodType").trim());
+				subCurrentElement = currentElement.getElementsByTag("websocket").first();
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Websocket.class, "maxTextMessageSize", Integer.parseInt(subCurrentElement.attr("maxTextMessageSize").trim()));
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Websocket.class, "maxBinaryMessageSize", Integer.parseInt(subCurrentElement.attr("maxBinaryMessageSize").trim()));
+				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Websocket.class, "maxIdleTimeout", Long.parseLong(subCurrentElement.attr("maxIdleTimeout").trim()));
 			}
 
 			currentElement = server.getElementsByTag("view").first();
@@ -151,17 +155,21 @@ public final class GreenCodeConfig {
 	}
 
 	public final static class Server {
-		public final static Boolean writeLog = true;
+		public final static Boolean log = true;
 
 		public final static class Request {
+			public final static String type = null;
+			public final static String methodType = null;
+			
 			public final static class Multipart {
 				public final static Boolean autodectetion = false;
 				public final static Integer maxRequestSize = -1;
 			}
 			
-			public final static class Event {
-				public final static String requestType = null;
-				public final static String methodType = null;
+			public final static class Websocket {
+				public final static Integer maxTextMessageSize = null;
+				public final static Integer maxBinaryMessageSize = null;
+				public final static Long maxIdleTimeout = null;
 			}
 		}
 

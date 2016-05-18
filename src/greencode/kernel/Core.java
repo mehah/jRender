@@ -130,6 +130,10 @@ public final class Core implements Filter {
 
 			Request _request = (Request) GenericReflection.NoThrow.getValue(Core.requestField, this.request);
 			GenericReflection.NoThrow.setValue(contextRequestField, config.getUserProperties().get("context"), _request);
+			
+			session.setMaxBinaryMessageBufferSize(GreenCodeConfig.Server.Request.Websocket.maxBinaryMessageSize);
+			session.setMaxTextMessageBufferSize(GreenCodeConfig.Server.Request.Websocket.maxTextMessageSize);
+			session.setMaxIdleTimeout(GreenCodeConfig.Server.Request.Websocket.maxIdleTimeout);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -343,7 +347,7 @@ public final class Core implements Filter {
 		DatabaseConnectionEvent databaseConnectionEvent = null;
 		try {			
 			Console.log(":: Request Processing ::");
-			if (GreenCodeConfig.Server.writeLog)
+			if (GreenCodeConfig.Server.log)
 				processTime = System.currentTimeMillis();
 			
 			final Basic basicRemote = context.request.isWebSocket() ? webSocketData.session.getBasicRemote() : null;
@@ -597,7 +601,7 @@ public final class Core implements Filter {
 			context.destroy();
 		}
 
-		if (GreenCodeConfig.Server.writeLog) {
+		if (GreenCodeConfig.Server.log) {
 			processTime = System.currentTimeMillis() - processTime;
 			int ms = (int) ((processTime) % 1000);
 			int seconds = (int) ((processTime / 1000) % 60);
@@ -692,7 +696,7 @@ public final class Core implements Filter {
 				
 				json.addProperty("CONTEXT_PATH", Core.CONTEXT_PATH);
 				json.addProperty("DEBUG_MODE", GreenCodeConfig.Browser.consoleDebug);
-				json.addProperty("EVENT_REQUEST_TYPE", GreenCodeConfig.Server.Request.Event.requestType);
+				json.addProperty("EVENT_REQUEST_TYPE", GreenCodeConfig.Server.Request.type);
 				json.addProperty("REQUEST_SINGLETON", GreenCodeConfig.Browser.websocketSingleton);
 				
 				for (UIDReference uid : UIDReference.values()) {

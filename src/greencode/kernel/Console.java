@@ -19,7 +19,7 @@ public abstract class Console {
 	}
 
 	public static void log(String msg) {
-		if(GreenCodeConfig.Server.writeLog)
+		if(GreenCodeConfig.Server.log)
 			print(msg);
 	}
 	

@@ -3,14 +3,17 @@
 <greencode-config>
 	<browser consoleDebug="false" websocket-singleton="true" />
 
-	<server writeLog="true">
-		<request>
-			<multipart autodectetion="false" max-request-size="-1" />
-			<!--
-				requestType: auto, websocket, iframe, ajax
-				methodType: post, get
-			-->
+	<server log="true">
+		<!--
+			type: auto, websocket, iframe, ajax
+			methodType: post, get
+		-->
+		<request type="auto" methodType="get">
+			<multipart autodectetion="false" maxRequestSize="-1" />
+			
 			<event requestType="auto" methodType="get" />
+			
+			<websocket maxTextMessageSize="8192" maxBinaryMessageSize="8192" maxIdleTimeout="0" />
 		</request>
 
 		<!--

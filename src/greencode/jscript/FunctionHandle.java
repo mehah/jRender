@@ -29,7 +29,7 @@ public final class FunctionHandle {
 		cid = context.getRequest().getConversationId(),
 		viewId = context.getRequest().getViewSession().getId();
 				
-	private String url, formName, requestMethod = GreenCodeConfig.Server.Request.Event.methodType.toUpperCase();
+	private String url, formName, requestMethod = GreenCodeConfig.Server.Request.methodType.toUpperCase();
 	
 	private JsonElement methodParameters;
 		
