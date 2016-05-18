@@ -20,7 +20,7 @@
 		<!ELEMENT websocket EMPTY>
 			<!ATTLIST websocket maxTextMessageSize CDATA #REQUIRED>
 			<!ATTLIST websocket maxBinaryMessageSize CDATA #REQUIRED>
-			<!ATTLIST websocket MaxIdleTimeout CDATA #REQUIRED>
+			<!ATTLIST websocket maxIdleTimeout CDATA #REQUIRED>
 			
 	<!ELEMENT view (templates?, session)>
 		<!ATTLIST view bootable ( true | false ) "false" >
