@@ -113,8 +113,6 @@ public class ElementsScan {
 				
 				String msgText = getMsgEventId(context.webSocketData) + json.toString();				
 				basicRemote.sendText(msgText);
-				
-				System.out.println(msgText.length());
 			} catch (Exception e) {
 				// Ignore Errors
 			}

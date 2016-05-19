@@ -2,10 +2,13 @@ package greencode.http;
 
 import java.security.Principal;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.Map.Entry;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletResponse;
@@ -79,7 +82,7 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 			this.headers = wsData.getHeaders();
 		} else {
 			this.webSocketSession = null;
-			this.params = new HashMap<String, String[]>();
+			this.params = new HashMap<String, String[]>(request.getParameterMap());
 			this.httpSession = request.getSession();
 			this.isIFrameHttpRequest = request.getParameterMap().containsKey("isIframe");
 			this.isAjax = "XMLHttpRequest".equals(request.getHeader("X-Requested-With"));
@@ -287,11 +290,8 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 	}
 
 	public String getParameter(String name) {
-		String[] value = params.get(name);
-		if (value == null)
-			return super.getParameter(name);
-
-		return value[0];
+		String[] values = params.get(name);
+		return values == null ? null : values[0];
 	}
 
 	public String[] getParameterValues(String name) {
@@ -303,10 +303,31 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 			value = params.get(name);
 		}
 
-		if (value == null)
-			return super.getParameterValues(name);
-
 		return value;
+	}
+	
+	public String[] getParameterValuesStartsWith(String name) {
+		return getParameterValues(name, true);
+	}
+	
+	public String[] getParameterValuesEndWith(String name) {
+		return getParameterValues(name, false);
+	}
+	
+	private String[] getParameterValues(String name, boolean start) {
+		List<String> values = new ArrayList<String>();		
+		for (Entry<String, String[]> param : params.entrySet()) {
+			if(start && param.getKey().startsWith(name) || param.getKey().endsWith(name)) {
+				for (String v : param.getValue()) {
+					values.add(v);
+				}
+			}
+		}
+		
+		if(values.size() == 0)
+			return null;
+		
+		return values.toArray(new String[values.size()]);
 	}
 
 	public String getContextPath() {

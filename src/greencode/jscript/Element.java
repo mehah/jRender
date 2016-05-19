@@ -241,4 +241,6 @@ public class Element extends Node {
 	public Integer tabindex() { return DOMHandle.getVariableValueByProperty(this, "tabindex", Integer.class, "tabindex"); }
 	
 	public void focus() { DOMHandle.execCommand(this, "focus"); }
+	
+	public void remove() { DOMHandle.execCommand(this, "remove"); }
 }
