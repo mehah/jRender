@@ -44,7 +44,7 @@ public final class GreenCodeConfig {
 		String value;
 
 		Element browser = greencodeCofig.getElementsByTag("browser").first();
-		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "consoleDebug", Boolean.parseBoolean(browser.attr("consoleDebug").trim()));
+		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "debugLog", Boolean.parseBoolean(browser.attr("debugLog").trim()));
 		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "websocketSingleton", Boolean.parseBoolean(browser.attr("websocket-singleton").trim()));
 
 		Element server = greencodeCofig.getElementsByTag("server").first();
@@ -150,7 +150,7 @@ public final class GreenCodeConfig {
 	}
 
 	public final static class Browser {
-		public final static Boolean consoleDebug = false;
+		public final static Boolean debugLog = false;
 		public final static Boolean websocketSingleton = false;
 	}
 

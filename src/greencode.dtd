@@ -3,7 +3,7 @@
 <!ELEMENT greencode-config (browser, server)>
 
 <!ELEMENT browser EMPTY>
-	<!ATTLIST browser consoleDebug ( true | false ) "true" >
+	<!ATTLIST browser debugLog ( true | false ) "true" >
 	<!ATTLIST browser websocket-singleton ( true | false ) "true">
 	
 <!ELEMENT server (request, view, database?, internationalization?, plugins?)>

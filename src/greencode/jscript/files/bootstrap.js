@@ -353,7 +353,7 @@ Bootstrap.readCommand = function(mainElement) {
 		try {
 			var res = __isFirefox ? new Function('var e = arguments[0]; var mainElement = arguments[1]; return ' + strEval).call(this, e, mainElement) : eval(strEval);
 
-			if (Greencode.DEBUG_MODE) {
+			if (Greencode.DEBUG_LOG) {
 				console.warn(e);
 				console.warn("Code: " + strEval + "\n[Reference]\n", e, this.parameters);
 				console.warn("Result: ", res);
@@ -399,7 +399,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 		for ( var i in __jsonObject) {
 			var jsonObject = __jsonObject[i];
 
-			if (Greencode.DEBUG_MODE) {
+			if (Greencode.DEBUG_LOG) {
 				console.warn('-----------------------');
 				console.warn('MainElement: ', mainElement);
 				console.warn('JSON Object: ', jsonObject);
@@ -417,7 +417,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 					Bootstrap.readCommand.call(_this, mainElement);
 				}
 
-				if (!Greencode.DEBUG_MODE)
+				if (!Greencode.DEBUG_LOG)
 					delete jsonObject.comm;
 			}
 
@@ -516,7 +516,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 
 				__request = null; 
 
-				if (!Greencode.DEBUG_MODE)
+				if (!Greencode.DEBUG_LOG)
 					delete jsonObject.sync;
 			}
 
@@ -584,7 +584,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 					}
 				}
 
-				if (!Greencode.DEBUG_MODE)
+				if (!Greencode.DEBUG_LOG)
 					delete jsonObject.error;
 			}
 

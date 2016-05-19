@@ -346,7 +346,7 @@ public final class Core implements Filter {
 		long processTime = 0;
 		DatabaseConnectionEvent databaseConnectionEvent = null;
 		try {			
-			Console.log(":: Request Processing ::");
+			Console.log(":: REQUEST PROCESSING ::");
 			if (GreenCodeConfig.Server.log)
 				processTime = System.currentTimeMillis();
 			
@@ -375,6 +375,8 @@ public final class Core implements Filter {
 					if (context.request.isWebSocket()) {
 						basicRemote.sendText(ElementsScan.getMsgEventId(context.webSocketData)+content);
 					} else {
+						Console.log("Requested Page: "+ servletPath);
+						
 						if (!isFirstRequest && greencode.http.$HttpRequest.contentIsHtml(context.request)) {
 							content = "<ajaxcontent>" + content + "</ajaxcontent>";
 						}
@@ -607,7 +609,7 @@ public final class Core implements Filter {
 			int seconds = (int) ((processTime / 1000) % 60);
 			long minutes = ((processTime - seconds) / 1000) / 60;
 
-			StringBuilder pt = new StringBuilder("Processing time: ");
+			StringBuilder pt = new StringBuilder("::  PROCESSING TIME   :: ");
 			if (minutes > 0)
 				pt.append(minutes + "m ");
 
@@ -617,7 +619,7 @@ public final class Core implements Filter {
 			if (ms > 0 || minutes == 0 && seconds == 0)
 				pt.append(ms + "ms");
 
-			Console.log(pt.toString());
+			Console.print(pt.toString());
 		}
 	}
 
@@ -695,7 +697,7 @@ public final class Core implements Filter {
 				json.add("className", className);
 				
 				json.addProperty("CONTEXT_PATH", Core.CONTEXT_PATH);
-				json.addProperty("DEBUG_MODE", GreenCodeConfig.Browser.consoleDebug);
+				json.addProperty("DEBUG_LOG", GreenCodeConfig.Browser.debugLog);
 				json.addProperty("EVENT_REQUEST_TYPE", GreenCodeConfig.Server.Request.type);
 				json.addProperty("REQUEST_SINGLETON", GreenCodeConfig.Browser.websocketSingleton);
 				
@@ -736,6 +738,27 @@ public final class Core implements Filter {
 			}
 
 			System.out.println(" [done]");
+			
+			if (GreenCodeConfig.Server.View.templatePaths != null) {
+				System.out.println(defaultLogMsg + "Caching Template(s)...");
+
+				for (Entry<String, String> entry : GreenCodeConfig.Server.View.templatePaths.entrySet()) {
+					File f = FileUtils.getFileInWebContent(entry.getValue());
+
+					if (!f.exists())
+						throw new IOException(LogMessage.getMessage("green-0002", entry.getValue()));
+
+					Cache.templates.put(entry.getKey(), f);
+
+					StringBuilder str = new StringBuilder(defaultLogMsg + "Template: " + entry.getValue());
+					if (Cache.defaultTemplate == null && entry.getValue().equals(GreenCodeConfig.Server.View.defaultTemplatePath)) {
+						GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", f);
+						str.append(" (Default)");
+					}
+
+					System.out.println(str.toString());
+				}
+			}
 
 			System.out.print(defaultLogMsg + "Caching Classes...");
 			Class<BootActionImplementation> classBootAction = null;
@@ -763,27 +786,6 @@ public final class Core implements Filter {
 			}
 			classesTeste.clear();
 			System.out.print(" [done]\n");
-
-			if (GreenCodeConfig.Server.View.templatePaths != null) {
-				System.out.println(defaultLogMsg + "Caching Template(s)...");
-
-				for (Entry<String, String> entry : GreenCodeConfig.Server.View.templatePaths.entrySet()) {
-					File f = FileUtils.getFileInWebContent(entry.getValue());
-
-					if (!f.exists())
-						throw new IOException(LogMessage.getMessage("green-0002", entry.getValue()));
-
-					Cache.templates.put(entry.getKey(), f);
-
-					StringBuilder str = new StringBuilder(defaultLogMsg + "Template: " + entry.getValue());
-					if (Cache.defaultTemplate == null && entry.getValue().equals(GreenCodeConfig.Server.View.defaultTemplatePath)) {
-						GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", f);
-						str.append(" (Default)");
-					}
-
-					System.out.println(str.toString());
-				}
-			}
 
 			if (classDatabaseConnection != null) {
 				System.out.print(defaultLogMsg + "Initializing Database Connection Event ...");

@@ -430,7 +430,12 @@ public final class FileWeb {
 			if(fileWeb == null && !requestsCached.contains(servletPath) || fileWeb != null && fileWeb.document == null) {
 				File file = FileUtils.getFileInWebContent(servletPath);
 				if(file != null && file.exists()) {
-					Console.log(isView ? "Applying (template" + (GreenCodeConfig.Server.View.useMinified ? ", minified" : "") + ") in " + servletPath : "Applying (minified) in " + servletPath);
+					
+					if(isView) {
+						Console.log("Applying (template" + (GreenCodeConfig.Server.View.useMinified ? ", minified" : "") + ") in " + servletPath);
+					} else if(GreenCodeConfig.Server.View.useMinified) {
+						Console.log("Applying (minified) in " + servletPath);	
+					}
 
 					fileWeb = loadStructure(file, fileWeb, true);
 					if(fileWeb != null && fileWeb.mobileFile != null)
