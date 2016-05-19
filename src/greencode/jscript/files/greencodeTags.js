@@ -37,7 +37,7 @@ Greencode.tags = {
 				clone.remove = this.remove;
 
 				var uid = Greencode.cache.generateUID();
-				clone.setAttribute('uid', uid)
+				clone.setAttribute('uid', uid);
 				Greencode.cache.register(uid, clone);
 
 				var elementToInsertAfter = (this.lastClone() || this);

@@ -148,7 +148,7 @@ Greencode.customMethod = {
 		
 		request.send({cid: cid, viewId: viewId}, f, function(data) {
 			f(data);
-			var _data = {mainElement: This}
+			var _data = {mainElement: This};
 			Greencode.executeEvent('pageLoad', _data);
 		});
 		
@@ -300,8 +300,8 @@ Greencode.customMethod = {
 						for(var attr in attrFilter) {
 							var value = attrFilter[attr];
 							if(!((value === true || value === false) && Greencode.crossbrowser.hasAttribute.call(child, attr) == value || child.getAttribute(attr) == value)) {
-								push = false
-								break
+								push = false;
+								break;
 							}
 						}
 					}
@@ -313,7 +313,7 @@ Greencode.customMethod = {
 				
 				search(child);
 			}
-		}
+		};
 		search(this);
 		return list;
 	},

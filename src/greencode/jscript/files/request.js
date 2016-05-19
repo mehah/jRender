@@ -386,7 +386,7 @@ var Request = function(url, type, isSingleton) {
 };
 
 Request.lastEventId = 0;
-Request.instance = null
+Request.instance = null;
 
 Request.LONG_POLLING = 1;
 Request.STREAMING = 2;

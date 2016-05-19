@@ -40,7 +40,7 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 		}
 		
 		temp = null;
-	}
+	};
 	
 	Bootstrap.init();
 
@@ -56,6 +56,6 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 		}
 	});
 	
-	var _data = {mainElement: document.body}
+	var _data = {mainElement: document.body};
 	Greencode.executeEvent('pageLoad', _data);
 });

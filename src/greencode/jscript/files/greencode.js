@@ -25,12 +25,12 @@ var Greencode = {
 		},		
 		register: function(uid, o) {
 			if(uid instanceof Node) {
-				o = uid
+				o = uid;
 				if(uid = o.getAttribute('uid'))
-					return parseInt(uid)
+					return parseInt(uid);
 				
 				uid = Greencode.cache.generateUID();
-				o.setAttribute('uid', uid)
+				o.setAttribute('uid', uid);
 			}
 			
 			this.references[uid] = o;			

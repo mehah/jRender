@@ -234,7 +234,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 				}
 
 				return param;
-			}
+			};
 
 			var list = Greencode.customMethod.getAllDataElements.call(form);
 			buildParam(param, list);
@@ -299,14 +299,14 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 
 Bootstrap.isGreencodeCommand = function(commandName) {
 	return (commandName.indexOf('@crossbrowser') != -1 || commandName.indexOf('@customMethod') != -1);
-}
+};
 
 Bootstrap.toGreencodeCommand = function(commandName) {
 	var s;
 	if (commandName.indexOf(s = '@crossbrowser') != -1 || commandName.indexOf(s = '@customMethod') != -1)
 		commandName = commandName.replace(s, 'Greencode.' + s.substring(1));
 	return commandName;
-}
+};
 
 Bootstrap.adaptiveCommand = function(commandName, parameters) {
 	return Bootstrap.isGreencodeCommand(commandName) ? 'Greencode.' + commandName.substring(1) + '.call(e' + (parameters ? ',' + parameters : '') + ')' : 'e.' + commandName + '(' + parameters + ')';
