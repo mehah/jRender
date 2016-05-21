@@ -38,22 +38,22 @@ Java: IndexController.java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 	
-    public void init() {
+    public void init(GreenContext context) {
     	document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
     	
-    	final InputCheckboxElement[] countries = ElementHandle.cast(document.getElementsByName("countries"), InputCheckboxElement.class);
-    	final InputCheckboxElement checkboxAllOptions = InputCheckboxElement.cast(document.getElementById("allOptions"));
+    	final InputCheckboxElement<String>[] countries = ElementHandle.cast(document.getElementsByName("countries"), InputCheckboxElement.class);
+    	final InputCheckboxElement<String> checkboxAllOptions = document.getElementById("allOptions", InputCheckboxElement.class);
     	
     	checkboxAllOptions.addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {			
     		@ForceSync("checked")
-			public void init() {
-    			for (InputCheckboxElement inputCheckboxElement : countries) {
+			public void init(GreenContext context) {
+    			for (InputCheckboxElement<String> inputCheckboxElement : countries) {
     				inputCheckboxElement.checked(checkboxAllOptions.checked());
 				}
 			}
 		}));
     	
-    	SelectElement citySelect = SelectElement.cast(document.getElementById("city"));
+    	SelectElement<String> citySelect = SelectElement.cast(document.getElementById("city"));
     	
     	String[] citys = new String[] {"New York", "Los Angeles", "Chicago", "Houston"};
     	

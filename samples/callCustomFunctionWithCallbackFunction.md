@@ -28,7 +28,7 @@ Java: IndexController.java
 ```java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
-    public void init() {
+    public void init(GreenContext context) {
     	DOMHandle.execCommand(window, "customMethod", new FunctionHandle(new CustomMethodFunction() {
 			public void init(ObjectCustomMethod arg0) {
 				System.out.println(arg0.methodName);

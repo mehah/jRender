@@ -14,7 +14,7 @@ Java: IndexController.java
 ```java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
-    public void init() {
+    public void init(GreenContext context) {
         // Creating Div Element
         final DivElement div = document.createElement(DivElement.class);
 
@@ -25,7 +25,7 @@ public class IndexController extends Window {
         // http://en.wikipedia.org/wiki/Comet_(programming)
         setTimeout(new SimpleFunction() {			
 			private int i = -1;
-            public void init() {
+            public void init(GreenContext context) {
 			
 				//Loop to keep the conection and releasing the mods when necessary, using flushing method
                 while(true) {                   

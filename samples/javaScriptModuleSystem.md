@@ -14,7 +14,7 @@ Java: IndexController.java
 ```java
 @Page(name="index", path="index.html", jsModule="package.index")
 public class IndexController extends Window {
-    public void init() {}
+    public void init(GreenContext context) {}
     
     public void teste() {
     	alert("Alert on Java Controller");	

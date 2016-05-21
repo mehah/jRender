@@ -33,11 +33,9 @@ Java: IndexController.java
 ```java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
-    public void init() {
+    public void init(GreenContext context) {
     	document.getElementById("login").addEventListener(Events.CLICK, new FunctionHandle("login"));
-    	
-    	GreenContext context = GreenContext.getInstance();
-    	
+    	    	
     	if(context.getRequest().getUserPrincipal() != null) {
     		location.href(HomeController.class);
     	}
@@ -62,10 +60,9 @@ Java: HomeController.java
 public class HomeController extends Window {
 	
 	// OR @RulesAllowed("ACCESS_HOME")
-    public void init() {
+    public void init(GreenContext context) {
     	document.getElementById("exit").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
-			public void init() {
-				GreenContext context = GreenContext.getInstance();
+			public void init(GreenContext context) {
 				context.getRequest().getSession().invalidate();
 				location.href(IndexController.class);
 			}

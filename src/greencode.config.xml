@@ -9,7 +9,7 @@
 			methodType: post, get
 		-->
 		<request type="auto" methodType="get">
-			<multipart autodectetion="false" maxRequestSize="2097152" />			
+			<multipart autodectetion="false" maxRequestSize="2097152" />
 			<websocket maxTextMessageSize="8192" maxBinaryMessageSize="8192" maxIdleTimeout="0" />
 		</request>
 

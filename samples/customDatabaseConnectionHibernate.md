@@ -40,11 +40,11 @@ Java: IndexController.java
 ```java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
-	private final TbodyElement tbody = TbodyElement.cast(document.getElementById("userList").querySelector("tbody"));
-	private final InputTextElement userNameInput = InputTextElement.cast(document.getElementById("userName"));
+	private final TbodyElement tbody = document.getElementById("userList").querySelector("tbody", TbodyElement.class);
+	private final InputTextElement<String> userNameInput = document.getElementById("userName", InputTextElement.class);
 	
 	@Connection
-    public void init() {
+    public void init(GreenContext context) {
 		document.getElementById("register").addEventListener(Events.CLICK, new FunctionHandle("register"));
 		
 		List<User> users = (List<User>) HibernateUtil.getCurrentSession().getNamedQuery("User.findAll").list();
@@ -99,9 +99,23 @@ public class BootAction implements BootActionImplementation {
 	
 	public void onRequest() {}
 
-	public boolean beforeAction(GreenContext context, Method method) { return true; }
+	public boolean beforeAction(GreenContext context, Method requestMethod) {
+		return true;
+	}
 
-	public void afterAction(GreenContext context, Method method) {}	
+	public void afterAction(GreenContext context, Method requestMethod) {}
+	
+	public void beforeValidation(DataValidation dataValidation) {}
+
+	public void afterValidation(Form form, DataValidation dataValidation) {}
+
+	public void onRequest(HttpServletRequest request, HttpServletResponse response) {}
+
+	public void onException(GreenContext context, Exception e) {}
+
+	public boolean whenUnauthorized(GreenContext context) {
+		return false;
+	}
 }
 ```
 Java: HibernateUtil.java

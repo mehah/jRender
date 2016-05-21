@@ -84,15 +84,15 @@ public final class FunctionHandle {
 						
 						final Class<?>[] classes = ClassUtils.getParents(clazz, DOM.class);
 						Class<?> parent = clazz;
-						for (int j = -1; ++j < classes.length;) {
-							Field[] fields = GenericReflection.getDeclaredFields(parent);							
+						
+						int j = -1;						
+						do {
+							Field[] fields = GenericReflection.getDeclaredFields(parent);
 							for (Field f : fields) {
 								if(!Modifier.isTransient(f.getModifiers()))
 									fieldsName.add(context.gsonInstance.toJsonTree(f.getName()));						
 							}
-							
-							parent = classes[i];
-						}
+						} while(++j < classes.length && (parent = classes[j]) != null);
 					}
 				}
 				

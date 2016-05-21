@@ -42,7 +42,7 @@ Java: IndexController.java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 	
-    public void init() {
+    public void init(GreenContext context) {
     	document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
     }
     

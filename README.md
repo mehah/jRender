@@ -28,7 +28,7 @@ Examples:
 - [Internationalization](/samples/internationalization.md)  
 - [Database Connection with MYSQL](/samples/databaseConnection.md)  
 - [Database Connection with MYSQL/Hibernate](/samples/customDatabaseConnectionHibernate.md)  
-- [Append Controller](/samples/appendController.md)  
+- [Replace Content](/samples/replaceContent.md)  
 - [Redirect](/samples/redirect.md)  
 - [Call Custom Function](/samples/callCustomFunction.md)  
 - [Call Custom Function With Callback](/samples/callCustomFunctionWithCallbackFunction.md)  

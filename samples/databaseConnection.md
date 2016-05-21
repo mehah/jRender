@@ -26,11 +26,11 @@ Java: IndexController.java
 ```java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
-	private final TbodyElement tbody = TbodyElement.cast(document.getElementById("userList").querySelector("tbody"));
-	private final InputTextElement userNameInput = InputTextElement.cast(document.getElementById("userName"));
+	private final TbodyElement tbody = document.getElementById("userList").querySelector("tbody", TbodyElement.class);
+	private final InputTextElement<String> userNameInput = document.getElementById("userName", InputTextElement.class);
 	
 	@Connection
-    public void init() {
+    public void init(GreenContext context) {
 		document.getElementById("register").addEventListener(Events.CLICK, new FunctionHandle("register"));
 		
 		DatabaseConnection connection = GreenContext.getInstance().getDatabaseConnection();

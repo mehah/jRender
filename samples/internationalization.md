@@ -29,9 +29,9 @@ Java: IndexController.java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 	
-    public void init() {
+    public void init(GreenContext context) {
     	// Set default user locale to pt-BR
-    	GreenContext.getInstance().setUserLocale(new Locale("pt", "BR"));
+    	context.setUserLocale(new Locale("pt", "BR"));
     	
     	// Get element by Id(language)
     	final SelectElement selectElement = document.getElementById("language", SelectElement.class);
@@ -41,7 +41,7 @@ public class IndexController extends Window {
     		
     		// Force sync only for the selectedIndex atribute
     		@ForceSync("selectedIndex")
-			public void init() {
+			public void init(GreenContext context) {
     			// Retrieve the index highlighted from select
     			Integer selectedIndex = selectElement.selectedIndex();
     			
@@ -51,7 +51,7 @@ public class IndexController extends Window {
 						String[] language = option.value().split("-");
 						
 						// Sets user locale according to selected option.
-						GreenContext.getInstance().setUserLocale(new Locale(language[0], language[1]));
+						context.setUserLocale(new Locale(language[0], language[1]));
 						
 						// Show on console the current property of userLocale
 						System.out.println(Message.getMessage("message.messageByController"));

@@ -13,7 +13,7 @@ Html: index.html
 <body>
 	<div>Teste</div>
 	<div>
-		<button type="button" name="append" id="append">Append</button><button type="button" name="empty" id="empty">Empty</button>
+		<button type="button" name="showContent" id="showContent">Show Content in newContent.html</button><button type="button" name="empty" id="empty">Empty</button>
 	</div>
 	<div id="content"></div>
 </body>
@@ -32,16 +32,16 @@ Java: IndexController.java
 public class IndexController extends Window {
 	private final Element div = document.getElementById("content");
 	
-    public void init() {
-		document.getElementById("append").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
-			public void init() {
-				div.appendController(AnyController.class);
+    public void init(GreenContext context) {
+		document.getElementById("showContent").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
+			public void init(GreenContext context) {
+				div.replaceWith(AnyController.class);
 			}
 		}));
 		
 		document.getElementById("empty").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
-			public void init() {
-				div.innerHTML("");
+			public void init(GreenContext context) {
+				ElementHandle.empty(div); // OR div.innerHTML("");
 			}
 		}));
     }
@@ -52,6 +52,6 @@ Java: AnyController.java
 ```java
 @Page(name="any", path="newContent.html")
 public class AnyController extends Window {	
-    public void init() {}
+    public void init(GreenContext context) {}
 }
 ```

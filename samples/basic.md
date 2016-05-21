@@ -17,14 +17,14 @@ Java: IndexController.java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 
-	private InputTextElement inputElement = InputTextElement.cast(document.getElementById("name"));
+	private InputTextElement<String> inputElement = document.getElementById("name", InputTextElement.class);
 	
-	public void init() {
+	public void init(GreenContext context) {
 		// Register Event
 		inputElement.addEventListener(Events.KEY_UP, new FunctionHandle("onKeyup"));
 	}
 
-	@ForceSync(value="value")
+	@ForceSync
 	public void onKeyup() {
 		// Get and print Input(Name) Value
 		System.out.println(inputElement.value());
