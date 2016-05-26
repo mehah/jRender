@@ -13,7 +13,7 @@ public class InputCheckboxElement<T> extends InputElementCheckable<T> {
 		super("checkbox", window, typeValue);
 	}
 
-	public static InputCheckboxElement<String> cast(Element e) {
+	public static<T> InputCheckboxElement<T> cast(Element e) {
 		return ElementHandle.cast(e, InputCheckboxElement.class);
 	}
 	

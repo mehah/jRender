@@ -48,14 +48,15 @@ public final class $Container {
 						if(type.isArray())
 							type = type.getComponentType();
 
-						if(!(
+						//TODO: Remover Futuramente para sistema de objeto em valor
+						/*if(!(
 							type.equals(Date.class) ||
 							type.equals(Part.class) ||
 							greencode.jscript.elements.$Element.isElementWithValue(type) ||
 							ClassUtils.isPrimitiveOrWrapper(type) ||
 							ClassUtils.isParent(type, ContainerElement.class))) {
 								throw new OperationNotAllowedException(LogMessage.getMessage("green-0028", field.getName(), currentClass.getSimpleName()));
-						}
+						}*/
 
 						fieldList.add(field);
 					}

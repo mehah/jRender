@@ -14,6 +14,7 @@ import greencode.kernel.GreenContext;
 public abstract class Window extends EventTarget implements HttpAction {
 	
 	HashMap<Integer, Function> functions;
+	HashMap<String, Object> objectParameters;
 	
 	public final Document document;
 	public final Location location;

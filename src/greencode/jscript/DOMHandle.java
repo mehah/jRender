@@ -5,6 +5,7 @@ import java.util.HashMap;
 import javax.servlet.http.Part;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import greencode.exception.ConnectionLost;
@@ -104,7 +105,7 @@ public final class DOMHandle {
 	private static<C> C getVariableValue(final DOM owner, final String varName, Class<C> cast, boolean isMethod, final String _name, Object... parameters) {
 		GreenContext context = GreenContext.getInstance();
 		
-		if(greencode.kernel.$GreenContext.isForcingSynchronization(context, owner, _name) || !owner.variables.containsKey(varName)) {
+		if((ClassUtils.isPrimitiveOrWrapper(cast) || ClassUtils.isParent(cast, JsonElement.class)) && (greencode.kernel.$GreenContext.isForcingSynchronization(context, owner, _name) || !owner.variables.containsKey(varName))) {
 			Object v = getSyncValue(context, owner, varName, cast, isMethod, _name, parameters);
 			
 			if(greencode.kernel.$GreenContext.isImmediateSync(context)) {

@@ -61,6 +61,11 @@ public final class WindowHandle {
 			w.functions = null;
 		}
 		
+		if(w.objectParameters != null){
+			w.objectParameters.clear();
+			w.objectParameters = null;
+		}
+		
 		if(w instanceof WindowDestroyListener)
 			((WindowDestroyListener) w).onDestroy();
 		

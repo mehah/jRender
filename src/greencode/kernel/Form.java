@@ -243,8 +243,7 @@ final class Form {
 				}
 			}
 			
-			return valor;
-			/* return HttpParameter.Context.getObjectRequest(valor); */
+			return greencode.jscript.$Window.getObjectParamter(context.currentWindow, (String) valor);
 		}
 
 		return null;

@@ -39,36 +39,36 @@ Html: index.html
 Java: IndexController.java
 
 ```java
-//Implements Class Validator
-public class RequiredValidator implements Validator {
-	public boolean validate(Window window, Form form, ContainerElement<?> container, Element element, String name, Object value, String[] labels, DataValidation dataValidation) {
-		// Get cached element
-		Element e = DOMHandle.getVariableValue(window, "element_"+name, Element.class);
-		if(e == null) {
-			// Search Element Label by attribute 'for'
-			e = window.principalElement().querySelector("label[for='"+name+"']");
-			
-			// Cache Element
-			DOMHandle.setVariableValue(window, "element_"+name, e);
-		}
-		
-		// Check if value is empty
-		if(value == null || value.equals("")) {
-			
-			// Set Color
-			e.style("color", "red");
-			
-			// Show Message
-			window.alert("The "+name+" field is required.");
-			
-			return false;
-		}else if(e.style("color").equals("red")) {			
-			// Reset Color to Black
-			e.style("color", "black");
-		}		
-		
-		return true;
-	}
+@Page(name="index", path="index.html")
+public class IndexController extends Window {
+
+    public void init() {
+        // Get Element By Id and register Event
+        document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
+    }
+
+    // Take a note that says that will be a validation to execute the method
+    @Validate
+    public void register() {
+
+        // Get Form by Class
+        MaintainUserForm form = document.forms(MaintainUserForm.class);
+
+        // Print result on console
+        System.out.println("Name: "+form.getName());
+        System.out.println("Sex: "+(form.getSex().equals('M') ? "Male" : "Female"));
+        System.out.println("City: "+form.getCity());        
+        System.out.print("Countries: ");
+        if(form.getCountries() != null) {
+            for (int i = -1, s = form.getCountries().length; ++i < s;) {
+                Character separator = ' ';
+                if(i > 0)
+                    separator = ',';
+                System.out.print(separator+form.getCountries()[i]);
+            }
+        }
+        System.out.println();
+    }
 }
 ```
 Java: MaintainUserForm.java

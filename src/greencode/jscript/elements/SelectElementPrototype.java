@@ -1,5 +1,6 @@
 package greencode.jscript.elements;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 
 import com.google.gson.JsonArray;
@@ -11,17 +12,16 @@ import greencode.jscript.Element;
 import greencode.jscript.ElementHandle;
 import greencode.jscript.Form;
 import greencode.jscript.Window;
-import greencode.kernel.GreenContext;
+import greencode.util.ClassUtils;
 
-public abstract class SelectElementPrototype extends Element {
-	
-	protected SelectElementPrototype(String type) {
-		this(type, GreenContext.getInstance().currentWindow());
-	}
-	
-	protected SelectElementPrototype(String type, Window window) {
+public abstract class SelectElementPrototype<T> extends Element {
+	protected final Class<T> typeValue;
+		
+	protected SelectElementPrototype(String type, Window window, Class<?> typeValue) {
 		super(window, "select");
 		DOMHandle.setVariableValue(this, "type", type);
+		
+		this.typeValue = (Class<T>) (typeValue == null ?  ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0] : typeValue);
 	}
 	
 	public Form form() { return null; }
@@ -46,9 +46,9 @@ public abstract class SelectElementPrototype extends Element {
 	
 	public Boolean disabled() { return DOMHandle.getVariableValueByProperty(this, "disabled", Boolean.class, "disabled"); }
 	
-	public void add(OptionElement option) { add(option, null); }
+	public void add(OptionElement<T> option) { add(option, null); }
 	
-	public void add(OptionElement option, Integer index) {
+	public void add(OptionElement<T> option, Integer index) {
 		if(index == null)
 			options().add(option);	
 		else
@@ -65,12 +65,12 @@ public abstract class SelectElementPrototype extends Element {
 		DOMHandle.execCommand(this, "remove", index);
 	}
 	
-	private OptionElementCollection options;
+	private OptionElementCollection<T> options;
 	
-	public OptionElementCollection options() {
+	public OptionElementCollection<T> options() {
 		if(options == null) {
-			DOMHandle.registerReturnByProperty(this, DOMHandle.getUID(options = new OptionElementCollection(this.window)), "options");
-			options.list = new ArrayList<OptionElement>();
+			DOMHandle.registerReturnByProperty(this, DOMHandle.getUID(options = new OptionElementCollection<T>(this.window, typeValue)), "options");
+			options.list = new ArrayList<OptionElement<T>>();
 		}
 		return options;
 	}
@@ -78,7 +78,7 @@ public abstract class SelectElementPrototype extends Element {
 	/*
 	 * Synchronized Options 
 	 */
-	public OptionElementCollection options(final boolean fetchEager) {
+	public OptionElementCollection<T> options(final boolean fetchEager) {
 		options = null;		
 		options();
 		
@@ -86,13 +86,20 @@ public abstract class SelectElementPrototype extends Element {
 			JsonArray res = DOMHandle.getJSONArrayByProperty(this, "__contentOptions", "options", "value", "text", "id", "index", "selected", "disabled", "defaultSelected");
 			DOMHandle.removeVariable(this, "__contentOptions");
 			
-			options.list = new ArrayList<OptionElement>();
+			options.list = new ArrayList<OptionElement<T>>();
 			final int size = res.size();
 			if(size > 0) {
 				for (int i = -1; ++i < size;) {
 					JsonElement json = res.get(i);
-					OptionElement option = new OptionElement(this.window);
-					DOMHandle.setVariableValue(option, "value", ((JsonObject)json).get("value").getAsString());
+					OptionElement<T> option = new OptionElement<T>(this.window, typeValue);
+					
+					Object value = ((JsonObject)json).get("value").getAsString();
+					
+					if(!ClassUtils.isPrimitiveOrWrapper(typeValue)) {
+						value = greencode.jscript.$Window.getObjectParamter(window, (String) value);
+					}
+					
+					DOMHandle.setVariableValue(option, "value", value);
 					DOMHandle.setVariableValue(option, "text", ((JsonObject)json).get("text").getAsString());
 					DOMHandle.setVariableValue(option, "id", ((JsonObject)json).get("id").getAsString());
 					DOMHandle.setVariableValue(option, "index", ((JsonObject)json).get("index").getAsInt());

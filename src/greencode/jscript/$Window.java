@@ -1,6 +1,7 @@
 package greencode.jscript;
 
 import greencode.http.Conversation;
+import greencode.http.ViewSession;
 import greencode.jscript.function.implementation.Function;
 import greencode.jscript.window.annotation.Page;
 
@@ -26,5 +27,25 @@ public class $Window {
 	
 	public static Page getCurrentPageAnnotation(Window window) {
 		return window.currentPageAnnotation;
+	}
+	
+	private static Map<String, Object> getObjectParameters(Window window) {
+		return window.objectParameters == null ? window.objectParameters = new HashMap<String, Object>() : window.objectParameters;
+	}
+	
+	public static Object getObjectParamter(Window window, String key) {
+		return getObjectParameters(window).get(key);
+	}
+
+	public static void registerObjectParamter(Window window, Object value) {
+		getObjectParameters(window).put(value.toString(), value);
+	}
+
+	public static void removeObjectParamter(Window window, Object value) {
+		getObjectParameters(window).remove(value.toString());
+	}
+
+	public static void clearObjectParamter(Window window) {
+		getObjectParameters(window).clear();
 	}
 }

@@ -8,16 +8,18 @@ import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.Window;
 
-public final class OptionElementCollection extends DOM implements Iterable<OptionElement>{
+public final class OptionElementCollection<T> extends DOM implements Iterable<OptionElement<T>>{
+	private final Class<T> typeValue;
 
-	OptionElementCollection(Window window) {
+	OptionElementCollection(Window window, Class<T> typeValue) {
 		super(window);
+		this.typeValue = typeValue;
 	}
 	
-	List<OptionElement> list;
+	List<OptionElement<T>> list;
 	private OptionIterator iterator;
 	
-	public Iterator<OptionElement> iterator() {
+	public Iterator<OptionElement<T>> iterator() {
 		if(iterator == null)
 			iterator = new OptionIterator();
 		else
@@ -26,9 +28,9 @@ public final class OptionElementCollection extends DOM implements Iterable<Optio
 		return iterator;
 	}
 	
-	public OptionElement namedItem(String nameOrId) {
+	public OptionElement<T> namedItem(String nameOrId) {
 		String res;
-		for (OptionElement o : list) {
+		for (OptionElement<T> o : list) {
 			if((res = o.getAttribute("name")) != null && res.equals(nameOrId) || (res = o.getAttribute("id")) != null && res.equals(nameOrId))
 				return o;
 		}
@@ -36,16 +38,16 @@ public final class OptionElementCollection extends DOM implements Iterable<Optio
 		return null;
 	}
 	
-	public OptionElement item(int index) {
-		OptionElement e = list.get(index);
+	public OptionElement<T> item(int index) {
+		OptionElement<T> e = list.get(index);
 		if(e == null)
-			DOMHandle.registerElementByCommand(this, e = new OptionElement(this.window), "item", index);
+			DOMHandle.registerElementByCommand(this, e = new OptionElement<T>(this.window, typeValue), "item", index);
 		return e;
 	}
 
 	public Integer length() {
 		if(list == null) {
-			list = new ArrayList<OptionElement>();
+			list = new ArrayList<OptionElement<T>>();
 			final Integer size = DOMHandle.getVariableValueByProperty(this, "length", Integer.class, "length");
 			for (int i = -1; ++i < size;)
 				list.add(null);
@@ -54,11 +56,11 @@ public final class OptionElementCollection extends DOM implements Iterable<Optio
 		return list.size();
 	}
 	
-	public void add(OptionElement option) {
+	public void add(OptionElement<T> option) {
 		add(option, null);
 	}
 	
-	public void add(OptionElement option, Integer index) {
+	public void add(OptionElement<T> option, Integer index) {
 		if(index == null)
 		{
 			list.add(option);
@@ -69,20 +71,20 @@ public final class OptionElementCollection extends DOM implements Iterable<Optio
 		}	
 	}
 	
-	public OptionElement remove(int index) {
-		OptionElement e = list.remove(index);
+	public OptionElement<T> remove(int index) {
+		OptionElement<T> e = list.remove(index);
 		DOMHandle.execCommand(this, "remove", index);
 		return e;
 	}
 	
-	private class OptionIterator implements Iterator<OptionElement> {
+	private class OptionIterator implements Iterator<OptionElement<T>> {
 		private int currentIndex = 0;
 		
 		public void reset() { currentIndex = 0; };
 		
 		public boolean hasNext() { return currentIndex < list.size(); }
 
-		public OptionElement next() { return item(currentIndex++); }
+		public OptionElement<T> next() { return item(currentIndex++); }
 
 		public void remove() {}
 	}
