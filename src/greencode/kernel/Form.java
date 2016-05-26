@@ -21,6 +21,7 @@ import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.Element;
 import greencode.jscript.Window;
+import greencode.jscript.WindowHandle;
 import greencode.jscript.elements.InputFileElement;
 import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
@@ -243,7 +244,7 @@ final class Form {
 				}
 			}
 			
-			return greencode.jscript.$Window.getObjectParamter(context.currentWindow, (String) valor);
+			return WindowHandle.getObjectParamter(context.currentWindow, (String) valor);
 		}
 
 		return null;

@@ -12,6 +12,7 @@ import greencode.jscript.Element;
 import greencode.jscript.ElementHandle;
 import greencode.jscript.Form;
 import greencode.jscript.Window;
+import greencode.jscript.WindowHandle;
 import greencode.util.ClassUtils;
 
 public abstract class SelectElementPrototype<T> extends Element {
@@ -96,7 +97,7 @@ public abstract class SelectElementPrototype<T> extends Element {
 					Object value = ((JsonObject)json).get("value").getAsString();
 					
 					if(!ClassUtils.isPrimitiveOrWrapper(typeValue)) {
-						value = greencode.jscript.$Window.getObjectParamter(window, (String) value);
+						value = WindowHandle.getObjectParamter(window, (String) value);
 					}
 					
 					DOMHandle.setVariableValue(option, "value", value);

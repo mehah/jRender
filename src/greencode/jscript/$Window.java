@@ -1,13 +1,12 @@
 package greencode.jscript;
 
-import greencode.http.Conversation;
-import greencode.http.ViewSession;
-import greencode.jscript.function.implementation.Function;
-import greencode.jscript.window.annotation.Page;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import greencode.http.Conversation;
+import greencode.jscript.function.implementation.Function;
+import greencode.jscript.window.annotation.Page;
 
 public class $Window {
 	private $Window() {}
@@ -18,7 +17,7 @@ public class $Window {
 		if(listHttpActions == null)
 			conversation.setAttribute("LIST_WINDOW_CONTROLLER", listHttpActions = new ConcurrentHashMap<Class<? extends Window>, Window>());
 		
-		return listHttpActions;
+		return listHttpActions;	
 	}
 	
 	public static HashMap<Integer, Function> getRegisteredFunctions(Window window) {
@@ -27,25 +26,5 @@ public class $Window {
 	
 	public static Page getCurrentPageAnnotation(Window window) {
 		return window.currentPageAnnotation;
-	}
-	
-	private static Map<String, Object> getObjectParameters(Window window) {
-		return window.objectParameters == null ? window.objectParameters = new HashMap<String, Object>() : window.objectParameters;
-	}
-	
-	public static Object getObjectParamter(Window window, String key) {
-		return getObjectParameters(window).get(key);
-	}
-
-	public static void registerObjectParamter(Window window, Object value) {
-		getObjectParameters(window).put(value.toString(), value);
-	}
-
-	public static void removeObjectParamter(Window window, Object value) {
-		getObjectParameters(window).remove(value.toString());
-	}
-
-	public static void clearObjectParamter(Window window) {
-		getObjectParameters(window).clear();
 	}
 }

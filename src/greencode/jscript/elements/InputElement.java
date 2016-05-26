@@ -7,6 +7,7 @@ import greencode.jscript.DOMHandle;
 import greencode.jscript.Element;
 import greencode.jscript.Form;
 import greencode.jscript.Window;
+import greencode.jscript.WindowHandle;
 import greencode.kernel.LogMessage;
 import greencode.util.ClassUtils;
 
@@ -50,7 +51,7 @@ public abstract class InputElement<T> extends Element {
 
 	public void value(T value) {
 		if(!ClassUtils.isPrimitiveOrWrapper(value.getClass())) {
-			greencode.jscript.$Window.registerObjectParamter(window, value);
+			WindowHandle.registerObjectParamter(window, value);
 		}
 		
 		DOMHandle.setProperty(this, "value", value.toString());
