@@ -2,21 +2,16 @@ package greencode.jscript;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-
-import javax.servlet.http.Part;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
-import greencode.exception.OperationNotAllowedException;
 import greencode.jscript.elements.custom.ContainerElement;
 import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
 import greencode.jscript.form.annotation.ElementValue;
-import greencode.kernel.LogMessage;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
 
@@ -38,7 +33,7 @@ public final class $Container {
 		if(fields == null) {
 			List<Field> fieldList = new ArrayList<Field>();
 
-			Class<? extends ContainerElementImplementation>[] classes = (Class<? extends ContainerElementImplementation>[]) ClassUtils.getParents(currentClass, Form.class);
+			Class<? extends ContainerElementImplementation>[] classes = (Class<? extends ContainerElementImplementation>[]) ClassUtils.getParents(currentClass, Form.class, ContainerElementImplementation.class);
 
 			int i = -1;
 			do {

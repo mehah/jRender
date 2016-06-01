@@ -50,11 +50,11 @@ public abstract class InputElement<T> extends Element {
 	}
 
 	public void value(T value) {
-		if(!ClassUtils.isPrimitiveOrWrapper(value.getClass())) {
+		if(value != null && !ClassUtils.isPrimitiveOrWrapper(value.getClass())) {
 			WindowHandle.registerObjectParamter(window, value);
 		}
 		
-		DOMHandle.setProperty(this, "value", value.toString());
+		DOMHandle.setProperty(this, "value", value == null ? "" : value.toString());
 	}
 
 	public T value() {

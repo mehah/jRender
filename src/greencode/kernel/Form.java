@@ -244,7 +244,8 @@ final class Form {
 				}
 			}
 			
-			return WindowHandle.getObjectParamter(context.currentWindow, (String) valor);
+			Object v = WindowHandle.getObjectParamter(context.currentWindow, (String) valor);			
+			return v == null ? valor : v;
 		}
 
 		return null;

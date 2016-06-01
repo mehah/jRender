@@ -219,7 +219,7 @@ public final class GreenContext {
 					this.webSocketData.session.getBasicRemote().sendText(ElementsScan.getCloseEventId(webSocketData));
 				}else
 					this.webSocketData.getSession().close();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				// Ignore Errors
 			}
 		}

@@ -6,6 +6,7 @@ import greencode.exception.GreencodeError;
 import greencode.jscript.DOMHandle.UIDReference;
 import greencode.jscript.elements.BodyElement;
 import greencode.jscript.elements.HeadElement;
+import greencode.jscript.elements.SelectMultipleElement;
 import greencode.kernel.LogMessage;
 import greencode.util.GenericReflection;
 
@@ -51,14 +52,14 @@ public class Document extends Node {
 		return createElement(element, null);
 	}
 
-	public <E extends Element> E createElement(Class<E> element, Class<?> typeValue) {
+	public <E extends Element, T> E createElement(Class<E> element, Class<T> typeValue) {
 		try {
 			
 			E e;
 			try {
 				if(typeValue == null) {
 					if(element.getTypeParameters().length > 0)
-						typeValue = String.class;			
+						typeValue = (Class<T>) String.class;			
 				} else if(element.getTypeParameters().length == 0)
 					throw new GreencodeError(LogMessage.getMessage("green-0048"));
 			
@@ -70,6 +71,9 @@ public class Document extends Node {
 
 			if(DOMHandle.containVariableKey(e, "type"))
 				DOMHandle.setProperty(e, "type", DOMHandle.getVariableValue(e, "type", String.class));
+			
+			if(e instanceof SelectMultipleElement)
+				e.setAttribute("multiple", "multiple");
 
 			return e;
 		} catch(Exception e1) {

@@ -118,7 +118,9 @@ public final class ClassUtils {
 	
 	public static Class<?>[] getParents(final Class<?> Class) { return getParents(Class, null); }
 	
-	public static Class<?>[] getParents(final Class<?> clazz, Class<?> delimiter) {
+	public static Class<?>[] getParents(final Class<?> Class, Class<?> delimiter) { return getParents(Class, delimiter, null); }
+	
+	public static<E> Class<E>[] getParents(final Class<?> clazz, Class<?> delimiter, Class<E> cast) {
 		HashMap<Class<?>, Class<?>[]> classHash;
 		final Class<?> index;
 		if(delimiter != null) {
@@ -144,6 +146,6 @@ public final class ClassUtils {
 			classHash.put(index, classes);	
 		}
 		
-		return classes;
+		return (Class<E>[]) classes;
 	}
 }
