@@ -1,8 +1,8 @@
 package greencode.http;
 
-import greencode.jscript.$Window;
-import greencode.jscript.Window;
-import greencode.jscript.WindowHandle;
+import greencode.jscript.dom.$Window;
+import greencode.jscript.dom.Window;
+import greencode.jscript.dom.WindowHandle;
 import greencode.kernel.GreenCodeConfig;
 import greencode.util.GenericReflection;
 

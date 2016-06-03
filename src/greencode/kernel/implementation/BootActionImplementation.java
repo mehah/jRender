@@ -1,6 +1,6 @@
 package greencode.kernel.implementation;
 
-import greencode.jscript.Form;
+import greencode.jscript.dom.Form;
 import greencode.kernel.GreenContext;
 import greencode.validator.DataValidation;
 

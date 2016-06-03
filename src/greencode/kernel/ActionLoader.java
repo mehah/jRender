@@ -4,15 +4,15 @@ import greencode.database.annotation.Connection;
 import greencode.database.implementation.DatabaseConnectionEvent;
 import greencode.http.Conversation;
 import greencode.http.HttpAction;
-import greencode.jscript.Window;
-import greencode.jscript.WindowHandle;
-import greencode.jscript.window.annotation.ConversationAttribute;
-import greencode.jscript.window.annotation.In;
-import greencode.jscript.window.annotation.RequestParameter;
-import greencode.jscript.window.annotation.SessionAttribute;
-import greencode.jscript.window.annotation.UserPrincipal;
-import greencode.jscript.window.annotation.Validate;
-import greencode.jscript.window.annotation.ViewSessionAttribute;
+import greencode.jscript.dom.Window;
+import greencode.jscript.dom.WindowHandle;
+import greencode.jscript.dom.window.annotation.ConversationAttribute;
+import greencode.jscript.dom.window.annotation.In;
+import greencode.jscript.dom.window.annotation.RequestParameter;
+import greencode.jscript.dom.window.annotation.SessionAttribute;
+import greencode.jscript.dom.window.annotation.UserPrincipal;
+import greencode.jscript.dom.window.annotation.Validate;
+import greencode.jscript.dom.window.annotation.ViewSessionAttribute;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
 import greencode.util.GenericReflection.Condition;
@@ -50,7 +50,7 @@ final class ActionLoader {
 				Conversation conversation = isDiffConversation ? greencode.http.$Conversation.getInstance(context.getRequest(), in.conversationId()) : context.getRequest().getConversation();
 
 				if(ClassUtils.isParent(fieldType, Window.class)) {
-					f.set(controller, in.create() ? WindowHandle.getInstance((Class<Window>) fieldType, conversation) : greencode.jscript.$Window.getMap(conversation).get(fieldType));
+					f.set(controller, in.create() ? WindowHandle.getInstance((Class<Window>) fieldType, conversation) : greencode.jscript.dom.$Window.getMap(conversation).get(fieldType));
 				}
 			} else if(f.isAnnotationPresent(RequestParameter.class)) {
 				if(ClassUtils.isPrimitiveOrWrapper(fieldType)) {

@@ -1,8 +1,8 @@
 package greencode.kernel;
 
 import greencode.database.implementation.DatabaseConnectionEvent;
-import greencode.jscript.Form;
-import greencode.jscript.Window;
+import greencode.jscript.dom.Form;
+import greencode.jscript.dom.Window;
 import greencode.kernel.implementation.BootActionImplementation;
 import greencode.kernel.implementation.PluginImplementation;
 import greencode.util.MergedFile;

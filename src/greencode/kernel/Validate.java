@@ -1,15 +1,15 @@
 package greencode.kernel;
 
 import greencode.jscript.DOMHandle;
-import greencode.jscript.Element;
-import greencode.jscript.Form;
-import greencode.jscript.elements.InputElement;
-import greencode.jscript.elements.SelectElement;
-import greencode.jscript.elements.SelectMultipleElement;
-import greencode.jscript.elements.TextareaElement;
-import greencode.jscript.elements.custom.ContainerElement;
-import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
-import greencode.jscript.form.annotation.Validator;
+import greencode.jscript.dom.Element;
+import greencode.jscript.dom.Form;
+import greencode.jscript.dom.elements.InputElement;
+import greencode.jscript.dom.elements.SelectElement;
+import greencode.jscript.dom.elements.SelectMultipleElement;
+import greencode.jscript.dom.elements.TextareaElement;
+import greencode.jscript.dom.elements.custom.ContainerElement;
+import greencode.jscript.dom.elements.custom.implementation.ContainerElementImplementation;
+import greencode.jscript.dom.form.annotation.Validator;
 import greencode.util.ArrayUtils;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
@@ -26,14 +26,14 @@ final class Validate {
 	static boolean validate(GreenContext context, Method requestMethod, Form form, ContainerElement<?> container, DataValidation dataValidation) {
 		final ContainerElementImplementation __container = container == null ? form : container;
 
-		final Field[] fields = greencode.jscript.$Container.getElementFields(__container);
+		final Field[] fields = greencode.jscript.dom.$Container.getElementFields(__container);
 		if(fields == null)
 			return true;
 
 		for(Field f: fields) {
-			greencode.jscript.form.annotation.ElementValue element = f.getAnnotation(greencode.jscript.form.annotation.ElementValue.class);
+			greencode.jscript.dom.form.annotation.ElementValue element = f.getAnnotation(greencode.jscript.dom.form.annotation.ElementValue.class);
 
-			final greencode.jscript.window.annotation.Validate methodValidate = requestMethod.getAnnotation(greencode.jscript.window.annotation.Validate.class);
+			final greencode.jscript.dom.window.annotation.Validate methodValidate = requestMethod.getAnnotation(greencode.jscript.dom.window.annotation.Validate.class);
 
 			if(methodValidate.blocks().length > 0 && !ArrayUtils.contains(methodValidate.blocks(), element.blockName()))
 				continue;

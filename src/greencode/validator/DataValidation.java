@@ -3,7 +3,7 @@ package greencode.validator;
 import java.util.HashMap;
 import java.util.Map;
 
-import greencode.jscript.window.annotation.Validate;
+import greencode.jscript.dom.window.annotation.Validate;
 import greencode.kernel.GreenContext;
 
 public final class DataValidation {

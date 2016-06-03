@@ -24,9 +24,9 @@ import org.apache.tomcat.util.http.MimeHeaders;
 import greencode.exception.OperationNotAllowedException;
 import greencode.http.enumeration.RequestMethod;
 import greencode.http.security.UserPrincipal;
-import greencode.kernel.LogMessage;
 import greencode.kernel.WebSocketData;
 import greencode.util.FileUtils;
+import greencode.util.LogMessage;
 
 public final class HttpRequest extends HttpServletRequestWrapper implements HttpServletRequest {
 	private static final TimeZone GMT_ZONE = TimeZone.getTimeZone("GMT");

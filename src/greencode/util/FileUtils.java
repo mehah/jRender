@@ -1,7 +1,5 @@
 package greencode.util;
 
-import greencode.kernel.GreenContext;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.DataInputStream;
@@ -17,6 +15,8 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import javax.servlet.http.Part;
+
+import greencode.kernel.GreenContext;
 
 public final class FileUtils {
 	private static final String pathWebContent = GreenContext.class.getClassLoader().getResource("").getPath()+"../../";

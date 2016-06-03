@@ -21,11 +21,12 @@ import com.google.gson.Gson;
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 
 import greencode.exception.GreencodeError;
-import greencode.jscript.FunctionHandle;
-import greencode.jscript.Window;
-import greencode.jscript.window.annotation.Page;
+import greencode.jscript.dom.FunctionHandle;
+import greencode.jscript.dom.Window;
+import greencode.jscript.dom.window.annotation.Page;
 import greencode.util.FileUtils;
 import greencode.util.GenericReflection;
+import greencode.util.LogMessage;
 import greencode.util.MergedFile;
 import greencode.util.StringUtils;
 
@@ -44,8 +45,6 @@ public final class FileWeb {
 
 	final Class<? extends Window> window;
 	final Page pageAnnotation;
-
-	String moduleName;
 
 	private File file;
 	private String content, selector, selectedContent, ajaxSelector, ajaxSelectedContent;
@@ -353,7 +352,6 @@ public final class FileWeb {
 
 			if(!page.jsModule().isEmpty()) {
 				final String modulePath = StringUtils.replace(page.jsModule(), ".", "/") + ".js";
-				pReference.moduleName = modulePath.substring(modulePath.lastIndexOf('/') + 1, modulePath.length() - 3);
 
 				final URL url = classLoader.getResource(modulePath);
 
@@ -369,7 +367,7 @@ public final class FileWeb {
 
 					final Method[] methods = GenericReflection.getDeclaredMethods(c);
 					for(Method method: methods) {
-						if(!method.getName().equals("init") && method.getParameterTypes().length == 0) {
+						if(method.getName().equals(Core.INIT_METHOD_NAME)) {
 							FunctionHandle func = new FunctionHandle(c, method.getName());
 							methodsJS.append("var ").append(method.getName()).append("=function(onComplete) {var param =").append(new Gson().toJson(func)).append(";param.viewId = __viewId;param.cid = __cid;param.url = CONTEXT_PATH+param.url;Bootstrap.callRequestMethod(principalElement, {}, {event: 'undefined', onComplete: onComplete}, param, []);};");
 						}
@@ -391,6 +389,14 @@ public final class FileWeb {
 			} else
 				throw new GreencodeError(LogMessage.getMessage("green-0014", page.path()));
 		}
+	}
+	
+	static String getModuleName(String jsModule) {
+		if(jsModule.isEmpty())
+			return null;
+		
+		final String modulePath = StringUtils.replace(jsModule, ".", "/") + ".js";
+		return modulePath.substring(modulePath.lastIndexOf('/') + 1, modulePath.length() - 3);
 	}
 
 	static FileWeb pathAnalyze(String servletPath, FileWeb fileWeb, HttpServletRequest request) {

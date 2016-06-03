@@ -1,8 +1,11 @@
 package greencode.kernel;
 
+import java.util.Locale;
+import java.util.Properties;
+
 import greencode.jscript.DOM;
-import greencode.jscript.Form;
-import greencode.jscript.Window;
+import greencode.jscript.dom.Form;
+import greencode.jscript.dom.Window;
 
 public final class $GreenContext {
 	private $GreenContext() {}
@@ -16,4 +19,8 @@ public final class $GreenContext {
 	public static boolean isImmediateSync(GreenContext context) {
 		return context.immediateSync;
 	}
+	
+	public static Properties getCurrentMessagePropertie(GreenContext context) {
+		return context.currentMessagePropertie;
+	}	
 }

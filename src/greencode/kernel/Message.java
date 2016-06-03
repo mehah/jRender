@@ -4,6 +4,8 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Properties;
 
+import greencode.util.LogMessage;
+
 public final class Message {
 	final static HashMap<String, Properties> properties = new HashMap<String, Properties>();
 	
@@ -11,7 +13,7 @@ public final class Message {
 		
 	public static String getMessage(String key) {
 		GreenContext context = GreenContext.getInstance();
-		Properties properties = context.currentMessagePropertie;
+		Properties properties = greencode.kernel.$GreenContext.getCurrentMessagePropertie(context);
 		
 		final String msg = properties.getProperty(key);
 		if(msg == null)

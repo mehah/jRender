@@ -26,12 +26,13 @@ import greencode.http.Conversation;
 import greencode.http.HttpRequest;
 import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
-import greencode.jscript.Form;
-import greencode.jscript.Window;
-import greencode.jscript.function.implementation.SimpleFunction;
+import greencode.jscript.dom.Form;
+import greencode.jscript.dom.Window;
+import greencode.jscript.dom.function.implementation.SimpleFunction;
 import greencode.kernel.implementation.BootActionImplementation;
 import greencode.kernel.serialization.DOMDeserializer;
 import greencode.kernel.serialization.DOMSerializer;
+import greencode.util.LogMessage;
 
 public final class GreenContext {
 	private final static ThreadLocal<WeakReference<GreenContext>> greenContext = new ThreadLocal<WeakReference<GreenContext>>();
@@ -44,6 +45,7 @@ public final class GreenContext {
 	final HttpRequest request;
 	final HttpServletResponse response;
 	final WebSocketData webSocketData;
+	final greencode.jscript.dom.window.annotation.Page currentPageAnnotation;
 	final public Gson gsonInstance = getGsonInstance();
 	
 	boolean userLocaleChanged = false;	
@@ -51,7 +53,6 @@ public final class GreenContext {
 	Properties currentMessagePropertie;
 
 	Window currentWindow;
-	greencode.jscript.window.annotation.Page currentPageAnnotation;
 	Form requestedForm;
 	Method requestedMethod;
 	
@@ -68,7 +69,16 @@ public final class GreenContext {
 		this.webSocketData = wsData;
 		this.response = (HttpServletResponse) response;
 		this.request = new HttpRequest(request, response, wsData);
-		this.currentPageAnnotation = currentPage == null ? null : currentPage.pageAnnotation;
+		
+		if(currentPage == null) {
+			String servletPath = this.request.getParameter("servletPath");
+			if(servletPath != null) {
+				this.currentPageAnnotation = FileWeb.files.get(servletPath).pageAnnotation;
+			} else {
+				this.currentPageAnnotation = null;
+			}
+		} else
+			this.currentPageAnnotation = currentPage.pageAnnotation;
 		
 		if(!sessionInitialized && getBootAction() != null)
 			getBootAction().initUserContext(this);
@@ -128,10 +138,10 @@ public final class GreenContext {
 		return this.requestedMethod;
 	}
 	
-	public greencode.jscript.window.annotation.Page currentPageAnnotation() {
+	public greencode.jscript.dom.window.annotation.Page currentPageAnnotation() {
 		exceptionCheck();
 		
-		return this.currentPageAnnotation == null ? greencode.jscript.$Window.getCurrentPageAnnotation(currentWindow()) : this.currentPageAnnotation;
+		return this.currentPageAnnotation == null ? greencode.jscript.dom.$Window.getCurrentPageAnnotation(currentWindow()) : this.currentPageAnnotation;
 	}
 	
 	Gson getGsonInstance() {
@@ -216,7 +226,7 @@ public final class GreenContext {
 		if(this.webSocketData != null) {
 			try {
 				if(GreenCodeConfig.Browser.websocketSingleton) {
-					this.webSocketData.session.getBasicRemote().sendText(ElementsScan.getCloseEventId(webSocketData));
+					this.webSocketData.session.getBasicRemote().sendText(DOMScanner.getCloseEventId(webSocketData));
 				}else
 					this.webSocketData.getSession().close();
 			} catch (Exception e) {

@@ -24,6 +24,7 @@ import greencode.database.DatabaseConfig;
 import greencode.exception.GreencodeError;
 import greencode.kernel.implementation.PluginImplementation;
 import greencode.util.GenericReflection;
+import greencode.util.LogMessage;
 
 public final class GreenCodeConfig {
 	private GreenCodeConfig() {

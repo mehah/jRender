@@ -3,7 +3,7 @@ package greencode.database;
 import greencode.exception.GreencodeError;
 import greencode.kernel.Console;
 import greencode.kernel.GreenCodeConfig;
-import greencode.kernel.LogMessage;
+import greencode.util.LogMessage;
 
 import java.sql.Array;
 import java.sql.Blob;

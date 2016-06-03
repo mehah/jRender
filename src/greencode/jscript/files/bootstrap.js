@@ -90,6 +90,12 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 		objectEvent.processing = true;
 
 		var param = {}, form = null, formName = null;
+		
+		if(p.requestParameters) {
+			for(var i in p.requestParameters) {
+				param[i] = p.requestParameters[i];
+			}
+		}
 
 		if (p.args != null) {
 			param._args = [];
@@ -250,7 +256,7 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 
 			param.__requestedForm = formName;
 		}
-
+		
 		param.cid = p.cid;
 		param.viewId = p.viewId;
 		param.eventType = event.type;

@@ -1,28 +1,28 @@
 package greencode.jscript;
 
-import greencode.exception.ConnectionLost;
-import greencode.http.ViewSession;
-import greencode.kernel.ElementsScan;
-import greencode.kernel.GreenContext;
-import greencode.kernel.LogMessage;
-
 import java.io.IOException;
 import java.util.HashMap;
+
+import greencode.exception.ConnectionLost;
+import greencode.http.ViewSession;
+import greencode.jscript.dom.Window;
+import greencode.kernel.DOMScanner;
+import greencode.kernel.GreenContext;
+import greencode.util.LogMessage;
 
 public abstract class DOM {
 	
 	protected final Window window;
 	protected final ViewSession viewSession;
-	HashMap<String, Object> variables = new HashMap<String, Object>();
-	
+	HashMap<String, Object> variables = new HashMap<String, Object>();	
 	int uid = hashCode();
 	
 	protected DOM(Window window) {
 		this.window = window;
-		this.viewSession = window.viewSession;
+		this.viewSession = ((DOM)window).viewSession;
 	}
 	
-	DOM(ViewSession viewSession) {
+	protected DOM(ViewSession viewSession) {
 		this.window = (Window) this;
 		this.viewSession = viewSession;
 	}
@@ -62,7 +62,7 @@ public abstract class DOM {
 		try {			
 			sendByte(context);
 
-			ElementsScan.sendElements(context);
+			DOMScanner.sendElements(context);
 			
 			if(buffer && !context.getRequest().isWebSocket()) context.getResponse().flushBuffer();
 			

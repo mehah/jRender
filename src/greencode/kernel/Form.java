@@ -19,18 +19,19 @@ import javax.servlet.http.Part;
 import greencode.exception.GreencodeError;
 import greencode.http.enumeration.RequestMethod;
 import greencode.jscript.DOMHandle;
-import greencode.jscript.Element;
-import greencode.jscript.Window;
-import greencode.jscript.WindowHandle;
-import greencode.jscript.elements.InputFileElement;
-import greencode.jscript.elements.custom.ContainerElement;
-import greencode.jscript.elements.custom.implementation.ContainerElementImplementation;
-import greencode.jscript.form.annotation.ConvertDateTime;
-import greencode.jscript.form.convert.Converter;
+import greencode.jscript.dom.Element;
+import greencode.jscript.dom.Window;
+import greencode.jscript.dom.WindowHandle;
+import greencode.jscript.dom.elements.InputFileElement;
+import greencode.jscript.dom.elements.custom.ContainerElement;
+import greencode.jscript.dom.elements.custom.implementation.ContainerElementImplementation;
+import greencode.jscript.dom.form.annotation.ConvertDateTime;
+import greencode.jscript.dom.form.convert.Converter;
 import greencode.util.ArrayUtils;
 import greencode.util.ClassUtils;
 import greencode.util.DateUtils;
 import greencode.util.GenericReflection;
+import greencode.util.LogMessage;
 import greencode.util.StringUtils;
 
 final class Form {
@@ -40,7 +41,7 @@ final class Form {
 			if(formName.equals("null"))
 				throw new GreencodeError(LogMessage.getMessage("green-0049"));
 				
-			final Class<? extends greencode.jscript.Form> formClass = Cache.forms.get(formName);
+			final Class<? extends greencode.jscript.dom.Form> formClass = Cache.forms.get(formName);
 			if(formClass == null)
 				throw new GreencodeError(LogMessage.getMessage("green-0032", formName));
 
@@ -53,9 +54,9 @@ final class Form {
 	}
 
 	private static void processElements(final GreenContext context, final ContainerElementImplementation container, final boolean METHOD_TYPE_IS_GET, Map<String, Object> map, HashMap<Integer, ContainerElement<?>> containersForm) throws IllegalArgumentException, IllegalStateException, IllegalAccessException, IOException, ServletException {
-		Field[] fields = greencode.jscript.$Container.getElementFields(container);
+		Field[] fields = greencode.jscript.dom.$Container.getElementFields(container);
 		for(Field f: fields) {
-			greencode.jscript.form.annotation.ElementValue element = f.getAnnotation(greencode.jscript.form.annotation.ElementValue.class);
+			greencode.jscript.dom.form.annotation.ElementValue element = f.getAnnotation(greencode.jscript.dom.form.annotation.ElementValue.class);
 
 			final String parametro = !element.name().isEmpty() ? element.name() : f.getName();
 
@@ -71,7 +72,7 @@ final class Form {
 				final List<HashMap<String, Object>> list = json instanceof String ? context.gsonInstance.fromJson(context.request.getParameter(parametro), (new ArrayList<HashMap<String, Object>>()).getClass()) : (List<HashMap<String, Object>>) json;
 
 				if(containersForm == null) {
-					containersForm = greencode.jscript.$Container.getContainers(context.requestedForm);
+					containersForm = greencode.jscript.dom.$Container.getContainers(context.requestedForm);
 					containersForm.clear();
 				}
 
@@ -113,7 +114,7 @@ final class Form {
 				DOMHandle.setVariableValue((Element) f.get(container), "value", context.getRequest().getPart(parametro));
 			} else {
 				final Type type = f.getGenericType();
-				final boolean isElementMultipleValue = greencode.jscript.elements.$Element.isValueMultiSelectable(fieldType);
+				final boolean isElementMultipleValue = greencode.jscript.dom.elements.$Element.isValueMultiSelectable(fieldType);
 
 				if(isElementMultipleValue || fieldType.isArray()) {
 					final String[] valores;
@@ -186,7 +187,7 @@ final class Form {
 							}
 						}
 
-						if(greencode.jscript.elements.$Element.isElementWithValue(fieldType)) {
+						if(greencode.jscript.dom.elements.$Element.isElementWithValue(fieldType)) {
 							DOMHandle.setVariableValue((Element) f.get(container), "value", valor);
 						} else {
 							f.set(container, valor);
@@ -199,7 +200,7 @@ final class Form {
 		}
 	}
 
-	static Object getFieldValue(GreenContext context, Field field, Class<?> instanceClass, final String valor, final greencode.jscript.form.annotation.ElementValue elementAnnotation) throws UnknownFormatConversionException {
+	static Object getFieldValue(GreenContext context, Field field, Class<?> instanceClass, final String valor, final greencode.jscript.dom.form.annotation.ElementValue elementAnnotation) throws UnknownFormatConversionException {
 		if(valor != null && !valor.isEmpty()) {
 			if(elementAnnotation.converters().length > 0) {
 				Object lastValue = valor;

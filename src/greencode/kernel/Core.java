@@ -56,28 +56,27 @@ import greencode.exception.GreencodeError;
 import greencode.exception.StopProcess;
 import greencode.http.HttpAction;
 import greencode.http.HttpRequest;
-import greencode.http.ViewSession;
 import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.DOMHandle.UIDReference;
-import greencode.jscript.Element;
-import greencode.jscript.ElementHandle;
-import greencode.jscript.Form;
-import greencode.jscript.FunctionHandle;
-import greencode.jscript.Window;
-import greencode.jscript.WindowHandle;
-import greencode.jscript.elements.custom.ContainerElement;
-import greencode.jscript.event.EventObject;
-import greencode.jscript.event.custom.ContainerEventObject;
-import greencode.jscript.form.annotation.Name;
-import greencode.jscript.function.implementation.EventFunction;
-import greencode.jscript.function.implementation.Function;
-import greencode.jscript.function.implementation.SimpleFunction;
-import greencode.jscript.window.annotation.AfterAction;
-import greencode.jscript.window.annotation.BeforeAction;
-import greencode.jscript.window.annotation.Destroy;
-import greencode.jscript.window.annotation.ForceSync;
-import greencode.jscript.window.annotation.PageParameter;
+import greencode.jscript.dom.Element;
+import greencode.jscript.dom.ElementHandle;
+import greencode.jscript.dom.Form;
+import greencode.jscript.dom.FunctionHandle;
+import greencode.jscript.dom.Window;
+import greencode.jscript.dom.WindowHandle;
+import greencode.jscript.dom.elements.custom.ContainerElement;
+import greencode.jscript.dom.event.EventObject;
+import greencode.jscript.dom.event.custom.ContainerEventObject;
+import greencode.jscript.dom.form.annotation.Name;
+import greencode.jscript.dom.function.implementation.EventFunction;
+import greencode.jscript.dom.function.implementation.Function;
+import greencode.jscript.dom.function.implementation.SimpleFunction;
+import greencode.jscript.dom.window.annotation.AfterAction;
+import greencode.jscript.dom.window.annotation.BeforeAction;
+import greencode.jscript.dom.window.annotation.Destroy;
+import greencode.jscript.dom.window.annotation.ForceSync;
+import greencode.jscript.dom.window.annotation.PageParameter;
 import greencode.kernel.implementation.BootActionImplementation;
 import greencode.kernel.implementation.PluginImplementation;
 import greencode.util.ArrayUtils;
@@ -85,12 +84,13 @@ import greencode.util.ClassUtils;
 import greencode.util.FileUtils;
 import greencode.util.FileUtils.FileRead;
 import greencode.util.GenericReflection;
+import greencode.util.LogMessage;
 import greencode.util.PackageUtils;
 
 @ServerEndpoint(value = "/coreWebSocket", configurator = WebSocketConfigurator.class)
 @WebFilter(displayName = "core", urlPatterns = "/*")
 public final class Core implements Filter {
-	private final static String INIT_METHOD_NAME = "init";
+	public final static String INIT_METHOD_NAME = "init";
 	private final static Boolean HAS_ERROR = true;
 	private final static String[] JS_SUPPORT_FILES = {
 		"json3.js",
@@ -203,86 +203,7 @@ public final class Core implements Filter {
 	static void coreInit(final String servletPath, final HttpServletRequest httpServletRequest, ServletResponse response, final FilterChain chain, final WebSocketData webSocketData) throws IOException, ServletException {
 				
 		if (servletPath.equals("$synchronize")) {
-			final GreenContext context = new GreenContext(httpServletRequest, response, null, webSocketData);
-			
-			final HttpRequest __request = context.request;
-						
-			final ViewSession viewSession = __request.getViewSession();
-			final boolean set = Boolean.parseBoolean(__request.getParameter("set"));
-			final Map<Integer, DOM> DOMList = greencode.jscript.$DOMHandle.getDOMSync(viewSession);			
-			final Map<String, List<Map<String, String>>> list = context.gsonInstance.fromJson(__request.getParameter("list"), new HashMap<String, List<Map<String, String>>>().getClass());			
-			
-			Map<Integer, Thread> threadList = null;
-			Thread th = null;
-			Integer accessCode = null; 
-			if(!set) {
-				threadList = GreenContext.getThreadList(__request.getConversation());
-				accessCode = Integer.parseInt(__request.getParameter("accessCode"));
-				th = threadList.get(accessCode);
-			}
-			
-			synchronized(set ? Object.class : th) {
-				for (Entry<String, List<Map<String, String>>> o : list.entrySet()) {
-					final Integer uid = Integer.parseInt(o.getKey());
-					
-					DOM dom = DOMList.get(uid);
-	
-					synchronized (dom) {
-						DOMList.remove(uid);
-	
-						List<Map<String, String>> attrs = o.getValue();	
-						
-						StringBuilder strInforme = new StringBuilder("[Synchronized] {uid=" + uid);
-						
-						if(attrs.size() == 0) {
-							strInforme.append(":Not Found}");
-						} else {
-							strInforme.append(", attrs = [");
-							boolean first = true;
-							for (Map<String, String> attr : attrs) {
-								final String varName = attr.get("name");
-								final String value = attr.get("var");
-								
-								
-								if(!first) {
-									strInforme.append(", ");
-								} else {
-									first = false;
-								}
-	
-								if(set) {
-									DOMHandle.setVariableValue(dom, varName, value);	
-								} else {
-									try {
-										Class<?> cast = attr.get("cast") != null ? Class.forName(attr.get("cast")) : null;
-										DOMHandle.setVariableValue(dom, varName, greencode.jscript.$DOMHandle.setVariableValue(context, dom, varName, cast, value));
-									} catch (ClassNotFoundException e) {
-										e.printStackTrace();
-									}								
-								}
-	
-								strInforme.append("{varName=" + varName + ", value=" + value+"}");
-							}
-							strInforme.append("]}");
-						}
-						
-						Console.log(strInforme.toString());
-	
-						if(set) {
-							dom.notify();
-						}
-					}
-				}
-				
-				if(!set) {
-					th.notify();
-					threadList.remove(accessCode);
-				}
-			}
-
-			if (!__request.isWebSocket())
-				response.getWriter().close();
-			
+			DOMScanner.synchronize(servletPath, httpServletRequest, response, webSocketData);			
 			return;
 		}
 
@@ -331,17 +252,6 @@ public final class Core implements Filter {
 			}
 		}
 
-		// Multipart System
-		{
-			MultipartConfig multipartConfig = null;
-			if (((GreenCodeConfig.Server.Request.Multipart.autodectetion) || ((multipartConfig = requestClass.getAnnotation(MultipartConfig.class)) != null)) && httpServletRequest.getContentType() != null && httpServletRequest.getContentType().indexOf("multipart/form-data") > -1) {
-
-				Request _request = (Request) GenericReflection.NoThrow.getValue(requestField, httpServletRequest);
-				_request.getContext().setAllowCasualMultipartParsing(true);
-				_request.getConnector().setMaxPostSize((int) (multipartConfig != null ? multipartConfig.maxRequestSize() : GreenCodeConfig.Server.Request.Multipart.maxRequestSize));
-			}
-		}
-
 		final GreenContext context = new GreenContext(httpServletRequest, (HttpServletResponse) response, page, webSocketData);
 		long processTime = 0;
 		DatabaseConnectionEvent databaseConnectionEvent = null;
@@ -359,7 +269,7 @@ public final class Core implements Filter {
 				
 				if (!(page.pageAnnotation.parameters().length == 1 && page.pageAnnotation.parameters()[0].name().isEmpty())) {
 					for (PageParameter p : page.pageAnnotation.parameters())
-						greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), new String[] { p.value() });
+						greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), p.value());
 				}
 				
 				if(hasAccess) {
@@ -372,21 +282,31 @@ public final class Core implements Filter {
 					else
 						content = page.getContent(context);
 					
+					Console.log("Requested Page: "+ servletPath);
+					
 					if (context.request.isWebSocket()) {
-						basicRemote.sendText(ElementsScan.getMsgEventId(context.webSocketData)+content);
+						basicRemote.sendText(DOMScanner.getMsgEventId(context.webSocketData)+content);
 					} else {
-						Console.log("Requested Page: "+ servletPath);
-						
 						if (!isFirstRequest && greencode.http.$HttpRequest.contentIsHtml(context.request)) {
 							content = "<ajaxcontent>" + content + "</ajaxcontent>";
 						}
-	
 						context.response.getWriter().write(content);
-						if(isFirstRequest) {
-							ElementsScan.registerCommand(context, "#viewId", context.request.getViewSession().getId());
-							ElementsScan.registerCommand(context, "Greencode.exec", new FunctionHandle((Class<Window>) requestClass, INIT_METHOD_NAME));
-							throw new StopProcess();
-						}
+					}
+
+					String moduleName = FileWeb.getModuleName(page.pageAnnotation.jsModule());
+					if (moduleName != null) {
+						DOMScanner.registerCommand(context, "Greencode.util.loadScript", Core.CONTEXT_PATH + "/jscript/greencode/modules/" + moduleName + ".js", false, GreenCodeConfig.Server.View.charset);
+					}
+					
+					if(isFirstRequest) {
+						DOMScanner.registerCommand(context, "#viewId", context.request.getViewSession().getId());
+						
+						FunctionHandle fh = new FunctionHandle((Class<Window>) requestClass, INIT_METHOD_NAME);
+						fh.registerRequestParameter("servletPath", servletPath);
+						
+						DOMScanner.registerCommand(context, "Greencode.exec", fh);
+						
+						throw new StopProcess();
 					}
 				} else {
 					Console.log(LogMessage.getMessage("green-0043", servletPath));
@@ -395,16 +315,39 @@ public final class Core implements Filter {
 				hasAccess = true;
 			}
 			
+			Method requestedMethod = null;
+			Object[] listArgs = null;
+			
+			if (hasAccess && methodName.equals(INIT_METHOD_NAME)) {
+				context.requestedMethod = requestedMethod = GenericReflection.getMethod(requestClass, methodName, new Class<?>[]{GreenContext.class});
+				if (requestedMethod.isAnnotationPresent(Destroy.class)) {
+					WindowHandle.removeInstance((Class<? extends Window>) requestClass, context.request.getConversation());
+				}
+			}
+			
 			HttpAction requestController = WindowHandle.getInstance((Class<Window>) requestClass, context.request.getConversation());
 			if (context.currentWindow == null)
 				context.currentWindow = (Window) requestController;
 			
-			if(!hasAccess)
+			if(!hasAccess) {
 				Rule.runAuthorizationMethod(context);
+				throw new StopProcess();
+			}
+			
+			// Multipart System
+			{
+				MultipartConfig multipartConfig = null;
+				if (((GreenCodeConfig.Server.Request.Multipart.autodectetion) || ((multipartConfig = requestClass.getAnnotation(MultipartConfig.class)) != null)) && httpServletRequest.getContentType() != null && httpServletRequest.getContentType().indexOf("multipart/form-data") > -1) {
+
+					Request _request = (Request) GenericReflection.NoThrow.getValue(requestField, httpServletRequest);
+					_request.getContext().setAllowCasualMultipartParsing(true);
+					_request.getConnector().setMaxPostSize((int) (multipartConfig != null ? multipartConfig.maxRequestSize() : GreenCodeConfig.Server.Request.Multipart.maxRequestSize));
+				}
+			}
 
 			final Map<Integer, Function> registeredFunctions;
 			if (hashcodeRequestMethod != null) {
-				registeredFunctions = greencode.jscript.$Window.getRegisteredFunctions((Window) requestController);
+				registeredFunctions = greencode.jscript.dom.$Window.getRegisteredFunctions((Window) requestController);
 				requestController = (HttpAction) registeredFunctions.get(hashcodeRequestMethod);
 				if (requestController == null) {
 
@@ -414,61 +357,60 @@ public final class Core implements Filter {
 			} else
 				registeredFunctions = null;
 
-			Object[] listArgs = null;
-			Method requestMethod = null;
-
 			greencode.kernel.Form.processRequestedForm(context);
 
 			try {
-				if (!isFirstRequest && listArgsClass == null) {
-					String[] _args = context.request.getParameterValues("_args[]");
-					if (_args != null) {
-						final int _argsSize = _args.length;
-
-						ElementsScan eArg = ElementsScan.getElements(context.request.getViewSession());
-
-						eArg.args = new Integer[_argsSize];
-						listArgs = new Object[_argsSize];
-						listArgsClass = new Class<?>[_argsSize];
-
-						int cntSkip = 0;
-						for (int i = -1; ++i < _argsSize;) {
-							final HashMap<String, String> j = context.gsonInstance.fromJson(_args[i], (new HashMap<String, String>()).getClass());
-
-							final Class<?> _class = Class.forName(j.get("className"));
-							listArgsClass[i] = _class;
-
-							if (_class.equals(GreenContext.class)) {
-								++cntSkip;
-								listArgs[i] = context;
-							} else {
-								final DOM dom;
-								if (_class.equals(ContainerEventObject.class)) {
-									dom = new ContainerEventObject(context, Integer.parseInt(j.get("uid")));
+				if(requestedMethod == null) {
+					if (!isFirstRequest && listArgsClass == null) {
+						String[] _args = context.request.getParameterValues("_args[]");
+						if (_args != null) {
+							final int _argsSize = _args.length;
+	
+							DOMScanner eArg = DOMScanner.getElements(context.request.getViewSession());
+	
+							eArg.args = new Integer[_argsSize];
+							listArgs = new Object[_argsSize];
+							listArgsClass = new Class<?>[_argsSize];
+	
+							int cntSkip = 0;
+							for (int i = -1; ++i < _argsSize;) {
+								final HashMap<String, String> j = context.gsonInstance.fromJson(_args[i], (new HashMap<String, String>()).getClass());
+	
+								final Class<?> _class = Class.forName(j.get("className"));
+								listArgsClass[i] = _class;
+	
+								if (_class.equals(GreenContext.class)) {
 									++cntSkip;
-								} else if (_class.equals(ContainerElement.class)) {
-									dom = greencode.jscript.$Container.getContainers(context.requestedForm).get(Integer.parseInt(j.get("uid")));
-									listArgsClass[i] = dom.getClass();
-									++cntSkip;
-								} else if (_class.equals(Element.class)) {
-									Class<? extends Element> castoTo = (Class<? extends Element>) Class.forName(j.get("castTo"));
-									dom = ElementHandle.getInstance(castoTo, context.currentWindow);
-									greencode.jscript.$DOMHandle.setUID(dom, Integer.parseInt(j.get("uid")));
-									listArgsClass[i] = castoTo;
-									++cntSkip;
+									listArgs[i] = context;
 								} else {
-									dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);
-									eArg.args[i - cntSkip] = DOMHandle.getUID(dom);
+									final DOM dom;
+									if (_class.equals(ContainerEventObject.class)) {
+										dom = new ContainerEventObject(context, Integer.parseInt(j.get("uid")));
+										++cntSkip;
+									} else if (_class.equals(ContainerElement.class)) {
+										dom = greencode.jscript.dom.$Container.getContainers(context.requestedForm).get(Integer.parseInt(j.get("uid")));
+										listArgsClass[i] = dom.getClass();
+										++cntSkip;
+									} else if (_class.equals(Element.class)) {
+										Class<? extends Element> castoTo = (Class<? extends Element>) Class.forName(j.get("castTo"));
+										dom = ElementHandle.getInstance(castoTo, context.currentWindow);
+										greencode.jscript.$DOMHandle.setUID(dom, Integer.parseInt(j.get("uid")));
+										listArgsClass[i] = castoTo;
+										++cntSkip;
+									} else {
+										dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);
+										eArg.args[i - cntSkip] = DOMHandle.getUID(dom);
+									}
+									listArgs[i] = dom;
 								}
-								listArgs[i] = dom;
 							}
 						}
 					}
+	
+					context.requestedMethod = requestedMethod = GenericReflection.getMethod(requestClass, methodName, listArgsClass);
 				}
 
-				context.requestedMethod = requestMethod = GenericReflection.getMethod(requestClass, methodName, listArgsClass);
-
-				Rule.forMethod(context, requestMethod);
+				Rule.forMethod(context, requestedMethod);
 			} catch (NoSuchMethodException e1) {
 				throw new NoSuchMethodException(LogMessage.getMessage("green-0007", methodName, controllerName));
 			}
@@ -479,7 +421,7 @@ public final class Core implements Filter {
 				context.forceSynchronization = true;
 				context.listAttrSyncCache = new HashMap<Integer, HashSet<String>>();
 			} else {
-				ForceSync fs = requestMethod.getAnnotation(ForceSync.class);
+				ForceSync fs = requestedMethod.getAnnotation(ForceSync.class);
 				if (fs != null) {
 					context.forceSynchronization = true;
 					context.listAttrSync = fs.value();
@@ -491,10 +433,10 @@ public final class Core implements Filter {
 			if (hasBootaction) {
 				classNameBootAction = Cache.bootAction.getClass().getSimpleName();
 
-				BeforeAction a = requestMethod.getAnnotation(BeforeAction.class);
+				BeforeAction a = requestedMethod.getAnnotation(BeforeAction.class);
 				if (a == null || !a.disable()) {
 					Console.log("Calling BeforeAction: [" + classNameBootAction + "]");
-					context.executeAction = Cache.bootAction.beforeAction(context, requestMethod);
+					context.executeAction = Cache.bootAction.beforeAction(context, requestedMethod);
 				}
 			}
 
@@ -503,24 +445,24 @@ public final class Core implements Filter {
 				Console.log("Calling Action: [" + controllerName + ":" + methodName + "]" + (eventType == null ? "" : "[EventType: " + eventType + "]"));
 
 				try {
-					databaseConnectionEvent = ActionLoader.connection(context, requestMethod);
+					databaseConnectionEvent = ActionLoader.connection(context, requestedMethod);
 
-					ActionLoader.process(context, requestController, requestMethod);
+					ActionLoader.process(context, requestController, requestedMethod);
 
 					if (context.executeAction) {
-						if (page != null && requestController instanceof Window) {
+						if (requestController instanceof Window && methodName.equals(Core.INIT_METHOD_NAME)) {
 							((Window) requestController).init(context);
 
-							if (page.moduleName != null) {
-								DOMHandle.execCommand(context.currentWindow, "Greencode.util.loadScript", Core.CONTEXT_PATH + "/jscript/greencode/modules/" + page.moduleName + ".js", false, GreenCodeConfig.Server.View.charset);
-								DOMHandle.execCommand(context.currentWindow, "Greencode.modules." + page.moduleName + ".call", context.currentWindow.principalElement(), context.currentWindow.principalElement(), context.request.getViewSession().getId(), context.request.getConversationId());
+							String moduleName = FileWeb.getModuleName(context.currentPageAnnotation().jsModule());
+							if (moduleName != null) {
+								DOMHandle.execCommand(context.currentWindow, "Greencode.modules." + moduleName + ".call", context.currentWindow.principalElement(), context.currentWindow.principalElement(), context.request.getViewSession().getId(), context.request.getConversationId());
 							}
 						} else if (requestController instanceof EventFunction)
 							((EventFunction) requestController).init((EventObject) listArgs[0]);
 						else if (requestController instanceof SimpleFunction)
 							((SimpleFunction) requestController).init(context);
 						else
-							requestMethod.invoke(requestController, listArgs);
+							requestedMethod.invoke(requestController, listArgs);
 					}
 				} catch (ConnectionLost e) {
 					Console.warning(e.getMessage());
@@ -530,11 +472,11 @@ public final class Core implements Filter {
 					databaseConnectionEvent.afterRequest(context);
 
 				if (hasBootaction) {
-					AfterAction a = requestMethod.getAnnotation(AfterAction.class);
+					AfterAction a = requestedMethod.getAnnotation(AfterAction.class);
 
 					if (a == null || !a.disable()) {
 						Console.log("Calling AfterAction: [" + classNameBootAction + "]");
-						Cache.bootAction.afterAction(context, requestMethod);
+						Cache.bootAction.afterAction(context, requestedMethod);
 					}
 				}
 			} else
@@ -546,7 +488,7 @@ public final class Core implements Filter {
 			if (databaseConnectionEvent != null)
 				databaseConnectionEvent.onSuccess(context);
 
-			if (requestMethod.isAnnotationPresent(Destroy.class)) {
+			if (requestedMethod.isAnnotationPresent(Destroy.class)) {
 				if (registeredFunctions != null)
 					registeredFunctions.remove(hashcodeRequestMethod);
 				else if (!methodName.equals(INIT_METHOD_NAME))
@@ -594,12 +536,12 @@ public final class Core implements Filter {
 
 			JsonObject json = new JsonObject();
 			json.add("error", error);
-			ElementsScan.send(context, json);
+			DOMScanner.send(context, json);
 
 			System.err.println(Console.msgError);
 			e.printStackTrace();
 		} finally {
-			ElementsScan.sendElements(context);
+			DOMScanner.sendElements(context);
 			context.destroy();
 		}
 
@@ -644,7 +586,7 @@ public final class Core implements Filter {
 				variant = GreenCodeConfig.Server.Internationalization.getVariantLogByLocale(new Locale("pt", "BR"));
 
 			if (variant != null) {
-				LogMessage.instance.load(new InputStreamReader(variant.resource.openStream(), variant.charsetName));
+				greencode.util.$LogMessage.getInstace().load(new InputStreamReader(variant.resource.openStream(), variant.charsetName));
 
 				for (GreenCodeConfig.Server.Internationalization.Variant v : GreenCodeConfig.Server.Internationalization.pagesLocale) {
 					try {

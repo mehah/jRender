@@ -25,6 +25,10 @@ public class Conversation {
 	
 	public Conversation next() { return new Conversation(viewSession, id+1); }
 	
+	public ViewSession getViewSession() {
+		return this.viewSession;
+	}
+	
 	public void changeConversation(int id) {
 		if(this.id == id)
 			return;

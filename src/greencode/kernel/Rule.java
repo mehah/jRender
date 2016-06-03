@@ -5,9 +5,9 @@ import java.lang.reflect.Method;
 
 import javax.servlet.http.HttpServletResponse;
 
-import greencode.exception.StopProcess;
 import greencode.http.security.UserPrincipal;
-import greencode.jscript.window.annotation.RulesAllowed;
+import greencode.jscript.dom.window.annotation.RulesAllowed;
+import greencode.util.LogMessage;
 
 final class Rule {
 
@@ -44,6 +44,5 @@ final class Rule {
 		if((Cache.bootAction == null || !Cache.bootAction.whenUnauthorized(context)) && !context.request.isWebSocket()) {
 			context.response.sendError(HttpServletResponse.SC_UNAUTHORIZED, LogMessage.getMessage("green-0040"));
 		}
-		throw new StopProcess();
 	}
 }

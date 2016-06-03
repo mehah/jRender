@@ -1,7 +1,6 @@
 package greencode.util;
 
 import greencode.kernel.Console;
-import greencode.kernel.LogMessage;
 
 import java.io.File;
 import java.io.IOException;

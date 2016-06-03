@@ -9,7 +9,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 
-import greencode.jscript.DOM;import greencode.jscript.Window;
+import greencode.jscript.DOM;
+import greencode.jscript.dom.Window;
 import greencode.kernel.GreenContext;
 import greencode.util.GenericReflection;
 
