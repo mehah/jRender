@@ -140,14 +140,8 @@ public class Element extends Node {
 	}
 	
 	public void replaceWith(Class<? extends Window> controllerClass, String pageName, Conversation conversation) {
-		final Page page = WindowHandle.getPageByName(controllerClass, pageName);
-		
-		DOMHandle.CustomMethod.call(
-			this,
-			"replaceWithPageURL",
-			greencode.kernel.$GreenContext.getContextPath()+"/"+(page.URLName().isEmpty() ? page.path() : page.URLName()),
-			(conversation == null ? GreenContext.getInstance().getRequest().getConversation() : conversation).getId()
-		);
+		final Page page = WindowHandle.getPageByName(controllerClass, pageName);		
+		replaceWithPageURL((page.URLName().isEmpty() ? page.path() : page.URLName()), conversation);
 	}
 	
 	public void replaceWithPageURL(String url) {
