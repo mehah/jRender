@@ -318,7 +318,7 @@ public final class Core implements Filter {
 			Method requestedMethod = null;
 			Object[] listArgs = null;
 			
-			if (hasAccess && methodName.equals(INIT_METHOD_NAME)) {
+			if (hashcodeRequestMethod == null && hasAccess && methodName.equals(INIT_METHOD_NAME)) {
 				context.requestedMethod = requestedMethod = GenericReflection.getMethod(requestClass, methodName, new Class<?>[]{GreenContext.class});
 				if (requestedMethod.isAnnotationPresent(Destroy.class)) {
 					WindowHandle.removeInstance((Class<? extends Window>) requestClass, context.request.getConversation());
