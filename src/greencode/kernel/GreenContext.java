@@ -28,6 +28,7 @@ import greencode.jscript.DOMHandle;
 import greencode.jscript.dom.Form;
 import greencode.jscript.dom.Window;
 import greencode.jscript.dom.function.implementation.SimpleFunction;
+import greencode.jscript.dom.window.annotation.PageParameter;
 import greencode.kernel.implementation.BootActionImplementation;
 import greencode.kernel.serialization.DOMDeserializer;
 import greencode.kernel.serialization.DOMSerializer;
@@ -78,6 +79,13 @@ public final class GreenContext {
 			}
 		} else
 			this.currentPageAnnotation = currentPage.pageAnnotation;
+		
+		if(this.currentPageAnnotation != null) {
+			if (!(this.currentPageAnnotation.parameters().length == 1 && this.currentPageAnnotation.parameters()[0].name().isEmpty())) {
+				for (PageParameter p : this.currentPageAnnotation.parameters())
+					greencode.http.$HttpRequest.getParameters(this.request).put(p.name(), p.value());
+			}
+		}
 		
 		if(!sessionInitialized && getBootAction() != null)
 			getBootAction().initUserContext(this);
@@ -227,9 +235,9 @@ public final class GreenContext {
 				if(GreenCodeConfig.Browser.websocketSingleton) {
 					this.webSocketData.session.getBasicRemote().sendText(DOMScanner.getCloseEventId(webSocketData));
 				}else
-					this.webSocketData.getSession().close();
+					this.webSocketData.session.close();
 			} catch (Exception e) {
-				// Ignore Errors
+				e.printStackTrace();
 			}
 		}
 		

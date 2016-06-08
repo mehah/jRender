@@ -83,12 +83,12 @@ var Request = function(url, type, isSingleton) {
 		return _request instanceof WebSocket;
 	};
 	
-	var sendRequestWebsocket = function(data) {
-		setTimeout(function() {
-			if(_request.readyState == WebSocket.CONNECTING) {
-				sendRequestWebsocket(data);
+	var sendRequestWebsocket = function(data, eventId) {
+		setTimeout(function() {			
+			if(_request.readyState == WebSocket.CONNECTING || _request.listEvents && !(Object.keys(_request.listEvents)[0] == eventId) && !data.params.set) {				
+				sendRequestWebsocket(data, eventId);
 			}else if(_request.readyState == WebSocket.OPEN) {
-				_request.send(data != null ? data : null);
+				_request.send(data != null ? JSON.stringify(data) : null);
 			}
 		}, 1);
 	};
@@ -115,11 +115,11 @@ var Request = function(url, type, isSingleton) {
 						var closed, eventId, data;
 						if(closed = (_.data.indexOf(_strRequestClose) != -1)) {
 							eventId = _.data.substring(_strRequestClose.length);
-							eventId = eventId.substring(0, eventId.indexOf('}'));
+							eventId = parseInt(eventId.substring(0, eventId.indexOf('}')));
 							data = "";
 						} else {
 							eventId = _.data.substring(_strRequestMsg.length);
-							eventId = eventId.substring(0, eventId.indexOf('}'));
+							eventId = parseInt(eventId.substring(0, eventId.indexOf('}')));
 							data = _.data.substring(_.data.indexOf('}')+1);
 						}
 						
@@ -129,14 +129,13 @@ var Request = function(url, type, isSingleton) {
 						}
 						
 						var event = _request.listEvents[eventId];
-						
+												
 						if(closed) {
 							if(event.close) {
 								event.close.call(o, data);
 							}
 							
-							delete _request.listEvents[data.eventId];
-							
+							delete _request.listEvents[eventId];
 							event.request.closed = true;
 						}else if(event.msg) {
 							event.msg.call(o, data);
@@ -169,14 +168,12 @@ var Request = function(url, type, isSingleton) {
 	        		data[i] = [v]
 	        	}	            	
 	        }
-	        
-	        data = JSON.stringify({
+	        			
+			sendRequestWebsocket({
 	        	params: data,
 	        	url: url,
 	        	eventId: eventId
-	        });
-			
-			sendRequestWebsocket(data);
+	        }, eventId);
 			return;
 		}
 			

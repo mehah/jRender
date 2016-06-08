@@ -75,7 +75,6 @@ import greencode.jscript.dom.window.annotation.AfterAction;
 import greencode.jscript.dom.window.annotation.BeforeAction;
 import greencode.jscript.dom.window.annotation.Destroy;
 import greencode.jscript.dom.window.annotation.ForceSync;
-import greencode.jscript.dom.window.annotation.PageParameter;
 import greencode.kernel.implementation.BootActionImplementation;
 import greencode.kernel.implementation.PluginImplementation;
 import greencode.util.ArrayUtils;
@@ -141,7 +140,7 @@ public final class Core implements Filter {
 	@OnMessage
 	public void onMessage(String message, Session session) throws IOException, ServletException {
 		final WebSocketData wsData = new Gson().fromJson(message, WebSocketData.class);
-
+		
 		wsData.httpSession = this.session;
 		wsData.session = session;
 		wsData.headers = (MimeHeaders) session.getUserProperties().get("headers");
@@ -264,11 +263,6 @@ public final class Core implements Filter {
 			Class<?>[] listArgsClass = null;
 			if (page != null) {
 				hasAccess = Rule.forClass(context, page);
-				
-				if (!(page.pageAnnotation.parameters().length == 1 && page.pageAnnotation.parameters()[0].name().isEmpty())) {
-					for (PageParameter p : page.pageAnnotation.parameters())
-						greencode.http.$HttpRequest.getParameters(context.request).put(p.name(), p.value());
-				}
 				
 				if(hasAccess) {
 					listArgsClass = new Class<?>[] { GreenContext.class };
