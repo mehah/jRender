@@ -1,6 +1,5 @@
 package greencode.kernel;
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
@@ -121,7 +120,7 @@ public final class GreenContext {
 		try {
 			Thread th = Thread.currentThread();
 			getThreadList(request.getConversation()).put(th.hashCode(), th);
-			synchronized(Thread.currentThread()) {
+			synchronized(th) {
 				func.init(this);
 				this.currentWindow.flush();
 				th.wait(120000);

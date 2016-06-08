@@ -4,6 +4,7 @@
 
 <!ELEMENT browser EMPTY>
 	<!ATTLIST browser debugLog ( true | false ) "true" >
+	<!ATTLIST browser printExceptionServer ( true | false ) "true" >
 	<!ATTLIST browser websocket-singleton ( true | false ) "true">
 	
 <!ELEMENT server (request, view, database?, internationalization?, plugins?)>
@@ -38,6 +39,7 @@
 		
 	<!ELEMENT default-max-request ANY>
 	<!ELEMENT database (default-config-file, show-query?, drivers)>
+		<!ATTLIST database autocommit ( true | false ) "false" >
 		<!ELEMENT default-config-file ANY>
 		<!ELEMENT show-query ANY>
 		<!ELEMENT drivers ANY>

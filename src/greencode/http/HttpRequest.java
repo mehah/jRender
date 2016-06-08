@@ -29,6 +29,7 @@ import greencode.util.FileUtils;
 import greencode.util.LogMessage;
 
 public final class HttpRequest extends HttpServletRequestWrapper implements HttpServletRequest {
+	private static final Pattern pattern = Pattern.compile("up.browser|up.link|windows ce|iphone|iemobile|mini|mmp|symbian|midp|wap|phone|pocket|mobile|pda|psp", Pattern.CASE_INSENSITIVE);
 	private static final TimeZone GMT_ZONE = TimeZone.getTimeZone("GMT");
 	private static final SimpleDateFormat formats[] = {
         new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US),
@@ -203,8 +204,6 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 
 		getSession().setAttribute("__USER_PRINCIPAL__", this.userPrincipal = user);
 	}
-
-	private static final Pattern pattern = Pattern.compile("up.browser|up.link|windows ce|iphone|iemobile|mini|mmp|symbian|midp|wap|phone|pocket|mobile|pda|psp", Pattern.CASE_INSENSITIVE);
 	
 	static boolean isMobile(HttpServletRequest request) {
 		return pattern.matcher(request.getHeader("user-agent")).find();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE HTML PUBLIC "Greencode" "https://raw.githubusercontent.com/mehah/Greencode-Framework/master/src/greencode.dtd">
 <greencode-config>
-	<browser debugLog="false" websocket-singleton="true" />
+	<browser debugLog="false" printExceptionServer="true" websocket-singleton="true" />
 
 	<server log="true">
 		<!--
@@ -31,7 +31,7 @@
 		</view>
 
 		<!--
-		<database>
+		<database autocommit="false">
 			<default-config-file>database.config.xml</default-config-file> 
 			<show-query>true</show-query>
 			<drivers>

@@ -46,6 +46,7 @@ public final class GreenCodeConfig {
 
 		Element browser = greencodeCofig.getElementsByTag("browser").first();
 		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "debugLog", Boolean.parseBoolean(browser.attr("debugLog").trim()));
+		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "printExceptionServer", Boolean.parseBoolean(browser.attr("printExceptionServer").trim()));
 		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "websocketSingleton", Boolean.parseBoolean(browser.attr("websocket-singleton").trim()));
 
 		Element server = greencodeCofig.getElementsByTag("server").first();
@@ -100,6 +101,8 @@ public final class GreenCodeConfig {
 
 			currentElement = server.getElementsByTag("database").first();
 			if(currentElement != null) {
+				GenericReflection.NoThrow.setFinalStaticValue(Server.DataBase.class, "autocommit", Boolean.parseBoolean(currentElement.attr("autocommit")));
+				
 				listCurrentElement = currentElement.getElementsByTag("default-config-file");
 				if(!listCurrentElement.isEmpty() && !(value = listCurrentElement.first().text()).isEmpty())
 					GenericReflection.NoThrow.setFinalStaticValue(Server.DataBase.class, "defaultConfigFile", value);
@@ -152,6 +155,7 @@ public final class GreenCodeConfig {
 
 	public final static class Browser {
 		public final static Boolean debugLog = false;
+		public final static Boolean printExceptionServer = false;
 		public final static Boolean websocketSingleton = false;
 	}
 
@@ -192,6 +196,7 @@ public final class GreenCodeConfig {
 		}
 
 		public final static class DataBase {
+			public final static Boolean autocommit = false;
 			public final static Boolean showResultQuery = true;
 
 			public final static String defaultConfigFile = null;

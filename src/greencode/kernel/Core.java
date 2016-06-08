@@ -37,7 +37,6 @@ import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
-import javax.websocket.RemoteEndpoint.Basic;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
@@ -149,12 +148,12 @@ public final class Core implements Filter {
 		wsData.localPort = (Integer) session.getUserProperties().get("localPort");
 		wsData.remoteHost = (String) session.getUserProperties().get("remoteHost");
 		wsData.requestURI = wsData.url;
-		wsData.requestURL = new StringBuffer("http://").append(wsData.remoteHost).append(":").append(wsData.localPort).append(wsData.url);
+		wsData.requestURL = new StringBuffer("http://").append(wsData.remoteHost).append(":").append(wsData.localPort).append("/").append(wsData.url);
 
 		try {
 			final String servletPath = wsData.url.indexOf(Core.CONTEXT_PATH) == 0 ? wsData.url.substring(Core.CONTEXT_PATH.length() + 1) : wsData.url;
 			if (servletPath.equals("$synchronize")) {
-				Core.coreInit(servletPath, request, response, null, wsData);
+				DOMScanner.synchronize(servletPath, request, response, wsData);
 			} else {
 				new Thread(new Runnable() {
 					public void run() {
@@ -260,7 +259,6 @@ public final class Core implements Filter {
 			if (GreenCodeConfig.Server.log)
 				processTime = System.currentTimeMillis();
 			
-			final Basic basicRemote = context.request.isWebSocket() ? webSocketData.session.getBasicRemote() : null;
 			final boolean hasAccess, isFirstRequest = context.request.isFirst();
 			
 			Class<?>[] listArgsClass = null;
@@ -285,7 +283,7 @@ public final class Core implements Filter {
 					Console.log("Requested Page: "+ servletPath);
 					
 					if (context.request.isWebSocket()) {
-						basicRemote.sendText(DOMScanner.getMsgEventId(context.webSocketData)+content);
+						webSocketData.session.getBasicRemote().sendText(DOMScanner.getMsgEventId(context.webSocketData)+content);
 					} else {
 						if (!isFirstRequest && greencode.http.$HttpRequest.contentIsHtml(context.request)) {
 							content = "<ajaxcontent>" + content + "</ajaxcontent>";
@@ -497,49 +495,52 @@ public final class Core implements Filter {
 
 		} catch (StopProcess e) {
 		} catch (Exception e) {
-			Throwable thr = e.getCause() == null ? e : e.getCause();
-
-			JsonArray stackTrace = new JsonArray();
-			JsonObject error = new JsonObject();
-			error.add("stackTrace", stackTrace);
-
-			error.addProperty("className", thr.getClass().getName());
-			error.addProperty("message", thr.getMessage());
-
-			for (StackTraceElement trace : thr.getStackTrace()) {
-				if (trace == null)
-					continue;
-
-				JsonObject o = new JsonObject();
-				o.addProperty("className", trace.getClassName());
-				o.addProperty("methodName", trace.getMethodName());
-				o.addProperty("lineNumber", trace.getLineNumber());
-				o.addProperty("fileName", trace.getFileName());
-				try {
-					ClassLoader cl = Class.forName(trace.getClassName()).getClassLoader();
-					if (cl == null)
-						throw new ClassNotFoundException();
-
-					o.addProperty("possibleError", cl.getResource("/") != null);
-				} catch (ClassNotFoundException e1) {
-					o.addProperty("possibleError", false);
-				}
-				stackTrace.add(o);
-			}
-
+			System.err.println(Console.msgError);
+			e.printStackTrace();
+			
 			if (Cache.bootAction != null) {
 				Cache.bootAction.onException(context, e);
 			}
 
-			if (databaseConnectionEvent != null)
-				databaseConnectionEvent.onError(context, e);
-
-			JsonObject json = new JsonObject();
-			json.add("error", error);
-			DOMScanner.send(context, json);
-
-			System.err.println(Console.msgError);
-			e.printStackTrace();
+			if (databaseConnectionEvent != null) {
+				databaseConnectionEvent.onError(context, e);			
+			}
+			
+			if(GreenCodeConfig.Browser.printExceptionServer) {
+				Throwable thr = e.getCause() == null ? e : e.getCause();
+	
+				JsonArray stackTrace = new JsonArray();
+				JsonObject error = new JsonObject();
+				error.add("stackTrace", stackTrace);
+	
+				error.addProperty("className", thr.getClass().getName());
+				error.addProperty("message", thr.getMessage());
+	
+				for (StackTraceElement trace : thr.getStackTrace()) {
+					if (trace == null)
+						continue;
+	
+					JsonObject o = new JsonObject();
+					o.addProperty("className", trace.getClassName());
+					o.addProperty("methodName", trace.getMethodName());
+					o.addProperty("lineNumber", trace.getLineNumber());
+					o.addProperty("fileName", trace.getFileName());
+					try {
+						ClassLoader cl = Class.forName(trace.getClassName()).getClassLoader();
+						if (cl == null)
+							throw new ClassNotFoundException();
+	
+						o.addProperty("possibleError", cl.getResource("/") != null);
+					} catch (ClassNotFoundException e1) {
+						o.addProperty("possibleError", false);
+					}
+					stackTrace.add(o);
+				}
+				
+				JsonObject json = new JsonObject();
+				json.add("error", error);
+				DOMScanner.send(context, json);
+			}
 		} finally {
 			DOMScanner.sendElements(context);
 			context.destroy();

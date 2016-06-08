@@ -133,30 +133,12 @@ Greencode.tags = {
 						empty = Greencode.crossbrowser.hasAttribute.call(this, 'empty'),
 						changeURL = Greencode.crossbrowser.hasAttribute.call(this, 'changeURL'),
 						keepViewId = Greencode.crossbrowser.hasAttribute.call(this, 'keepViewId'),
-						href = hrefOriginal,
+						href = Greencode.getRealURLPath(hrefOriginal),
 						data = {__contentIsHtml : true};						
 
 					if (keepViewId)
 						data.viewId = viewId;
-
-					if(Greencode.isWebsocket() && href.indexOf(Greencode.CONTEXT_PATH) == -1) {
-						var _href = window.location.pathname.substring(Greencode.CONTEXT_PATH.length+1);
-						var folders = _href.substring(0, _href.lastIndexOf('/')+1);
-						href = folders + href;
-						
-						if(href.indexOf('../') != -1) {
-							folders = href.split('/');
-							for (var i = -1; ++i < folders.length;) {
-								var folder = folders[i];
-								if(folder === '..') {
-									folders.splice(--i, 2);
-									--i;
-								}
-							}
-							href = folders.join('/');
-						}
-					}
-										
+					
 					request = new Request(href, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
 					
 					request.setMethodRequest('GET');

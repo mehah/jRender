@@ -45,5 +45,26 @@ var Greencode = {
 	},
 	isRequestSingleton: function() {
 		return this.REQUEST_SINGLETON && this.isWebsocket();
+	},
+	getRealURLPath: function(url) {
+		if(Greencode.isWebsocket() && url.indexOf(Greencode.CONTEXT_PATH) == -1) {
+			var _url = window.location.pathname.substring(Greencode.CONTEXT_PATH.length+1);
+			var folders = _url.substring(0, _url.lastIndexOf('/')+1);
+			url = folders + url;
+			
+			if(url.indexOf('../') != -1) {
+				folders = url.split('/');
+				for (var i = -1; ++i < folders.length;) {
+					var folder = folders[i];
+					if(folder === '..') {
+						folders.splice(--i, 2);
+						--i;
+					}
+				}
+				url = folders.join('/');
+			}
+		}
+		
+		return url;
 	}
 };

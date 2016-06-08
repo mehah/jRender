@@ -113,12 +113,12 @@ public class DOMScanner {
 
 		if (context.request.isWebSocket()) {
 			try {
-				Basic basicRemote = context.request.getWebSocketSession().getBasicRemote();				
+				Basic basicRemote = context.request.getWebSocketSession().getBasicRemote();
 				if (greencode.http.$HttpRequest.contentIsHtml(context.request)) {
 					json.insert(0, "<json style=\"display: none;\">").append("</json>");
 				}
 				
-				String msgText = getMsgEventId(context.webSocketData) + json.toString();				
+				String msgText = getMsgEventId(context.webSocketData) + json.toString();
 				basicRemote.sendText(msgText);
 			} catch (Exception e) {
 				// Ignore Errors
@@ -205,7 +205,6 @@ public class DOMScanner {
 			}
 		}
 
-		if (!__request.isWebSocket())
-			response.getWriter().close();
+		context.destroy();
 	}
 }

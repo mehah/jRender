@@ -125,9 +125,9 @@ Greencode.customMethod = {
 		this.parentNode.replaceChild(e, this);
 		return this;
 	},
-	replaceWithPageURL: function(url, viewId, cid) {
+	replaceWithPageURL: function(url, viewId, cid) {		
 		var This = this,
-			request = new Request(url, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton()),
+			request = new Request(Greencode.getRealURLPath(url), Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton()),
 			first = false;
 		
 		request.setMethodRequest("POST");
