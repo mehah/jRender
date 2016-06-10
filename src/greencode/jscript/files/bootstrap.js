@@ -97,164 +97,166 @@ Bootstrap.callRequestMethod = function(mainElement, target, event, p, __argument
 			}
 		}
 
-		if (p.args != null) {
-			param._args = [];
+		if(!(target instanceof Window)) {
+			if (p.args != null) {
+				param._args = [];
 
-			for ( var i in p.args) {
-				var o = p.args[i];
-				if (o.className == Greencode.className.greenContext) {
-					param._args.push(JSON.stringify(o));
-				} else if (o.className == Greencode.className.containerElement || o.className == Greencode.className.containerEventObject) {
-					var uid;
-					if (target.tagName === 'CONTAINER') {
-						for ( var i2 in __arguments) {
-							if ((uid = __arguments[i2].__containerUID) != null)
-								break;
+				for ( var i in p.args) {
+					var o = p.args[i];
+					if (o.className == Greencode.className.greenContext) {
+						param._args.push(JSON.stringify(o));
+					} else if (o.className == Greencode.className.containerElement || o.className == Greencode.className.containerEventObject) {
+						var uid;
+						if (target.tagName === 'CONTAINER') {
+							for ( var i2 in __arguments) {
+								if ((uid = __arguments[i2].__containerUID) != null)
+									break;
+							}
+						} else {
+							var c = target.getParentByTagName("container");
+							uid = c ? c.getAttribute('uid') : null;
 						}
+
+						param._args.push(JSON.stringify({
+							className : o.className,
+							uid : uid + ''
+						}));
+					} else if (o.className == Greencode.className.element) {
+						param._args.push(JSON.stringify({
+							className : o.className,
+							castTo : o.castTo,
+							uid : Greencode.cache.register(target) + ''
+						}));
 					} else {
-						var c = Greencode.customMethod.getParentByTagName.call(target, "container");
-						uid = c ? c.getAttribute('uid') : null;
+						var _arg = {
+							className : o.className,
+							fields : {}
+						};
+
+						var arg = __arguments[i - param._args.length];
+						Greencode.jQuery.each(o.fields, function() {
+							var value = arg[this];
+							if (Greencode.util.isElement(value))
+								_arg.fields[this] = {
+									create : false
+								};
+							else if (value != null && !Greencode.jQuery.isFunction(value) && !Greencode.util.isElement(value))
+								_arg.fields[this] = value;
+						});
+
+						_arg.fields = JSON.stringify(_arg.fields);
+						param._args.push(JSON.stringify(_arg));
 					}
-
-					param._args.push(JSON.stringify({
-						className : o.className,
-						uid : uid + ''
-					}));
-				} else if (o.className == Greencode.className.element) {
-					param._args.push(JSON.stringify({
-						className : o.className,
-						castTo : o.castTo,
-						uid : Greencode.cache.register(target) + ''
-					}));
-				} else {
-					var _arg = {
-						className : o.className,
-						fields : {}
-					};
-
-					var arg = __arguments[i - param._args.length];
-					Greencode.jQuery.each(o.fields, function() {
-						var value = arg[this];
-						if (Greencode.util.isElement(value))
-							_arg.fields[this] = {
-								create : false
-							};
-						else if (value != null && !Greencode.jQuery.isFunction(value) && !Greencode.util.isElement(value))
-							_arg.fields[this] = value;
-					});
-
-					_arg.fields = JSON.stringify(_arg.fields);
-					param._args.push(JSON.stringify(_arg));
 				}
 			}
-		}
 
-		if (p.formName != null) {
-			form = Greencode.crossbrowser.querySelector.call(mainElement, 'form[name="' + p.formName + '"]');
-			if (form == null && typeof console != 'undefined')
-				console.warn("Could not find the form with name " + p.formName + ".");
-			else
-				formName = p.formName;
-		} else if ((form = target.form) != null || (form = Greencode.customMethod.getParentByTagName.call(target, "form")) != null) {
-			formName = form.getAttribute("name");
-		}
+			if (p.formName != null) {
+				form = mainElement.querySelector('form[name="' + p.formName + '"]');
+				if (form == null && typeof console != 'undefined')
+					console.warn("Could not find the form with name " + p.formName + ".");
+				else
+					formName = p.formName;
+			} else if ((form = target.form) != null || (form = target.getParentByTagName("form")) != null) {
+				formName = form.getAttribute("name");
+			}
 
-		if (form != null) {
-			var buildParam = function(param, list) {
-				for ( var i in list) {
-					var res = list[i], value = null, name = null;
+			if (form != null) {
+				var buildParam = function(param, list) {
+					for ( var i in list) {
+						var res = list[i], value = null, name = null;
 
-					if (res instanceof Array) {
-						var eFirst = res[0];
+						if (res instanceof Array) {
+							var eFirst = res[0];
 
-						if (eFirst instanceof Node) {
-							name = eFirst.name;
-							var isCheckBox = eFirst.type === "checkbox", values = null;
-							if (isCheckBox)
-								values = new Array();
+							if (eFirst instanceof Node) {
+								name = eFirst.name;
+								var isCheckBox = eFirst.type === "checkbox", values = null;
+								if (isCheckBox)
+									values = new Array();
 
-							for (var i2 = -1; ++i2 < res.length;) {
-								var e = res[i2];
-								if (e.checked) {
-									if (isCheckBox)
-										values.push(e.value);
-									else {
-										values = e.value;
-										break;
+								for (var i2 = -1; ++i2 < res.length;) {
+									var e = res[i2];
+									if (e.checked) {
+										if (isCheckBox)
+											values.push(e.value);
+										else {
+											values = e.value;
+											break;
+										}
 									}
 								}
-							}
 
-							if (values != null) {
-								if (values.length > 1)
-									value = values;
-								else
-									value = values[0];
-							} else
-								value = null;
-						} else {
-							name = i;
-							value = param[name];
+								if (values != null) {
+									if (values.length > 1)
+										value = values;
+									else
+										value = values[0];
+								} else
+									value = null;
+							} else {
+								name = i;
+								value = param[name];
 
-							var first = false;
-							if (!value) {
-								value = new Array();
-								value.isContainer = true;
-								first = true;
-							}
-
-							for (var i2 = -1; ++i2 < res.length;) {
-								var e = res[i2];
-								var o = buildParam({
-									__uid : e.__container.getAttribute('uid')
-								}, e);
-								value.push(o);
-							}
-
-							if (first)
-								param[name] = value;
-
-							continue;
-						}
-					} else {
-						var eFirst = res;
-						name = eFirst.name;
-
-						if (eFirst.tagName === "SELECT") {
-							if (eFirst.multiple) {
-								var values = new Array();
-								for (var i2 = -1; ++i2 < eFirst.options.length;) {
-									var option = eFirst.options[i2];
-									if (option.selected)
-										values.push(option.value);
+								var first = false;
+								if (!value) {
+									value = new Array();
+									value.isContainer = true;
+									first = true;
 								}
-								value = values.length > 0 ? values : null;
+
+								for (var i2 = -1; ++i2 < res.length;) {
+									var e = res[i2];
+									var o = buildParam({
+										__uid : e.__container.getAttribute('uid')
+									}, e);
+									value.push(o);
+								}
+
+								if (first)
+									param[name] = value;
+
+								continue;
+							}
+						} else {
+							var eFirst = res;
+							name = eFirst.name;
+
+							if (eFirst.tagName === "SELECT") {
+								if (eFirst.multiple) {
+									var values = new Array();
+									for (var i2 = -1; ++i2 < eFirst.options.length;) {
+										var option = eFirst.options[i2];
+										if (option.selected)
+											values.push(option.value);
+									}
+									value = values.length > 0 ? values : null;
+								} else
+									value = eFirst.selectedIndex === -1 ? "" : eFirst.options[eFirst.selectedIndex].value;
 							} else
-								value = eFirst.selectedIndex === -1 ? "" : eFirst.options[eFirst.selectedIndex].value;
-						} else
-							value = eFirst.tagName === "INPUT" && eFirst.type === "file" ? eFirst : eFirst.value;
+								value = eFirst.tagName === "INPUT" && eFirst.type === "file" ? eFirst : eFirst.value;
+						}
+
+						if (value)
+							param[name] = value;
 					}
 
-					if (value)
-						param[name] = value;
+					return param;
+				};
+
+				var list = form.getAllDataElements();
+				buildParam(param, list);
+
+				for ( var i in param) {
+					if (i === '_args')
+						continue;
+
+					var v = param[i];
+					if (v.isContainer)
+						param[i] = JSON.stringify(v);
 				}
 
-				return param;
-			};
-
-			var list = Greencode.customMethod.getAllDataElements.call(form);
-			buildParam(param, list);
-
-			for ( var i in param) {
-				if (i === '_args')
-					continue;
-
-				var v = param[i];
-				if (v.isContainer)
-					param[i] = JSON.stringify(v);
-			}
-
-			param.__requestedForm = formName;
+				param.__requestedForm = formName;
+			}			
 		}
 		
 		param.cid = p.cid;
@@ -385,7 +387,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 			var jsonDiv;
 			while (jsonDiv = jsons[0]) {
 				try {
-					var txt = Greencode.crossbrowser.text.call(jsonDiv);
+					var txt = jsonDiv.childTextConent();
 					if (txt.length > 0) {
 						Bootstrap.init(request, mainElement, JSON.parse(txt));
 						Greencode.executeEvent('init');
@@ -541,7 +543,7 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 				for ( var i in Greencode.modalErro.topBar.closeButton.style)
 					spanBotaoFechar.style[i] = Greencode.modalErro.topBar.closeButton.style[i];
 
-				Greencode.crossbrowser.registerEvent.call(spanBotaoFechar, 'click', function() {
+				spanBotaoFechar.registerEvent('click', function() {
 					divGreenCodeModalErro.parentNode.removeChild(divGreenCodeModalErro);
 				});
 
@@ -600,11 +602,11 @@ Bootstrap.init = function(request, mainElement, __jsonObject, argsEvent) {
 		__jsonObject = null;
 	}
 
-	var res = Greencode.crossbrowser.querySelectorAll.call(mainElement, '[msg\\:key]');
+	var res = mainElement.querySelectorAll('[msg\\:key]');
 	for (var i = -1; ++i < res.length;) {
 		var e = res[i], msg = internationalization_msg[e.getAttribute('msg:key')];
 
-		if (Greencode.crossbrowser.hasAttribute.call(e, 'msg:appendText'))
+		if (e.hasAttribute('msg:appendText'))
 			msg += e.getAttribute('msg:appendText');
 
 		if (e.tagName === 'INPUT')

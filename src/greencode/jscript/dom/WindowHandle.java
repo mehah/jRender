@@ -4,6 +4,7 @@ import greencode.exception.GreencodeError;
 import greencode.http.Conversation;
 import greencode.jscript.dom.window.annotation.RegisterPage;
 import greencode.jscript.dom.window.listener.WindowDestroyListener;
+import greencode.kernel.Console;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
 import greencode.util.LogMessage;
@@ -23,7 +24,8 @@ public final class WindowHandle {
 		
 		if(action == null) {
 			try {
-				action = actionClass.newInstance();			
+				Console.log("Creating Controller: "+actionClass.getSimpleName());
+				action = actionClass.newInstance();
 				list.put((Class<? extends Window>) actionClass, action);
 				
 				Window lastWindow = null;

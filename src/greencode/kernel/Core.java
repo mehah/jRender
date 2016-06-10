@@ -97,10 +97,13 @@ public final class Core implements Filter {
 
 	private final static String[] JS_CORE_FILES = {
 		"greencode.js",
-		"greencodeFunction.js",
-		"greencodeEvents.js",
-		"greencodeTags.js",
-		"greenCodeStyle.js",
+		"greencode.jquery.js",
+		"greencode.crossbrowser.js",
+		"greencode.element.function.js",
+		"greencode.util.js",
+		"greencode.events.js",
+		"greencode.tags.js",
+		"greencode.style.js",
 		"iframeHttpRequest.js",
 		"request.js",
 		"bootstrap.js",

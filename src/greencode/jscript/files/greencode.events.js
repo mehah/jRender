@@ -41,12 +41,12 @@ Greencode.customEvent.scrollreachpercent = {
 		handleObj.data.beginDown = handleObj.lastCcrollPercent > handleObj.data.percent;
 		handleObj.data.beginUp = handleObj.lastCcrollPercent < handleObj.data.percent;
 		
-		Greencode.crossbrowser.registerEvent.call(this, 'scroll', function(event) {
+		this.registerEvent('scroll', function(event) {
 			Greencode.customEvent.scrollreachpercent.handle.call(this, callback, event, handleObj);
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent.call(this, 'scroll', Greencode.customEvent.scrollreachpercent.handle, true);
+		this.removeEvent('scroll', Greencode.customEvent.scrollreachpercent.handle, true);
 	},
 	handle: function(callback, event, handleObj) {
 		var scrollPercent=100*this.scrollTop/this.scrollHeight/(1-this.clientHeight/this.scrollHeight);
@@ -64,12 +64,12 @@ Greencode.customEvent.scrollreachpercent = {
 
 Greencode.customEvent.scrollreachtop = {
 	add: function(callback) {
-		Greencode.crossbrowser.registerEvent.call(this, 'scroll', function(event) {
+		this.registerEvent('scroll', function(event) {
 			Greencode.customEvent.scrollreachtop.handle.call(this, callback, event);				
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent.call(this, 'scroll', Greencode.customEvent.scrollreachtop.handle, true);
+		this.removeEvent('scroll', Greencode.customEvent.scrollreachtop.handle, true);
 	},
 	handle: function(callback, event) {
 		if(0 == (100*this.scrollTop/this.scrollHeight/(1-this.clientHeight/this.scrollHeight)).toFixed(0))
@@ -79,12 +79,12 @@ Greencode.customEvent.scrollreachtop = {
 
 Greencode.customEvent.scrollreachbottom = {
 	add: function(callback) {
-		Greencode.crossbrowser.registerEvent.call(this, 'scroll', function(event) {
+		this.registerEvent('scroll', function(event) {
 			Greencode.customEvent.scrollreachbottom.handle.call(this, callback, event);				
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent.call(this, 'scroll', Greencode.customEvent.scrollreachbottom.handle, true);
+		this.removeEvent('scroll', Greencode.customEvent.scrollreachbottom.handle, true);
 	},
 	handle: function(callback, event) {
 		if(100 == (100*this.scrollTop/this.scrollHeight/(1-this.clientHeight/this.scrollHeight)).toFixed(0))
@@ -98,12 +98,12 @@ Greencode.customEvent.keyuptime = {
 			time: data && data[0] ? data[0] : 500
 		};			
 		
-		Greencode.crossbrowser.registerEvent.call(this, 'keyup', function(event) {
+		this.registerEvent('keyup', function(event) {
 			Greencode.customEvent.keyuptime.handle.call(this, callback, event, handleObj);				
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent.call(this, 'keyup', Greencode.customEvent.keyuptime.handle, true);
+		this.removeEvent('keyup', Greencode.customEvent.keyuptime.handle, true);
 	},
 	handle: function(callback, event, handleObj) {
 		var _this = this;
@@ -124,13 +124,13 @@ Greencode.customEvent.keyuptime = {
 
 Greencode.customEvent.enter = {
 	add: function(callback) {
-		Greencode.crossbrowser.registerEvent.call(this, 'keyup', function(event) {
+		this.registerEvent('keyup', function(event) {
 			if(event.keyCode === 13)
 				Greencode.customEvent.enter.handle.call(this, callback, event);				
 		});
 	},
 	remove: function() {
-		Greencode.crossbrowser.removeEvent.call(this, 'keyup', Greencode.customEvent.enter.handle, true);
+		this.removeEvent('keyup', Greencode.customEvent.enter.handle, true);
 	},
 	handle: function(callback, event) {
 		callback.call(this, event);

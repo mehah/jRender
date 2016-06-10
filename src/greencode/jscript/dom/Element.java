@@ -4,13 +4,13 @@ import greencode.http.Conversation;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.dom.window.annotation.Page;
 import greencode.kernel.GreenContext;
-public class Element extends Node {
+public class Element extends ECustomFunction {
 	
 	protected Element(Window window) { super(window); }
 	protected Element(Window window, String tagName) { super(window); DOMHandle.setVariableValue(this, "tagName", tagName); }
 	
 	public Boolean hasAttribute(String name) {
-		return DOMHandle.getVariableValueByCommand(this, "hasAttribute", Boolean.class, "@crossbrowser.hasAttribute", name);
+		return DOMHandle.getVariableValueByCommand(this, "hasAttribute", Boolean.class, "hasAttribute", name);
 	}
 	
 	public String getAttribute(String name) {
@@ -33,7 +33,7 @@ public class Element extends Node {
 	}
 	
 	public String style(String property) {
-		return DOMHandle.getVariableValueByCommand(this, "style."+property, String.class, "@crossbrowser.getStyle", property);
+		return DOMHandle.getVariableValueByCommand(this, "style."+property, String.class, "getStyle", property);
 	}
 
 	public Element[] getElementsByTagName(String tagName) {
@@ -53,7 +53,7 @@ public class Element extends Node {
 	}
 	
 	public Element[] getElementsByClassName(String tagName, int count) {
-		return getElementsBy("getElementsByClassName.length", "@crossbrowser.getElementsByClassName", tagName, count);
+		return getElementsBy("getElementsByClassName.length", "getElementsByClassName", tagName, count);
 	}
 	
 	public<E extends Element> E[] getElementsByClassName(String tagName, int count, Class<E> castTo) {
@@ -79,7 +79,7 @@ public class Element extends Node {
 			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
 		}
 		
-		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
+		DOMHandle.registerElementByCommand(this, e, "querySelector", selector);
 		
 		return (E) e;
 	}
@@ -87,7 +87,7 @@ public class Element extends Node {
 	public Element[] querySelectorAll(String selector) { return querySelectorAll(selector, -1); }
 
 	public Element[] querySelectorAll(String selector, int count) {
-		return getElementsBy("querySelectorAll.length", "@crossbrowser.querySelectorAll", selector, count);
+		return getElementsBy("querySelectorAll.length", "querySelectorAll", selector, count);
 	}
 	
 	public<E extends Element> E[] querySelectorAll(String selector, Class<E> castTo) {
@@ -124,7 +124,7 @@ public class Element extends Node {
 	}
 	
 	public void replaceWith(Element e) {
-		DOMHandle.CustomMethod.call(this, "replaceWith", e);
+		DOMHandle.execCommand(this, "replaceWith", e);
 	}
 	
 	public void replaceWith(Class<? extends Window> controllerClass) {
@@ -151,7 +151,7 @@ public class Element extends Node {
 	public void replaceWithPageURL(String url, Conversation conversation) {
 		conversation = (conversation == null ? GreenContext.getInstance().getRequest().getConversation() : conversation);
 		
-		DOMHandle.CustomMethod.call(
+		DOMHandle.execCommand(
 			this,
 			"replaceWithPageURL",
 			greencode.kernel.$GreenContext.getContextPath()+"/"+url,

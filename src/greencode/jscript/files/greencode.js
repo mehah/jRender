@@ -1,5 +1,4 @@
 var Greencode = {
-	viewId: null,
 	exec: function(f) {f();},
 	cache : {
 		lastUID: 1000,

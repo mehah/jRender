@@ -48,9 +48,9 @@ public abstract class Form extends Element implements ContainerElementImplementa
 		Visible visibleAnnotation = getClass().getAnnotation(Visible.class);
 
 		if(visibleAnnotation == null)
-			DOMHandle.registerElementByCommand(window.principalElement(), this, "@crossbrowser.querySelector", "form[name=\"" + name + "\"]");
+			DOMHandle.registerElementByCommand(window.principalElement(), this, "querySelector", "form[name=\"" + name + "\"]");
 		else
-			DOMHandle.registerElementByCommand(window.principalElement(), this, "@customMethod.querySelector", "form[name=\"" + name + "\"]", "return (this.offsetHeight " + (visibleAnnotation.value() ? "!" : "=") + "== 0);");
+			DOMHandle.registerElementByCommand(window.principalElement(), this, "querySelector", "form[name=\"" + name + "\"]", "return (this.offsetHeight " + (visibleAnnotation.value() ? "!" : "=") + "== 0);");
 	}
 
 	void processAnnotation() {
@@ -194,7 +194,7 @@ public abstract class Form extends Element implements ContainerElementImplementa
 			e.printStackTrace();
 		}
 
-		DOMHandle.CustomMethod.call(this, "resetForm");
+		DOMHandle.execCommand(this, "resetForm");
 	}
 
 	public void submit() {

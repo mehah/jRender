@@ -6,6 +6,7 @@ import java.util.List;
 
 import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
+import greencode.jscript.dom.Node;
 import greencode.jscript.dom.Window;
 
 public final class OptionElementCollection<T> extends DOM implements Iterable<OptionElement<T>>{
@@ -41,7 +42,7 @@ public final class OptionElementCollection<T> extends DOM implements Iterable<Op
 	public OptionElement<T> item(int index) {
 		OptionElement<T> e = list.get(index);
 		if(e == null)
-			DOMHandle.registerElementByCommand(this, e = new OptionElement<T>(this.window, typeValue), "item", index);
+			DOMHandle.registerElementByCommand(this, (Node)(e = new OptionElement<T>(this.window, typeValue)), "item", index);
 		return e;
 	}
 

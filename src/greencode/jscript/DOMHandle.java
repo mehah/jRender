@@ -52,6 +52,10 @@ public final class DOMHandle {
 		DOMScanner.registerCommand(owner, uid + "*prop." + name);
 	}
 
+	public static void registerReturnByCommand(DOM owner, DOM d, String name, Object... parameters) {
+		registerReturnByCommand(owner, d.uid, name, parameters);
+	}
+	
 	public static void registerReturnByCommand(DOM owner, int uid, String name, Object... parameters) {
 		DOMScanner.registerCommand(owner, uid + "*ref." + name, parameters);
 	}
@@ -213,23 +217,5 @@ public final class DOMHandle {
 
 	public static boolean isForcingSynchronization(GreenContext context, final DOM dom, String property) {
 		return greencode.kernel.$GreenContext.isForcingSynchronization(context, dom, property);
-	}
-
-	public static class CustomMethod {
-		public static void call(DOM dom, String methodName, Object... args) {
-			execCommand(dom, "@customMethod." + methodName, args);
-		}
-
-		public static void registerElement(DOM owner, Node e, String name, Object... parameters) {
-			registerReturnByCommand(owner, ((DOM) e).uid, "@customMethod." + name, parameters);
-		}
-
-		public static void registerReturn(DOM owner, int uid, String name, Object... parameters) {
-			registerReturnByCommand(owner, uid, "@customMethod." + name, parameters);
-		}
-
-		public static void registerReturn(DOM owner, int[] uids, String name, Object... parameters) {
-			registerReturnByCommand(owner, uids, "@customMethod." + name, parameters);
-		}
 	}
 }

@@ -1,7 +1,7 @@
 if(__isIE8orLess)
 	Greencode.util.loadScript(Greencode.CONTEXT_PATH + "/jscript/greencode/sizzle.js", false);
 
-Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
+window.registerEvent('load', function() {
 	if(window.location.hash.indexOf('#!') === 0) {
 		window.location.href = Greencode.CONTEXT_PATH + '/' + window.location.hash.substring(2);
 		return;
@@ -44,11 +44,11 @@ Greencode.crossbrowser.registerEvent.call(window, 'load', function() {
 	
 	Bootstrap.init();
 
-	Greencode.crossbrowser.registerEvent.call(window, 'popstate', function(e) {
+	window.registerEvent('popstate', function(e) {
 		if(e.state != null && e.state.selector != null) {
 			Greencode.executeEvent('beforePopstate');
-			var o = e.state.selector == 'body' ? document.body : Greencode.crossbrowser.querySelector.call(document.body, e.state.selector);
-			Greencode.customMethod.empty.call(o);
+			var o = e.state.selector == 'body' ? document.body : document.body.querySelector(e.state.selector);
+			o.empty();
 			var tags = Greencode.cache.tags[window.location.href];
 			for(var i in tags)
 				o.appendChild(tags[i]);

@@ -42,7 +42,7 @@ public class Document extends Node {
 	public Element createElement(String tagName) {
 		Element e = new Element(this.window);
 
-		DOMHandle.registerElementByCommand(this, e, "createElement", tagName);
+		DOMHandle.registerElementByCommand(this, (Node)e, "createElement", tagName);
 		DOMHandle.setVariableValue(e, "tagName", tagName);
 
 		return e;
@@ -156,7 +156,7 @@ public class Document extends Node {
 	}
 
 	public Element[] getElementsByClassName(String tagName) {
-		return getElementsBy("getElementsByClassName.length", "@crossbrowser.getElementsByClassName", tagName);
+		return getElementsBy("getElementsByClassName.length", "getElementsByClassName", tagName);
 	}
 
 	public Element querySelector(String selector) {
@@ -178,7 +178,7 @@ public class Document extends Node {
 			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
 		}
 		
-		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
+		DOMHandle.registerElementByCommand(this, e, "querySelector", selector);
 		
 		return (E) e;
 	}
@@ -192,13 +192,13 @@ public class Document extends Node {
 		if(!classUnnamed.isAnonymousClass())
 			throw new GreencodeError(LogMessage.getMessage("green-0045", clazz.getSimpleName()));
 		
-		DOMHandle.registerElementByCommand(this, e, "@crossbrowser.querySelector", selector);
+		DOMHandle.registerElementByCommand(this, e, "querySelector", selector);
 		
 		return (E) e;
 	}
 
 	public Element[] querySelectorAll(String selector) {
-		return getElementsBy("querySelectorAll.length", "@crossbrowser.querySelectorAll", selector);
+		return getElementsBy("querySelectorAll.length", "querySelectorAll", selector);
 	}
 
 	private Element[] getElementsBy(String varName, String command, String tagName) {

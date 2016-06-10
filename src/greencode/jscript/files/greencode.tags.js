@@ -1,6 +1,6 @@
 Greencode.tags = {
 	process : function(ref) {
-		var listRepeat = Greencode.customMethod.getClosestChildrenByTagName.call(ref, "container", {uid : false});
+		var listRepeat = ref.getClosestChildrenByTagName("container", {uid : false});
 		for (var i = -1; ++i < listRepeat.length;) {
 			var e = listRepeat[i], nameRepeat = e.getAttribute('name');
 
@@ -24,7 +24,7 @@ Greencode.tags = {
 				}
 			};
 
-			e.form = Greencode.customMethod.getParentByTagName.call(e, "form");
+			e.form = e.getParentByTagName("form");
 
 			e.repeat = function(useOriginal, notExecuteEvent) {
 				var clone = (useOriginal ? this.original : this).cloneNode(true);
@@ -42,11 +42,11 @@ Greencode.tags = {
 
 				var elementToInsertAfter = (this.lastClone() || this);
 				elementToInsertAfter.parentNode.insertBefore(clone, elementToInsertAfter.nextSibling);
-				clone.form = Greencode.customMethod.getParentByTagName.call(clone, "form");
+				clone.form = clone.getParentByTagName("form");
 
 				this.clones.push(clone);
 
-				var containers = Greencode.customMethod.getClosestChildrenByTagName.call(clone, "container");
+				var containers = clone.getClosestChildrenByTagName("container");
 				for (var i = -1; ++i < containers.length;) {
 					var container = containers[i];
 					container.clones = new Array();
@@ -97,13 +97,13 @@ Greencode.tags = {
 		Greencode.tags.buttons(ref);
 	},
 	buttons : function(mainElement) {
-		var elements = Greencode.crossbrowser.querySelectorAll.call(mainElement, 'input[type="redirect"]:not([swept]), button[type="redirect"]:not([swept])');
+		var elements = mainElement.querySelectorAll('input[type="redirect"]:not([swept]), button[type="redirect"]:not([swept])');
 
 		for (var i = -1; ++i < elements.length;) {
 			var element = elements[i];
 			element.setAttribute('swept', null);
 
-			Greencode.crossbrowser.registerEvent.call(element, 'click', function() {
+			element.registerEvent('click', function() {
 				this.type = "button";
 
 				var action = this.getAttribute('action');
@@ -113,26 +113,26 @@ Greencode.tags = {
 			});
 		}
 
-		elements = Greencode.crossbrowser.querySelectorAll.call(mainElement, '[appendTo]:not([swept])');
+		elements = mainElement.querySelectorAll('[appendTo]:not([swept])');
 
 		for (var i = -1; ++i < elements.length;) {
-			var element = elements[i], appendTo = element.getAttribute('appendTo').toLowerCase(), o = appendTo == "body" ? document.body : Greencode.crossbrowser.querySelector.call(mainElement, appendTo);
+			var element = elements[i], appendTo = element.getAttribute('appendTo').toLowerCase(), o = appendTo == "body" ? document.body : mainElement.querySelector(appendTo);
 
 			element.setAttribute('swept', 'swept');
 			
 			if(o == null) {				
-				o = Greencode.crossbrowser.querySelector.call(document.body, appendTo);
+				o = document.body.querySelector(appendTo);
 			}
 
 			if (o != null) {
-				Greencode.crossbrowser.registerEvent.call(element, 'click', function(e) {
+				element.registerEvent('click', function(e) {
 					e.preventDefault();
 					
 					var hrefOriginal = this.getAttribute('href');
 					var appendTo = this.getAttribute('appendTo'),
-						empty = Greencode.crossbrowser.hasAttribute.call(this, 'empty'),
-						changeURL = Greencode.crossbrowser.hasAttribute.call(this, 'changeURL'),
-						keepViewId = Greencode.crossbrowser.hasAttribute.call(this, 'keepViewId'),
+						empty = this.hasAttribute('empty'),
+						changeURL = this.hasAttribute('changeURL'),
+						keepViewId = this.hasAttribute('keepViewId'),
 						href = Greencode.getRealURLPath(hrefOriginal),
 						data = {__contentIsHtml : true};						
 
@@ -171,12 +171,12 @@ Greencode.tags = {
 								tags.push(o.childNodes[ii]);
 	
 							if (empty)
-								Greencode.customMethod.empty.call(o);
+								o.empty();
 	
 							dataComplete += data;
 							
 							o.insertAdjacentHTML('beforeEnd', dataComplete);
-							var scripts = Greencode.crossbrowser.querySelectorAll.call(o, 'script');
+							var scripts = o.querySelectorAll('script');
 							for (var s = -1; ++s < scripts.length;) {
 								var scriptElement = scripts[s];
 								if(scriptElement.src) {
@@ -201,7 +201,7 @@ Greencode.tags = {
 							        head.appendChild(script);
 								}
 								else
-									window.eval(Greencode.crossbrowser.text.call(scriptElement));
+									window.eval(scriptElement.childTextConent());
 							}
 	
 							Bootstrap.init(this, o);
@@ -233,7 +233,7 @@ Greencode.tags = {
 			}
 		}
 
-		elements = Greencode.crossbrowser.querySelectorAll.call(mainElement, 'input[type="ajax"]:not([swept]), button[type="ajax"]:not([swept])');
+		elements = mainElement.querySelectorAll('input[type="ajax"]:not([swept]), button[type="ajax"]:not([swept])');
 
 		for (var i = -1; ++i < elements.length;) {
 			var element = elements[i];
@@ -241,8 +241,8 @@ Greencode.tags = {
 
 			this.type = "button";
 
-			Greencode.crossbrowser.registerEvent.call(element, 'click', function() {
-				var data = {}, form = this.form, _es = Greencode.crossbrowser.querySelectorAll.call(form, 'input, textarea, select'), request = new Request(this.getAttribute('action'), Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
+			element.registerEvent('click', function() {
+				var data = {}, form = this.form, _es = form.querySelectorAll('input, textarea, select'), request = new Request(this.getAttribute('action'), Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
 
 				if (_es != null) {
 					for ( var e in _es)
@@ -256,7 +256,7 @@ Greencode.tags = {
 				request.send(data, function(data) {
 				}, function(data) {
 					if (element.getAttribute('appendTo') != null) {
-						var o = Greencode.crossbrowser.querySelector.call(mainElement, element.getAttribute('appendTo'));
+						var o = mainElement.querySelector(element.getAttribute('appendTo'));
 
 						if (element.getAttribute('empty') != null && element.getAttribute('empty').toLowerCase() === 'true') {
 							for (var ii = -1; ++ii < element.children.length;) {
@@ -275,7 +275,7 @@ Greencode.tags = {
 			});
 		}
 
-		elements = Greencode.crossbrowser.querySelectorAll.call(mainElement, 'input[type="submit"]:not([swept]), button[type="submit"]:not([swept])');
+		elements = mainElement.querySelectorAll('input[type="submit"]:not([swept]), button[type="submit"]:not([swept])');
 
 		for (var i = -1; ++i < elements.length;) {
 			var element = elements[i];

@@ -263,7 +263,7 @@ var Request = function(url, type, isSingleton) {
 		_request.onreadystatechange = null;
 		var ultLength = 0, o = this;
 
-		Greencode.crossbrowser.registerEvent.call(window, 'unload', function() {
+		window.registerEvent('unload', function() {
 			o.abort();
 		});
 
@@ -326,7 +326,7 @@ var Request = function(url, type, isSingleton) {
 
 							var es = div.getElementsByTagName('json');
 							for (var i = -1; ++i < es.length;) {
-								var jsonTxt = Greencode.crossbrowser.text.call(es[i]);
+								var jsonTxt = es[i].childTextConent();
 								if (jsonTxt.length > 0) {
 									data.push(JSON.parse(jsonTxt));
 								}

@@ -111,6 +111,6 @@ public final class $Container {
 		}
 		
 		if(fields.size() > 0)
-			DOMHandle.CustomMethod.call(e, "fillForm", fields);
+			DOMHandle.execCommand(e, "fillForm", fields);
 	}
 }

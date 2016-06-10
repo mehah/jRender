@@ -121,7 +121,7 @@ public class DOMScanner {
 				String msgText = getMsgEventId(context.webSocketData) + json.toString();
 				basicRemote.sendText(msgText);
 			} catch (Exception e) {
-				// Ignore Errors
+				e.printStackTrace();
 			}
 		} else
 			context.response.getWriter().write(json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());

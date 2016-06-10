@@ -2,9 +2,6 @@ package greencode.jscript.dom;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-
-import com.google.gson.Gson;
 
 import greencode.exception.GreencodeError;
 import greencode.jscript.DOMHandle;
@@ -79,80 +76,5 @@ public final class ElementHandle {
 			list[i] = cast(elements[i], castTo);
 
 		return list;
-	}
-
-	public static void empty(Element e) {
-		DOMHandle.CustomMethod.call(e, "empty");
-		if (e instanceof SelectElementPrototype) {
-			((SelectElementPrototype) e).options(false);
-		}
-	}
-
-	public static Element getOrCreateElementByTagName(Element owner, String tagName) {
-		Element e = new Element(greencode.jscript.$DOMHandle.getWindow(owner));
-		DOMHandle.CustomMethod.registerElement(owner, e, "getOrCreateElementByTagName", tagName);
-		return e;
-	}
-
-	public static Element querySelector(Element owner, String selector, HashMap<String, String[]> cssAttrs, boolean not) {
-		Element e = new Element(greencode.jscript.$DOMHandle.getWindow(owner));
-		DOMHandle.registerElementByCommand(owner, e, "@customMethod.querySelector", selector, cssAttrs, not);
-		return e;
-	}
-
-	public static Element[] querySelectorAll(Element owner, String selector, HashMap<String, String[]> cssAttrs, boolean not) {
-		final int qnt = DOMHandle.getVariableValueByPropertyNoCache(owner, "querySelectorAll.length", Integer.class, "@customMethod.querySelectorAll('" + selector + "', " + new Gson().toJson(cssAttrs) + "," + not + ").length");
-
-		Element[] elements = new Element[qnt];
-		int[] uids = new int[qnt];
-		for (int i = -1; ++i < qnt;)
-			uids[i] = DOMHandle.getUID(elements[i] = new Element(greencode.jscript.$DOMHandle.getWindow(owner)));
-
-		DOMHandle.registerReturnByCommand(owner, uids, "@customMethod.querySelectorAll", selector, cssAttrs, not);
-
-		return elements;
-	}
-
-	public static Element querySelector(Element owner, String selector, String javascriptSyntax) {
-		Element e = new Element(greencode.jscript.$DOMHandle.getWindow(owner));
-		DOMHandle.registerElementByCommand(owner, e, "@customMethod.querySelector", selector, javascriptSyntax);
-		return e;
-	}
-
-	public static Element[] querySelectorAll(Element owner, String selector, String javascriptSyntax) {
-		final int qnt = DOMHandle.getVariableValueByPropertyNoCache(owner, "querySelectorAll.length", Integer.class, "@customMethod.querySelectorAll('" + selector + "', '" + javascriptSyntax + "').length");
-		final Window window = greencode.jscript.$DOMHandle.getWindow(owner);
-		
-		Element[] elements = new Element[qnt];
-		int[] uids = new int[qnt];
-		for (int i = -1; ++i < qnt;)
-			uids[i] = DOMHandle.getUID(elements[i] = new Element(window));
-
-		DOMHandle.registerReturnByCommand(owner, uids, "@customMethod.querySelectorAll", selector, javascriptSyntax);
-
-		return elements;
-	}
-
-	public static void addClass(Element e, String className) {
-		DOMHandle.CustomMethod.call(e, "addClass", className);
-	}
-
-	public static void removeClass(Element e, String className) {
-		DOMHandle.CustomMethod.call(e, "removeClass", className);
-	}
-
-	public static Node prepend(Element e, Node node) {
-		DOMHandle.CustomMethod.call(e, "prepend", node);
-		return node;
-	}
-
-	public static Node insertBefore(Element e, Node node) {
-		DOMHandle.CustomMethod.call(e, "insertBefore", node);
-		return node;
-	}
-
-	public static Node insertAfter(Element e, Node node) {
-		DOMHandle.CustomMethod.call(e, "insertAfter", node);
-		return node;
 	}
 }

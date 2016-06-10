@@ -36,6 +36,6 @@ public class SelectElement<T> extends SelectElementPrototype<T> {
 	 */
 	public void selectedValue(T value) {
 		DOMHandle.setVariableValue(this, "value", value);
-		DOMHandle.CustomMethod.call(this, "selectOptionByValue", value);
+		DOMHandle.execCommand(this, "selectOptionByValue", value);
 	}
 }

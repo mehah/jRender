@@ -166,7 +166,7 @@ var IframeHttpRequest = function() {
 
 		intervalId = setInterval(function() {
 			try {
-				fContent = Greencode.crossbrowser.content.call(frame);
+				fContent = frame.content();
 
 				if(fContent.body == null || fContent.readyState === "uninitialized" || fContent.URL === 'about:blank')
 					return;
