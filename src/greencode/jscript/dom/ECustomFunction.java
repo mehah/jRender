@@ -15,9 +15,9 @@ public abstract class ECustomFunction extends Node {
 		}
 	}
 
-	public Element getOrCreateElementByTagName(String tagName) {
+	public Element getElementOrCreateByTagName(String tagName) {
 		Element e = new Element(greencode.jscript.$DOMHandle.getWindow(this));
-		DOMHandle.registerReturnByCommand(this, e, "getOrCreateElementByTagName", tagName);
+		DOMHandle.registerReturnByCommand(this, e, "getElementOrCreateByTagName", tagName);
 		return e;
 	}
 

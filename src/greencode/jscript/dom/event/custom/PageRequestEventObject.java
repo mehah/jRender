@@ -18,7 +18,7 @@ public abstract class PageRequestEventObject extends CustomEventObject {
 	
 	public Element getTarget() {
 		if(target == null)
-			DOMHandle.registerElementByProperty(this, target = ElementHandle.getInstance(window), "target");
+			DOMHandle.registerReturnByProperty(target = ElementHandle.getInstance(window), this, "target");
 		
 		return target;
 	}

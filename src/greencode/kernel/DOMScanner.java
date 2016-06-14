@@ -19,10 +19,10 @@ import greencode.http.HttpRequest;
 import greencode.http.ViewSession;
 import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
-import greencode.jscript.JSCommand;
+import greencode.jscript.JSExecutor;
 
 public class DOMScanner {
-	private final List<JSCommand> comm = new ArrayList<JSCommand>();
+	private final List<JSExecutor> comm = new ArrayList<JSExecutor>();
 	JsonObject sync;
 	Integer[] args;
 
@@ -36,24 +36,12 @@ public class DOMScanner {
 
 		return elements;
 	}
-	
-	public static void registerCommand(DOM e, String name, Object... args) {
-		registerCommand(e, null, name, args);
+
+	public static void registerExecution(JSExecutor execution) {
+		getElements(execution.view).comm.add(execution);
 	}
 
-	public static void registerCommand(GreenContext context, String name, Object... args) {
-		registerCommand(context, null, name, args);
-	}
-
-	public static void registerCommand(DOM e, Class<?> cast, String name, Object... args) {
-		getElements(greencode.jscript.$DOMHandle.getViewSession(e)).comm.add(new JSCommand(e, cast, name, args));
-	}
-
-	public static void registerCommand(GreenContext context, Class<?> cast, String name, Object... args) {
-		getElements(context.getRequest().getViewSession()).comm.add(new JSCommand(null, cast, name, args));
-	}
-
-	static void setSync(GreenContext context, int uid, String varName, JSCommand jsCommand) {
+	static void setSync(GreenContext context, int uid, String varName, JSExecutor jsCommand) {
 		DOMScanner scan = getElements(context.getRequest().getViewSession());
 		
 		JsonArray list;

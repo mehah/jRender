@@ -58,6 +58,7 @@ import greencode.http.HttpRequest;
 import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.DOMHandle.UIDReference;
+import greencode.jscript.JSExecutor;
 import greencode.jscript.dom.Element;
 import greencode.jscript.dom.ElementHandle;
 import greencode.jscript.dom.Form;
@@ -96,6 +97,8 @@ public final class Core implements Filter {
 	};
 
 	private final static String[] JS_CORE_FILES = {
+		"iframeHttpRequest.js",
+		"request.js",
 		"greencode.js",
 		"greencode.jquery.js",
 		"greencode.crossbrowser.js",
@@ -104,10 +107,7 @@ public final class Core implements Filter {
 		"greencode.events.js",
 		"greencode.tags.js",
 		"greencode.style.js",
-		"iframeHttpRequest.js",
-		"request.js",
-		"bootstrap.js",
-		"init.js"
+		"greencode.core.js",
 	};
 	
 	
@@ -290,16 +290,14 @@ public final class Core implements Filter {
 
 					String moduleName = FileWeb.getModuleName(page.pageAnnotation.jsModule());
 					if (moduleName != null) {
-						DOMScanner.registerCommand(context, "Greencode.util.loadScript", Core.CONTEXT_PATH + "/jscript/greencode/modules/" + moduleName + ".js", false, GreenCodeConfig.Server.View.charset);
+						DOMScanner.registerExecution(new JSExecutor(context, "Greencode.util.loadScript", JSExecutor.TYPE.METHOD, Core.CONTEXT_PATH + "/jscript/greencode/modules/" + moduleName + ".js", false, GreenCodeConfig.Server.View.charset));
 					}
 					
-					if(isFirstRequest) {
-						DOMScanner.registerCommand(context, "#viewId", context.request.getViewSession().getId());
-						
+					if(isFirstRequest) {						
 						FunctionHandle fh = new FunctionHandle((Class<Window>) requestClass, INIT_METHOD_NAME);
 						fh.registerRequestParameter("servletPath", servletPath);
 						
-						DOMScanner.registerCommand(context, "Greencode.exec", fh);
+						DOMScanner.registerExecution(new JSExecutor(context, "Greencode.exec", JSExecutor.TYPE.METHOD, fh));
 						
 						throw new StopProcess();
 					}
@@ -644,6 +642,14 @@ public final class Core implements Filter {
 				for (UIDReference uid : UIDReference.values()) {
 					json.addProperty(uid.name(), uid.ordinal());
 				}
+				
+				JsonObject executorType = new JsonObject();
+				
+				for (JSExecutor.TYPE type : JSExecutor.TYPE.values()) {
+					executorType.addProperty(type.name(), type.ordinal());
+				}
+				
+				json.add("executorType", executorType);
 
 				coreFileJS.append("Greencode.jQuery.extend(Greencode,").append(json).append(");");
 
@@ -666,12 +672,11 @@ public final class Core implements Filter {
 							final String key = line.substring(0, indexOf).trim();
 							if (!(key.indexOf('#') != -1 || key.indexOf('!') != -1)) // Comment
 																						// Symbol
-								return "internationalization_msg['" + key + "'] = '" + line.substring(indexOf + 1, line.length()).trim() + "';";
+								return "Greencode.internationalProperty['" + key + "'] = '" + line.substring(indexOf + 1, line.length()).trim() + "';";
 						}
 
 						return null;
 					}
-
 				}));
 
 				FileWeb.files.put("jscript/greencode/msg_" + v.locale.toString() + ".js", p);

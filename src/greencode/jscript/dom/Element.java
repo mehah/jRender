@@ -79,7 +79,7 @@ public class Element extends ECustomFunction {
 			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
 		}
 		
-		DOMHandle.registerElementByCommand(this, e, "querySelector", selector);
+		DOMHandle.registerReturnByCommand(e, this, "querySelector", selector);
 		
 		return (E) e;
 	}
@@ -103,14 +103,11 @@ public class Element extends ECustomFunction {
 			qnt = DOMHandle.getVariableValueByPropertyNoCache(this, varName, Integer.class, command+"('"+tagName+"').length");
 		
 		Element[] elements = new Element[qnt];
-		int[] uids = new int[qnt];
 		for (int i = -1; ++i < qnt;) {
-			Element e = new Element(this.window);
-			elements[i] = e;
-			uids[i] = DOMHandle.getUID(e);
+			elements[i] = new Element(this.window);
 		}
 		
-		DOMHandle.registerReturnByCommand(this, uids, command, tagName);
+		DOMHandle.registerReturnsByCommand(elements, this, command, tagName);
 		
 		return elements;
 	}

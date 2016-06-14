@@ -142,13 +142,13 @@ public abstract class Window extends EventTarget implements HttpAction {
 	
 	public int setTimeout(FunctionHandle handle, int time) {
 		int hashcode = handle.hashCode();
-		DOMHandle.registerReturnByCommand(this, hashcode, "setTimeout", handle, time);
+		DOMHandle.registerFunctionHandleByCommand(handle, this, "setTimeout", handle, time);
 		return hashcode;
 	}
 	
 	public int setInterval(FunctionHandle handle, int time) {
 		int hashcode = handle.hashCode();
-		DOMHandle.registerReturnByCommand(this, hashcode, "setInterval", handle, time);
+		DOMHandle.registerFunctionHandleByCommand(handle, this, "setInterval", handle, time);
 		return hashcode;
 	}
 	

@@ -10,6 +10,6 @@ import greencode.jscript.DOMHandle;
 
 public class DOMSerializer implements com.google.gson.JsonSerializer<DOM> {
 	public JsonElement serialize(DOM arg0, Type arg1, JsonSerializationContext arg2) {
-		return arg2.serialize(DOMHandle.getUID(arg0)+"*ref");
+		return arg2.serialize("$:"+DOMHandle.getUID(arg0));
 	}
 }

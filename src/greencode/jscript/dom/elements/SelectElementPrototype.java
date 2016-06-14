@@ -70,7 +70,7 @@ public abstract class SelectElementPrototype<T> extends Element {
 	
 	public OptionElementCollection<T> options() {
 		if(options == null) {
-			DOMHandle.registerReturnByProperty(this, DOMHandle.getUID(options = new OptionElementCollection<T>(this.window, typeValue)), "options");
+			DOMHandle.registerReturnByProperty(options = new OptionElementCollection<T>(this.window, typeValue), this, "options");
 			options.list = new ArrayList<OptionElement<T>>();
 		}
 		return options;
@@ -108,7 +108,7 @@ public abstract class SelectElementPrototype<T> extends Element {
 					DOMHandle.setVariableValue(option, "disabled", ((JsonObject)json).get("disabled").getAsBoolean());
 					DOMHandle.setVariableValue(option, "defaultSelected", ((JsonObject)json).get("defaultSelected").getAsBoolean());
 					options.list.add(option);
-					DOMHandle.registerElementByProperty(this, option, "options["+i+"]");
+					DOMHandle.registerReturnByProperty(option, this, "options["+i+"]");
 				}
 			}
 		}else
@@ -121,14 +121,14 @@ public abstract class SelectElementPrototype<T> extends Element {
 		return DOMHandle.getVariableValueByProperty(this, "multiple", Boolean.class, "multiple");
 	}
 	
-	public SelectElementPrototype multiple(boolean multiple) {
+	public SelectElementPrototype<T> multiple(boolean multiple) {
 		DOMHandle.setProperty(this, "multiple", multiple);
 		
 		if(this instanceof SelectMultipleElement) {
 			if(!multiple)
-				return ElementHandle.cast(this, SelectElement.class);
+				return ElementHandle.cast(this, SelectElement.class, typeValue);
 		} else if(multiple)
-			return ElementHandle.cast(this, SelectMultipleElement.class);
+			return ElementHandle.cast(this, SelectMultipleElement.class, typeValue);
 		
 		return this;
 	}

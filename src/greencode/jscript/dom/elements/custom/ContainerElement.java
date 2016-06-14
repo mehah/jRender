@@ -20,7 +20,7 @@ public abstract class ContainerElement<E extends ContainerElement<E>> extends El
 
 	public E getOriginal() {
 		if(this.original == null)
-			DOMHandle.registerElementByProperty(this, this.original = (E) GenericReflection.NoThrow.newInstance(getClass(), new Class<?>[]{Window.class}, this.window), "original");
+			DOMHandle.registerReturnByProperty(this.original = (E) GenericReflection.NoThrow.newInstance(getClass(), new Class<?>[]{Window.class}, this.window), this, "original");
 
 		return this.original;
 	}
@@ -31,7 +31,7 @@ public abstract class ContainerElement<E extends ContainerElement<E>> extends El
 	
 	public E repeat(boolean useOriginal) {
 		Element e = GenericReflection.NoThrow.newInstance(getClass(), new Class[]{Window.class}, window);		
-		DOMHandle.registerElementByCommand(this, e, "repeat", useOriginal);
+		DOMHandle.registerReturnByCommand(e, this, "repeat", useOriginal);
 		
 		return (E) e;
 	}

@@ -42,7 +42,7 @@ public final class OptionElementCollection<T> extends DOM implements Iterable<Op
 	public OptionElement<T> item(int index) {
 		OptionElement<T> e = list.get(index);
 		if(e == null)
-			DOMHandle.registerElementByCommand(this, (Node)(e = new OptionElement<T>(this.window, typeValue)), "item", index);
+			DOMHandle.registerReturnByCommand((Node)(e = new OptionElement<T>(this.window, typeValue)), this, "item", index);
 		return e;
 	}
 

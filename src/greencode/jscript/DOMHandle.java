@@ -11,6 +11,8 @@ import com.google.gson.JsonObject;
 import greencode.exception.ConnectionLost;
 import greencode.exception.GreencodeError;
 import greencode.http.ViewSession;
+import greencode.jscript.JSExecutor.TYPE;
+import greencode.jscript.dom.FunctionHandle;
 import greencode.jscript.dom.Node;
 import greencode.jscript.dom.Window;
 import greencode.kernel.Console;
@@ -36,48 +38,34 @@ public final class DOMHandle {
 		return d.window;
 	}
 
-	public static void registerElementByCommand(DOM owner, Node e, String name, Object... parameters) {
-		registerReturnByCommand(owner, ((DOM) e).uid, name, parameters);
+	public static void registerFunctionHandleByCommand(FunctionHandle ret, DOM owner, String name, Object... parameters) {
+		DOMScanner.registerExecution(new JSExecutor(ret, owner, name, parameters));
 	}
 
-	public static void registerElementByVector(DOM owner, Node e, int index) {
-		DOMScanner.registerCommand(owner, ((DOM) e).uid + "*vector." + index);
+	public static void registerReturnByVector(Node ret, DOM owner, int index) {
+		DOMScanner.registerExecution(new JSExecutor(new DOM[] { ret }, owner, index + "", TYPE.VECTOR));
 	}
 
-	public static void registerElementByProperty(DOM owner, Node e, String name) {
-		registerReturnByProperty(owner, ((DOM) e).uid, name);
+	public static void registerReturnByProperty(DOM ret, DOM owner, String name) {
+		DOMScanner.registerExecution(new JSExecutor(new DOM[] { ret }, owner, name, TYPE.PROPERTY));
 	}
 
-	public static void registerReturnByProperty(DOM owner, int uid, String name) {
-		DOMScanner.registerCommand(owner, uid + "*prop." + name);
+	public static void registerReturnByCommand(DOM ret, DOM owner, String name, Object... parameters) {
+		DOMScanner.registerExecution(new JSExecutor(new DOM[] { ret }, owner, name, TYPE.METHOD, parameters));
 	}
 
-	public static void registerReturnByCommand(DOM owner, DOM d, String name, Object... parameters) {
-		registerReturnByCommand(owner, d.uid, name, parameters);
-	}
-	
-	public static void registerReturnByCommand(DOM owner, int uid, String name, Object... parameters) {
-		DOMScanner.registerCommand(owner, uid + "*ref." + name, parameters);
-	}
-
-	public static void registerReturnByCommand(DOM owner, int[] uids, String name, Object... parameters) {
-		assert (uids.length < 1);
-
-		StringBuilder _uids = new StringBuilder("[").append(uids[0]);
-		for (int i = 0; ++i < uids.length;) {
-			_uids.append(',').append(uids[i]);
-		}
-		_uids.append(']');
-		DOMScanner.registerCommand(owner, _uids + "*ref." + name, parameters);
+	public static void registerReturnsByCommand(DOM[] rets, DOM owner, String name, Object... parameters) {
+		assert (rets.length < 1);
+		DOMScanner.registerExecution(new JSExecutor(rets, owner, null, name, TYPE.METHOD, parameters));
 	}
 
 	public static void execCommand(DOM dom, String methodName, Object... args) {
-		DOMScanner.registerCommand(dom, methodName, args);
+		DOMScanner.registerExecution(new JSExecutor(dom, methodName, JSExecutor.TYPE.METHOD, args));
 	}
 
 	public static void setProperty(DOM dom, String name, Object value) {
 		dom.variables.put(name, value);
-		DOMScanner.registerCommand(dom, "#" + name, value);
+		DOMScanner.registerExecution(new JSExecutor(dom, name, TYPE.PROPERTY, value));
 	}
 
 	public static String getDefaultIdToRegisterReturn(int uid) {
@@ -109,18 +97,15 @@ public final class DOMHandle {
 		return owner.variables.containsKey(key);
 	}
 
-	private static Object getSyncValue(GreenContext context, DOM owner, String varName, Class<?> cast, boolean isMethod, String methodOrPropName, Object... parameters) {
+	private static Object getSyncValue(GreenContext context, DOM owner, String varName, Class<?> cast, String name, JSExecutor.TYPE type, Object... parameters) {
 		final ViewSession viewSession = owner.viewSession;
 		synchronized (greencode.kernel.$GreenContext.isImmediateSync(context) ? owner : Thread.currentThread()) {
-			if (!isMethod)
-				methodOrPropName = '#' + methodOrPropName;
-
-			JSCommand jsCommand = new JSCommand(owner, cast, methodOrPropName, parameters);
+			JSExecutor jsCommand = new JSExecutor(owner, cast, name, type, parameters);
 
 			try {
 				greencode.kernel.$DOMScanner.setSync(context, owner.uid, varName, jsCommand);
 				getDOMSync(viewSession).put(owner.uid, owner);
-				Console.log("Synchronizing: [varName=" + varName + ", command={uid=" + owner.uid + ", name=" + methodOrPropName + ", parameters=" + context.gsonInstance.toJson(parameters) + "]");
+				Console.log("Synchronizing: [varName=" + varName + ", command={uid=" + owner.uid + ", name=" + name + ", parameters=" + context.gsonInstance.toJson(parameters) + "]");
 
 				if (greencode.kernel.$GreenContext.isImmediateSync(context)) {
 					owner.flush();
@@ -135,11 +120,11 @@ public final class DOMHandle {
 	}
 
 	@SuppressWarnings("unchecked")
-	private static <C> C getVariableValue(final DOM owner, final String varName, Class<C> cast, boolean isMethod, final String _name, Object... parameters) {
+	private static <C> C getVariableValue(final DOM owner, final String varName, Class<C> cast, final String _name, JSExecutor.TYPE type, Object... parameters) {
 		GreenContext context = GreenContext.getInstance();
 
 		if ((ClassUtils.isPrimitiveOrWrapper(cast) || ClassUtils.isParent(cast, JsonElement.class)) && (greencode.kernel.$GreenContext.isForcingSynchronization(context, owner, _name) || !owner.variables.containsKey(varName))) {
-			Object v = getSyncValue(context, owner, varName, cast, isMethod, _name, parameters);
+			Object v = getSyncValue(context, owner, varName, cast, _name, type, parameters);
 
 			if (greencode.kernel.$GreenContext.isImmediateSync(context)) {
 				return setVariableValue(context, owner, varName, cast, v);
@@ -180,39 +165,31 @@ public final class DOMHandle {
 	}
 
 	public static <C> C getVariableValueByCommand(DOM owner, String varName, Class<C> cast, String commandName, Object... parameters) {
-		return getVariableValue(owner, varName, cast, true, commandName, parameters);
+		return getVariableValue(owner, varName, cast, commandName, JSExecutor.TYPE.METHOD, parameters);
 	}
 
 	public static <C> C getVariableValueByProperty(DOM owner, String varName, Class<C> cast, String propName) {
-		return getVariableValue(owner, varName, cast, false, propName);
+		return getVariableValue(owner, varName, cast, propName, JSExecutor.TYPE.PROPERTY);
 	}
 
 	public static <C> C getVariableValueByCommandNoCache(DOM owner, String varName, Class<C> cast, String commandName, Object... parameters) {
-		C v = getVariableValue(owner, varName, cast, true, commandName, parameters);
+		C v = getVariableValue(owner, varName, cast, commandName, JSExecutor.TYPE.METHOD, parameters);
 		DOMHandle.removeVariable(owner, varName);
 		return v;
 	}
 
 	public static <C> C getVariableValueByPropertyNoCache(DOM owner, String varName, Class<C> cast, String propName) {
-		C v = getVariableValue(owner, varName, cast, false, propName);
+		C v = getVariableValue(owner, varName, cast, propName, JSExecutor.TYPE.PROPERTY);
 		DOMHandle.removeVariable(owner, varName);
 		return v;
 	}
 
-	public static JsonObject getJSONObject(DOM owner, String varName, String... propertyNames) {
-		return getVariableValue(owner, varName, JsonObject.class, false, "", (Object[]) propertyNames);
-	}
-
-	public static JsonArray getJSONArray(DOM owner, String varName, String... propertyNames) {
-		return getVariableValue(owner, varName, JsonArray.class, false, "[]", (Object[]) propertyNames);
-	}
-
 	public static JsonObject getJSONObjectByProperty(DOM owner, String varName, String propertyName, String... propertyNames) {
-		return getVariableValue(owner, varName, JsonObject.class, false, '#' + propertyName, (Object[]) propertyNames);
+		return getVariableValue(owner, varName, JsonObject.class, propertyName, JSExecutor.TYPE.PROPERTY, (Object[]) propertyNames);
 	}
 
 	public static JsonArray getJSONArrayByProperty(DOM owner, String varName, String propertyName, String... propertyNames) {
-		return getVariableValue(owner, varName, JsonArray.class, false, "#[]" + propertyName, (Object[]) propertyNames);
+		return getVariableValue(owner, varName, JsonArray.class, propertyName, JSExecutor.TYPE.VECTOR, (Object[]) propertyNames);
 	}
 
 	public static boolean isForcingSynchronization(GreenContext context, final DOM dom, String property) {

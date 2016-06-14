@@ -369,7 +369,7 @@ public final class FileWeb {
 					for(Method method: methods) {
 						if(method.getName().equals(Core.INIT_METHOD_NAME)) {
 							FunctionHandle func = new FunctionHandle(c, method.getName());
-							methodsJS.append("var ").append(method.getName()).append("=function(onComplete) {var param =").append(new Gson().toJson(func)).append(";param.viewId = __viewId;param.cid = __cid;param.url = CONTEXT_PATH+param.url;Bootstrap.callRequestMethod(principalElement, {}, {event: 'undefined', onComplete: onComplete}, param, []);};");
+							methodsJS.append("var ").append(method.getName()).append("=function(onComplete) {var param =").append(new Gson().toJson(func)).append(";param.viewId = __viewId;param.cid = __cid;param.url = CONTEXT_PATH+param.url;Greencode.core.callRequestMethod(principalElement, {}, {event: 'undefined', onComplete: onComplete}, param, []);};");
 						}
 					}
 

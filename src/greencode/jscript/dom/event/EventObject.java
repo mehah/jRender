@@ -17,14 +17,14 @@ public class EventObject extends DOM {
 	
 	public Element getTarget() {
 		if(target == null)
-			DOMHandle.registerElementByProperty(this, target = ElementHandle.getInstance(window), "target");
+			DOMHandle.registerReturnByProperty(target = ElementHandle.getInstance(window), this, "target");
 		
 		return target;
 	}
 	
 	public Element getRelatedTarget() {
 		if(relatedTarget == null)
-			DOMHandle.registerElementByProperty(this, relatedTarget = ElementHandle.getInstance(window), "relatedTarget");
+			DOMHandle.registerReturnByProperty(relatedTarget = ElementHandle.getInstance(window), this, "relatedTarget");
 		
 		return relatedTarget;
 	}

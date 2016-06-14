@@ -1,11 +1,9 @@
 Greencode.util = {
 	isArray: function(o) {
-		return o && typeof o === 'object'
-				&& Object.prototype.toString.call(o) == '[object Array]';
+		return o && typeof o === 'object' && Object.prototype.toString.call(o) == '[object Array]';
 	},
 	loadScript: function(src, asyc, charset) {
-		var request = new Request(src, Greencode.EVENT_REQUEST_TYPE, Greencode
-				.isRequestSingleton());
+		var request = new Request(src, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
 		request.setMethodRequest("GET");
 		request.setCometType(Request.LONG_POLLING);
 		request.reconnect(false);
@@ -108,9 +106,7 @@ Greencode.util = {
 		return str + ']';
 	},
 	isElement: function isElement(o) {
-		return (typeof HTMLElement === "object" ? o instanceof HTMLElement : o
-				&& typeof o === "object" && o.nodeType === 1
-				&& typeof o.nodeName === "string");
+		return (typeof HTMLElement === "object" ? o instanceof HTMLElement : o && typeof o === "object" && o.nodeType === 1 && typeof o.nodeName === "string");
 	},
 	isArraylike: function(obj) {
 		var length = obj.length, type = Greencode.jQuery.type(obj);
@@ -121,9 +117,6 @@ Greencode.util = {
 		if (obj.nodeType === 1 && length)
 			return true;
 		
-		return type === "array"
-				|| type !== "function"
-				&& (length === 0 || typeof length === "number" && length > 0
-						&& (length - 1) in obj);
+		return type === "array" || type !== "function" && (length === 0 || typeof length === "number" && length > 0 && (length - 1) in obj);
 	}
 };

@@ -42,7 +42,7 @@ public class Document extends Node {
 	public Element createElement(String tagName) {
 		Element e = new Element(this.window);
 
-		DOMHandle.registerElementByCommand(this, (Node)e, "createElement", tagName);
+		DOMHandle.registerReturnByCommand((Node)e, this, "createElement", tagName);
 		DOMHandle.setVariableValue(e, "tagName", tagName);
 
 		return e;
@@ -67,7 +67,7 @@ public class Document extends Node {
 			} catch(Exception ex) {
 				e = GenericReflection.NoThrow.getDeclaredConstrutor(element).newInstance();
 			}
-			DOMHandle.registerElementByCommand(this, e, "createElement", DOMHandle.getVariableValue(e, "tagName", String.class));
+			DOMHandle.registerReturnByCommand(e, this, "createElement", DOMHandle.getVariableValue(e, "tagName", String.class));
 
 			if(DOMHandle.containVariableKey(e, "type"))
 				DOMHandle.setProperty(e, "type", DOMHandle.getVariableValue(e, "type", String.class));
@@ -83,21 +83,21 @@ public class Document extends Node {
 
 	public Node createTextNode(String text) {
 		Node e = new Node(this.window);
-		DOMHandle.registerElementByCommand(this, e, "createTextNode", text);
+		DOMHandle.registerReturnByCommand(e, this, "createTextNode", text);
 
 		return e;
 	}
 
 	public Node createComment(String text) {
 		Node e = new Node(this.window);
-		DOMHandle.registerElementByCommand(this, e, "createComment", text);
+		DOMHandle.registerReturnByCommand(e, this, "createComment", text);
 
 		return e;
 	}
 
 	public Element getElementById(String id) {
 		Element e = new Element(this.window);
-		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
+		DOMHandle.registerReturnByCommand(e, this, "getElementById", id);
 
 		return e;
 	}
@@ -108,7 +108,7 @@ public class Document extends Node {
 		}
 		
 		E e = ElementHandle.getInstance(cast, window);
-		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
+		DOMHandle.registerReturnByCommand(e, this, "getElementById", id);
 		
 		return e;
 	}
@@ -127,7 +127,7 @@ public class Document extends Node {
 			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
 		}
 		
-		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
+		DOMHandle.registerReturnByCommand(e, this, "getElementById", id);
 		return (E) e;
 	}
 	
@@ -143,7 +143,7 @@ public class Document extends Node {
 		if(classUnnamed.getGenericSuperclass() instanceof Class)
 			throw new GreencodeError(LogMessage.getMessage("green-0046", ((Class<?>)classUnnamed.getGenericSuperclass()).getSimpleName()));
 		
-		DOMHandle.registerElementByCommand(this, e, "getElementById", id);
+		DOMHandle.registerReturnByCommand(e, this, "getElementById", id);
 		return (E) e;
 	}
 
@@ -178,7 +178,7 @@ public class Document extends Node {
 			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
 		}
 		
-		DOMHandle.registerElementByCommand(this, e, "querySelector", selector);
+		DOMHandle.registerReturnByCommand(e, this, "querySelector", selector);
 		
 		return (E) e;
 	}
@@ -192,7 +192,7 @@ public class Document extends Node {
 		if(!classUnnamed.isAnonymousClass())
 			throw new GreencodeError(LogMessage.getMessage("green-0045", clazz.getSimpleName()));
 		
-		DOMHandle.registerElementByCommand(this, e, "querySelector", selector);
+		DOMHandle.registerReturnByCommand(e, this, "querySelector", selector);
 		
 		return (E) e;
 	}
@@ -205,11 +205,10 @@ public class Document extends Node {
 		final int qnt = DOMHandle.getVariableValueByPropertyNoCache(this, varName, Integer.class, command + "('" + tagName + "').length");
 
 		Element[] elements = new Element[qnt];
-		int[] uids = new int[qnt];
 		for(int i = -1; ++i < qnt;)
-			uids[i] = DOMHandle.getUID(elements[i] = new Element(this.window));
+			elements[i] = new Element(this.window);
 
-		DOMHandle.registerReturnByCommand(this, uids, command, tagName);
+		DOMHandle.registerReturnsByCommand(elements, this, command, tagName);
 
 		return elements;
 	}

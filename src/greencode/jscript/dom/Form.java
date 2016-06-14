@@ -48,9 +48,9 @@ public abstract class Form extends Element implements ContainerElementImplementa
 		Visible visibleAnnotation = getClass().getAnnotation(Visible.class);
 
 		if(visibleAnnotation == null)
-			DOMHandle.registerElementByCommand(window.principalElement(), this, "querySelector", "form[name=\"" + name + "\"]");
+			DOMHandle.registerReturnByCommand(this, window.principalElement(), "querySelector", "form[name=\"" + name + "\"]");
 		else
-			DOMHandle.registerElementByCommand(window.principalElement(), this, "querySelector", "form[name=\"" + name + "\"]", "return (this.offsetHeight " + (visibleAnnotation.value() ? "!" : "=") + "== 0);");
+			DOMHandle.registerReturnByCommand(this, window.principalElement(), "querySelector", "form[name=\"" + name + "\"]", "return (this.offsetHeight " + (visibleAnnotation.value() ? "!" : "=") + "== 0);");
 	}
 
 	void processAnnotation() {

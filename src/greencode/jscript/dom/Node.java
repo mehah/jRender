@@ -29,7 +29,7 @@ public class Node extends EventTarget {
 	public<C extends Node> Node nextSibling(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
-			DOMHandle.registerElementByProperty(this, node, "nextSibling");
+			DOMHandle.registerReturnByProperty(node, this, "nextSibling");
 			return node;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -39,7 +39,7 @@ public class Node extends EventTarget {
 	public<C extends Node> Node previousSibling(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
-			DOMHandle.registerElementByProperty(this, node, "previousSibling");
+			DOMHandle.registerReturnByProperty(node, this, "previousSibling");
 			return node;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -49,7 +49,7 @@ public class Node extends EventTarget {
 	public<C extends Node> Node firstChild(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
-			DOMHandle.registerElementByProperty(this, node, "firstChild");
+			DOMHandle.registerReturnByProperty(node, this, "firstChild");
 			return node;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -59,7 +59,7 @@ public class Node extends EventTarget {
 	public<C extends Node> Node lastChild(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
-			DOMHandle.registerElementByProperty(this, node, "lastChild");
+			DOMHandle.registerReturnByProperty(node, this, "lastChild");
 			return node;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -69,7 +69,7 @@ public class Node extends EventTarget {
 	public<C extends Node> C parentNode(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);
-			DOMHandle.registerElementByProperty(this, node, "parentNode");
+			DOMHandle.registerReturnByProperty(node, this, "parentNode");
 			return node;
 		} catch (Exception e) {
 			throw new RuntimeException(e);
@@ -83,7 +83,7 @@ public class Node extends EventTarget {
 			if(deep)
 				greencode.jscript.$DOMHandle.cloneVariables(this, node);
 			
-			DOMHandle.registerElementByCommand(this, node, "cloneNode", deep);
+			DOMHandle.registerReturnByCommand(node, this, "cloneNode", deep);
 			
 			return node;
 		} catch (Exception e1) {

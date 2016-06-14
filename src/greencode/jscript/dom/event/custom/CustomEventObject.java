@@ -13,7 +13,7 @@ public class CustomEventObject extends DOM {
 	
 	public Element getMainElement() {
 		if(mainElement == null)
-			DOMHandle.registerElementByProperty(this, mainElement = ElementHandle.getInstance(window), "mainElement");
+			DOMHandle.registerReturnByProperty(mainElement = ElementHandle.getInstance(window), this, "mainElement");
 		
 		return mainElement;
 	}
