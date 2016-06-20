@@ -2,7 +2,7 @@ package greencode.jscript.dom;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.util.HashMap;
+import java.util.Map;
 
 import greencode.exception.GreencodeError;
 import greencode.http.enumeration.RequestMethod;
@@ -23,7 +23,7 @@ import greencode.util.LogMessage;
 
 public abstract class Form extends Element implements ContainerElementImplementation {
 	final Field[] elementFields = $Container.processFields(getClass());
-	HashMap<Integer, ContainerElement<?>> containers;
+	Map<Integer, ContainerElement<?>> containers;
 
 	private static final Condition<Field> fieldsWithRegisterEvent = new Condition<Field>() {
 		public boolean init(Field arg0) {

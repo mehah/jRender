@@ -1,7 +1,7 @@
 package greencode.http;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -11,7 +11,7 @@ public final class $HttpRequest {
 		return request.contentIsHtml;
 	}
 
-	public static HashMap<String, String[]> getParameters(HttpRequest request) {
+	public static Map<String, String[]> getParameters(HttpRequest request) {
 		return request.params;
 	}
 

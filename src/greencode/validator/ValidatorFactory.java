@@ -1,13 +1,14 @@
 package greencode.validator;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import greencode.http.ViewSession;
 
-import java.util.HashMap;
-
 public abstract class ValidatorFactory {
-	private static HashMap<Class<? extends Validator>, Validator> getValidators(final ViewSession viewSession) {
+	private static Map<Class<? extends Validator>, Validator> getValidators(final ViewSession viewSession) {
 		@SuppressWarnings("unchecked")
-		HashMap<Class<? extends Validator>, Validator> validators = (HashMap<Class<? extends Validator>, Validator>) viewSession.getAttribute("__VALIDATORS__");
+		Map<Class<? extends Validator>, Validator> validators = (Map<Class<? extends Validator>, Validator>) viewSession.getAttribute("__VALIDATORS__");
 		
 		if(validators == null)
 			viewSession.setAttribute("__VALIDATORS__", validators = new HashMap<Class<? extends Validator>, Validator>());
@@ -17,7 +18,7 @@ public abstract class ValidatorFactory {
 	
 	public static<V extends Validator> V getValidationInstance(final ViewSession viewSession, final Class<V> v)
 	{
-		final HashMap<Class<? extends Validator>, Validator> validators = getValidators(viewSession);
+		final Map<Class<? extends Validator>, Validator> validators = getValidators(viewSession);
 		
 		@SuppressWarnings("unchecked")
 		V validation = (V) validators.get(v);

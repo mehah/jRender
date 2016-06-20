@@ -1,6 +1,7 @@
 package greencode.jscript;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.Part;
 
@@ -155,9 +156,9 @@ public final class DOMHandle {
 		return (C) v;
 	}
 
-	static HashMap<Integer, DOM> getDOMSync(ViewSession viewSession) {
+	static Map<Integer, DOM> getDOMSync(ViewSession viewSession) {
 		@SuppressWarnings("unchecked")
-		HashMap<Integer, DOM> DOMList = (HashMap<Integer, DOM>) viewSession.getAttribute("DOM_SYNC");
+		Map<Integer, DOM> DOMList = (HashMap<Integer, DOM>) viewSession.getAttribute("DOM_SYNC");
 		if (DOMList == null)
 			viewSession.setAttribute("DOM_SYNC", DOMList = new HashMap<Integer, DOM>());
 

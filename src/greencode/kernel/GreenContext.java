@@ -59,7 +59,7 @@ public final class GreenContext {
 	private DatabaseConnection databaseConnection;
 	boolean executeAction = true, flushed, forceSynchronization, immediateSync = true;
 	String[] listAttrSync;
-	HashMap<Integer, HashSet<String>> listAttrSyncCache;
+	Map<Integer, HashSet<String>> listAttrSyncCache;
 	
 	GreenContext(HttpServletRequest request, ServletResponse response, FileWeb currentPage, WebSocketData wsData) {
 		GreenContext.greenContext.set(new WeakReference<GreenContext>(this)); 

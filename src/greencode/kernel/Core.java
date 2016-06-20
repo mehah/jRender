@@ -367,7 +367,7 @@ public final class Core implements Filter {
 	
 							int cntSkip = 0;
 							for (int i = -1; ++i < _argsSize;) {
-								final HashMap<String, String> j = context.gsonInstance.fromJson(_args[i], (new HashMap<String, String>()).getClass());
+								final Map<String, String> j = context.gsonInstance.fromJson(_args[i], (new HashMap<String, String>()).getClass());
 	
 								final Class<?> _class = Class.forName(j.get("className"));
 								listArgsClass[i] = _class;
@@ -385,10 +385,10 @@ public final class Core implements Filter {
 										listArgsClass[i] = dom.getClass();
 										++cntSkip;
 									} else if (_class.equals(Element.class)) {
-										Class<? extends Element> castoTo = (Class<? extends Element>) Class.forName(j.get("castTo"));
-										dom = ElementHandle.getInstance(castoTo, context.currentWindow);
+										Class<? extends Element> castTo = (Class<? extends Element>) Class.forName(j.get("castTo"));
+										dom = ElementHandle.getInstance(castTo, context.currentWindow);
 										greencode.jscript.$DOMHandle.setUID(dom, Integer.parseInt(j.get("uid")));
-										listArgsClass[i] = castoTo;
+										listArgsClass[i] = castTo;
 										++cntSkip;
 									} else {
 										dom = (DOM) context.gsonInstance.fromJson(j.get("fields"), _class);

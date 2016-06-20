@@ -1,6 +1,6 @@
 package greencode.kernel;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 import javax.websocket.Session;
@@ -8,7 +8,7 @@ import javax.websocket.Session;
 import org.apache.tomcat.util.http.MimeHeaders;
 
 public class WebSocketData {
-	private HashMap<String, String[]> params;
+	private Map<String, String[]> params;
 	
 	int eventId;
 	
@@ -46,7 +46,7 @@ public class WebSocketData {
 		return url;
 	}
 
-	public HashMap<String, String[]> getParameters() {
+	public Map<String, String[]> getParameters() {
 		return params;
 	}
 

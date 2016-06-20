@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -72,7 +73,7 @@ public final class $Container {
 		return fields;
 	}
 
-	public static HashMap<Integer, ContainerElement<?>> getContainers(Form form) {
+	public static Map<Integer, ContainerElement<?>> getContainers(Form form) {
 		if(form.containers == null)
 			form.containers = new HashMap<Integer, ContainerElement<?>>();
 

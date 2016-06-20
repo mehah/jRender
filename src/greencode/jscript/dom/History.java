@@ -1,6 +1,6 @@
 package greencode.jscript.dom;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import greencode.jscript.DOMHandle;
 
@@ -15,8 +15,8 @@ public final class History {
 	public void go(int index) { DOMHandle.execCommand(window, "history.go", index); }
 	public void go(String url) { DOMHandle.execCommand(window, "history.go", url); }
 	
-	public void pushState(HashMap<String, Object> stateObject, String title) { DOMHandle.execCommand(window, "history.pushState", stateObject, title); }
-	public void replaceState(HashMap<String, Object> stateObject, String title) { DOMHandle.execCommand(window, "history.replaceState", stateObject, title); }
-	public void pushState(HashMap<String, Object> stateObject, String title, String URL) { DOMHandle.execCommand(window, "history.pushState", stateObject, title, URL); }
-	public void replaceState(HashMap<String, Object> stateObject, String title, String URL) { DOMHandle.execCommand(window, "history.replaceState", stateObject, title, URL); }
+	public void pushState(Map<String, Object> stateObject, String title) { DOMHandle.execCommand(window, "history.pushState", stateObject, title); }
+	public void replaceState(Map<String, Object> stateObject, String title) { DOMHandle.execCommand(window, "history.replaceState", stateObject, title); }
+	public void pushState(Map<String, Object> stateObject, String title, String URL) { DOMHandle.execCommand(window, "history.pushState", stateObject, title, URL); }
+	public void replaceState(Map<String, Object> stateObject, String title, String URL) { DOMHandle.execCommand(window, "history.replaceState", stateObject, title, URL); }
 }

@@ -1,13 +1,14 @@
 package greencode.jscript;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import greencode.http.ViewSession;
 import greencode.jscript.dom.Window;
 import greencode.kernel.GreenContext;
 
 public class $DOMHandle {
-	public static HashMap<Integer, DOM> getDOMSync(ViewSession viewSession) {
+	public static Map<Integer, DOM> getDOMSync(ViewSession viewSession) {
 		return DOMHandle.getDOMSync(viewSession);
 	}
 

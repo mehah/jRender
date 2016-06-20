@@ -2,6 +2,7 @@ package greencode.http;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class Conversation {
 	public static final int FIRST = -3, NEXT = -2, LAST = -1, CURRENT = 0;
@@ -9,7 +10,7 @@ public class Conversation {
 	private final ViewSession viewSession;
 	private int id;
 	
-	private HashMap<String, Object> map;
+	private Map<String, Object> map;
 	
 	Conversation(ViewSession view, int id) {
 		this.viewSession = view;
@@ -37,23 +38,23 @@ public class Conversation {
 		this.map = getMap(viewSession, id);
 	}
 
-	static HashMap<Integer, HashMap<String, Object>> getConverstionMap(ViewSession view) {
-		@SuppressWarnings("unchecked")
-		HashMap<Integer, HashMap<String, Object>> conversations = (HashMap<Integer, HashMap<String, Object>>) view.getAttribute("CONVERSATION_LIST");
-		if(conversations == null)
-			view.setAttribute("CONVERSATION_LIST", conversations = new HashMap<Integer, HashMap<String, Object>>());
+	private static Map<String, Object> getMap(ViewSession view, int cid) {
+		Map<Integer, Map<String, Object>> conversations = getConverstionMap(view);
 		
-		return conversations;
-	}
-	
-	private static HashMap<String, Object> getMap(ViewSession view, int cid) {
-		HashMap<Integer, HashMap<String, Object>> conversations = getConverstionMap(view);
-		
-		HashMap<String, Object> map = conversations.get(cid);
+		Map<String, Object> map = conversations.get(cid);
 		if(map == null)
 			conversations.put(cid, map = new HashMap<String, Object>());
 		
 		return map;
+	}
+	
+	static Map<Integer, Map<String, Object>> getConverstionMap(ViewSession view) {
+		@SuppressWarnings("unchecked")
+		Map<Integer, Map<String, Object>> conversations = (Map<Integer, Map<String, Object>>) view.getAttribute("CONVERSATION_LIST");
+		if(conversations == null)
+			view.setAttribute("CONVERSATION_LIST", conversations = new HashMap<Integer, Map<String, Object>>());
+		
+		return conversations;
 	}
 	
 	static Conversation getInstance(HttpRequest request, int cid) {
@@ -68,9 +69,6 @@ public class Conversation {
 			while (it.hasNext()) cid = it.next();
 		}
 		
-		if(cid == request.getConversationId())
-			return request.getConversation();
-		
-		return new Conversation(request.getViewSession(), cid);
+		return cid == request.getConversationId() ? request.getConversation() : new Conversation(request.getViewSession(), cid);
 	}
 }

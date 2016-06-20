@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
@@ -31,7 +32,7 @@ import greencode.util.MergedFile;
 import greencode.util.StringUtils;
 
 public final class FileWeb {
-	final static HashMap<String, FileWeb> files = new HashMap<String, FileWeb>();
+	final static Map<String, FileWeb> files = new HashMap<String, FileWeb>();
 	private final static HashSet<String> requestsCached = new HashSet<String>();
 
 	FileWeb(Class<? extends Window> window, Page pageAnnotation) {

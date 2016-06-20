@@ -201,8 +201,8 @@ public final class GreenCodeConfig {
 
 			public final static String defaultConfigFile = null;
 
-			public final static HashMap<String, String> drives = new HashMap<String, String>();
-			final static HashMap<String, DatabaseConfig> configs = new HashMap<String, DatabaseConfig>();
+			public final static Map<String, String> drives = new HashMap<String, String>();
+			final static Map<String, DatabaseConfig> configs = new HashMap<String, DatabaseConfig>();
 
 			public static DatabaseConfig getConfig(String path) {
 				if(path == null)

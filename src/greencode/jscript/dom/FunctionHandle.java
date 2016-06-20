@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -24,6 +25,8 @@ import greencode.util.GenericReflection;
 import greencode.util.LogMessage;
 
 public final class FunctionHandle {
+	private static final transient Map<Class<?>, Method> methodsInitCached = new HashMap<Class<?>, Method>();
+	
 	private final transient GreenContext context = GreenContext.getInstance();
 	
 	private final Integer
@@ -66,7 +69,7 @@ public final class FunctionHandle {
 		this.requestParameters.addProperty(parameter, value);
 	}
 		
-	private static final HashMap<Integer, JsonObject[]> argsCached = new HashMap<Integer, JsonObject[]>();
+	private static final Map<Integer, JsonObject[]> argsCached = new HashMap<Integer, JsonObject[]>();
 	
 	private FunctionHandle setArguments(final Class<?>... args) {		
 		if(args.length > 0) {
@@ -116,8 +119,6 @@ public final class FunctionHandle {
 		
 		return this;
 	}
-	
-	private static final transient HashMap<Class<?>, Method> methodsInitCached = new HashMap<Class<?>, Method>();
 	
 	private void setUrl(Function o) {
 		if(o instanceof DOM)

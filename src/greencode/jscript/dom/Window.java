@@ -1,6 +1,6 @@
 package greencode.jscript.dom;
 
-import java.util.HashMap;
+import java.util.Map;
 
 import greencode.http.Conversation;
 import greencode.http.HttpAction;
@@ -14,8 +14,8 @@ import greencode.kernel.GreenContext;
 
 public abstract class Window extends EventTarget implements HttpAction {
 	
-	HashMap<Integer, Function> functions;
-	HashMap<String, Object> objectParameters;
+	Map<Integer, Function> functions;
+	Map<String, Object> objectParameters;
 	
 	public final Document document;
 	public final Location location;

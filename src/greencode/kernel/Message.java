@@ -2,12 +2,13 @@ package greencode.kernel;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 
 import greencode.util.LogMessage;
 
 public final class Message {
-	final static HashMap<String, Properties> properties = new HashMap<String, Properties>();
+	final static Map<String, Properties> properties = new HashMap<String, Properties>();
 	
 	private Message(){}
 		

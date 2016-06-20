@@ -20,7 +20,7 @@ public class $Window {
 		return listHttpActions;	
 	}
 	
-	public static HashMap<Integer, Function> getRegisteredFunctions(Window window) {
+	public static Map<Integer, Function> getRegisteredFunctions(Window window) {
 		return window.functions == null ? window.functions = new HashMap<Integer, Function>() : window.functions;
 	}
 	

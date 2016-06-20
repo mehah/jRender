@@ -53,7 +53,7 @@ final class Form {
 		}
 	}
 
-	private static void processElements(final GreenContext context, final ContainerElementImplementation container, final boolean METHOD_TYPE_IS_GET, Map<String, Object> map, HashMap<Integer, ContainerElement<?>> containersForm) throws IllegalArgumentException, IllegalStateException, IllegalAccessException, IOException, ServletException {
+	private static void processElements(final GreenContext context, final ContainerElementImplementation container, final boolean METHOD_TYPE_IS_GET, Map<String, Object> map, Map<Integer, ContainerElement<?>> containersForm) throws IllegalArgumentException, IllegalStateException, IllegalAccessException, IOException, ServletException {
 		Field[] fields = greencode.jscript.dom.$Container.getElementFields(container);
 		for(Field f: fields) {
 			greencode.jscript.dom.form.annotation.ElementValue element = f.getAnnotation(greencode.jscript.dom.form.annotation.ElementValue.class);
@@ -69,7 +69,7 @@ final class Form {
 				if(json == null)
 					continue;
 
-				final List<HashMap<String, Object>> list = json instanceof String ? context.gsonInstance.fromJson(context.request.getParameter(parametro), (new ArrayList<HashMap<String, Object>>()).getClass()) : (List<HashMap<String, Object>>) json;
+				final List<Map<String, Object>> list = json instanceof String ? context.gsonInstance.fromJson(context.request.getParameter(parametro), (new ArrayList<Map<String, Object>>()).getClass()) : (List<Map<String, Object>>) json;
 
 				if(containersForm == null) {
 					containersForm = greencode.jscript.dom.$Container.getContainers(context.requestedForm);

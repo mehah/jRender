@@ -7,8 +7,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletResponse;
@@ -31,11 +32,17 @@ import greencode.util.LogMessage;
 public final class HttpRequest extends HttpServletRequestWrapper implements HttpServletRequest {
 	private static final Pattern pattern = Pattern.compile("up.browser|up.link|windows ce|iphone|iemobile|mini|mmp|symbian|midp|wap|phone|pocket|mobile|pda|psp", Pattern.CASE_INSENSITIVE);
 	private static final TimeZone GMT_ZONE = TimeZone.getTimeZone("GMT");
-	private static final SimpleDateFormat formats[] = {
+	private static final SimpleDateFormat FORMATS[] = {
         new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss zzz", Locale.US),
         new SimpleDateFormat("EEEEEE, dd-MMM-yy HH:mm:ss zzz", Locale.US),
         new SimpleDateFormat("EEE MMMM d HH:mm:ss yyyy", Locale.US)
     };
+	
+	static {
+		for (SimpleDateFormat sdf : FORMATS) {
+			sdf.setTimeZone(GMT_ZONE);
+		}
+	}
 	
 	private ViewSession viewSession;
 
@@ -55,7 +62,7 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 	private final StringBuffer requestURL;
 	private final MimeHeaders headers;
 	
-	final HashMap<String, String[]> params;
+	final Map<String, String[]> params;
 	final boolean contentIsHtml;
 
 	public HttpRequest(HttpServletRequest request, HttpServletResponse response) {
@@ -65,10 +72,6 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 	public HttpRequest(HttpServletRequest request, ServletResponse response, WebSocketData wsData) {
 		super(request);
 
-        formats[0].setTimeZone(GMT_ZONE);
-        formats[1].setTimeZone(GMT_ZONE);
-        formats[2].setTimeZone(GMT_ZONE);
-		
 		if (wsData != null) {
 			this.webSocketSession = wsData.getSession();
 			this.params = wsData.getParameters();
@@ -145,7 +148,7 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 	        if (value == null)
 	            return (-1L);
 
-	        long result = FastHttpDateFormat.parseDate(value, formats);
+	        long result = FastHttpDateFormat.parseDate(value, FORMATS);
 	        if (result != (-1L)) {
 	            return result;
 	        }

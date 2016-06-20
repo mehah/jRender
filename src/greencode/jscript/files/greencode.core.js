@@ -89,169 +89,166 @@ Greencode.core = {
 					param[i] = p.requestParameters[i];
 				}
 			}
-			
-			if (!(target instanceof Window)) {
-				if (p.args != null) {
-					param._args = [];
-					
-					for( var i in p.args) {
-						var o = p.args[i];
-						if (o.className == Greencode.className.greenContext) {
-							param._args.push(JSON.stringify(o));
-						} else if (o.className == Greencode.className.containerElement || o.className == Greencode.className.containerEventObject) {
-							var uid;
-							if (target.tagName === 'CONTAINER') {
-								for( var i2 in __arguments) {
-									if ((uid = __arguments[i2].__containerUID) != null)
-										break;
-								}
-							} else {
-								var c = target.getParentByTagName("container");
-								uid = c ? c.getAttribute('uid') : null;
+			if (p.args != null) {
+				param._args = [];
+				
+				for( var i in p.args) {
+					var o = p.args[i];
+					if (o.className == Greencode.className.greenContext) {
+						param._args.push(JSON.stringify(o));
+					} else if (o.className == Greencode.className.containerElement || o.className == Greencode.className.containerEventObject) {
+						var uid;
+						if (target.tagName === 'CONTAINER') {
+							for( var i2 in __arguments) {
+								if ((uid = __arguments[i2].__containerUID) != null)
+									break;
 							}
-							
-							param._args.push(JSON.stringify({
-								className: o.className,
-								uid: uid + ''
-							}));
-						} else if (o.className == Greencode.className.element) {
-							param._args.push(JSON.stringify({
-								className: o.className,
-								castTo: o.castTo,
-								uid: Greencode.cache.register(target) + ''
-							}));
 						} else {
-							var _arg = {
-								className: o.className,
-								fields: {}
-							};
-							
-							var arg = __arguments[i - param._args.length];
-							
-							for(var i = -1; ++i < o.fields.length;) {
-								var name = o.fields[i];
-								var value = arg[name];
-								if (Greencode.util.isElement(value))
-									_arg.fields[name] = {
-										create: false
-									};
-								else if (value != null && !Greencode.jQuery.isFunction(value) && !Greencode.util.isElement(value))
-									_arg.fields[name] = value;
-							}
-							
-							_arg.fields = JSON.stringify(_arg.fields);
-							param._args.push(JSON.stringify(_arg));
+							var c = target.getParentByTagName("container");
+							uid = c ? c.getAttribute('uid') : null;
 						}
+						
+						param._args.push(JSON.stringify({
+							className: o.className,
+							uid: uid + ''
+						}));
+					} else if (o.className == Greencode.className.element) {
+						param._args.push(JSON.stringify({
+							className: o.className,
+							castTo: o.castTo,
+							uid: Greencode.cache.register(target) + ''
+						}));
+					} else {
+						var _arg = {
+							className: o.className,
+							fields: {}
+						};
+						
+						var arg = __arguments[i - param._args.length];
+						
+						for(var i = -1; ++i < o.fields.length;) {
+							var name = o.fields[i];
+							var value = arg[name];
+							if (Greencode.util.isElement(value))
+								_arg.fields[name] = {
+									create: false
+								};
+							else if (value != null && !Greencode.jQuery.isFunction(value) && !Greencode.util.isElement(value))
+								_arg.fields[name] = value;
+						}
+						
+						_arg.fields = JSON.stringify(_arg.fields);
+						param._args.push(JSON.stringify(_arg));
 					}
 				}
-				
-				if (p.formName != null) {
-					form = mainElement.querySelector('form[name="' + p.formName + '"]');
-					if (form == null && typeof console != 'undefined')
-						console.warn("Could not find the form with name " + p.formName + ".");
-					else
-						formName = p.formName;
-				} else if ((form = target.form) != null || (form = target.getParentByTagName("form")) != null) {
-					formName = form.getAttribute("name");
-				}
-				
-				if (form != null) {
-					var buildParam = function(param, list) {
-						for( var i in list) {
-							var res = list[i], value = null, name = null;
+			}
+			
+			if (p.formName != null) {
+				form = mainElement.querySelector('form[name="' + p.formName + '"]');
+				if (form == null && typeof console != 'undefined')
+					console.warn("Could not find the form with name " + p.formName + ".");
+				else
+					formName = p.formName;
+			} else if ((form = target.form) != null || !(target instanceof Window) && (form = target.getParentByTagName("form")) != null) {
+				formName = form.getAttribute("name");
+			}
+			
+			if (form != null) {
+				var buildParam = function(param, list) {
+					for( var i in list) {
+						var res = list[i], value = null, name = null;
+						
+						if (res instanceof Array) {
+							var eFirst = res[0];
 							
-							if (res instanceof Array) {
-								var eFirst = res[0];
-								
-								if (eFirst instanceof Node) {
-									name = eFirst.name;
-									var isCheckBox = eFirst.type === "checkbox", values = null;
-									if (isCheckBox)
-										values = new Array();
-									
-									for(var i2 = -1; ++i2 < res.length;) {
-										var e = res[i2];
-										if (e.checked) {
-											if (isCheckBox)
-												values.push(e.value);
-											else {
-												values = e.value;
-												break;
-											}
-										}
-									}
-									
-									if (values != null) {
-										if (values.length > 1)
-											value = values;
-										else
-											value = values[0];
-									} else
-										value = null;
-								} else {
-									name = i;
-									value = param[name];
-									
-									var first = false;
-									if (!value) {
-										value = new Array();
-										value.isContainer = true;
-										first = true;
-									}
-									
-									for(var i2 = -1; ++i2 < res.length;) {
-										var e = res[i2];
-										var o = buildParam({
-											__uid: e.__container.getAttribute('uid')
-										}, e);
-										value.push(o);
-									}
-									
-									if (first)
-										param[name] = value;
-									
-									continue;
-								}
-							} else {
-								var eFirst = res;
+							if (eFirst instanceof Node) {
 								name = eFirst.name;
+								var isCheckBox = eFirst.type === "checkbox", values = null;
+								if (isCheckBox)
+									values = new Array();
 								
-								if (eFirst.tagName === "SELECT") {
-									if (eFirst.multiple) {
-										var values = new Array();
-										for(var i2 = -1; ++i2 < eFirst.options.length;) {
-											var option = eFirst.options[i2];
-											if (option.selected)
-												values.push(option.value);
+								for(var i2 = -1; ++i2 < res.length;) {
+									var e = res[i2];
+									if (e.checked) {
+										if (isCheckBox)
+											values.push(e.value);
+										else {
+											values = e.value;
+											break;
 										}
-										value = values.length > 0 ? values : null;
-									} else
-										value = eFirst.selectedIndex === -1 ? "" : eFirst.options[eFirst.selectedIndex].value;
+									}
+								}
+								
+								if (values != null) {
+									if (values.length > 1)
+										value = values;
+									else
+										value = values[0];
 								} else
-									value = eFirst.tagName === "INPUT" && eFirst.type === "file" ? eFirst : eFirst.value;
+									value = null;
+							} else {
+								name = i;
+								value = param[name];
+								
+								var first = false;
+								if (!value) {
+									value = new Array();
+									value.isContainer = true;
+									first = true;
+								}
+								
+								for(var i2 = -1; ++i2 < res.length;) {
+									var e = res[i2];
+									var o = buildParam({
+										__uid: e.__container.getAttribute('uid')
+									}, e);
+									value.push(o);
+								}
+								
+								if (first)
+									param[name] = value;
+								
+								continue;
 							}
+						} else {
+							var eFirst = res;
+							name = eFirst.name;
 							
-							if (value)
-								param[name] = value;
+							if (eFirst.tagName === "SELECT") {
+								if (eFirst.multiple) {
+									var values = new Array();
+									for(var i2 = -1; ++i2 < eFirst.options.length;) {
+										var option = eFirst.options[i2];
+										if (option.selected)
+											values.push(option.value);
+									}
+									value = values.length > 0 ? values : null;
+								} else
+									value = eFirst.selectedIndex === -1 ? "" : eFirst.options[eFirst.selectedIndex].value;
+							} else
+								value = eFirst.tagName === "INPUT" && eFirst.type === "file" ? eFirst : eFirst.value;
 						}
 						
-						return param;
-					};
-					
-					var list = form.getAllDataElements();
-					buildParam(param, list);
-					
-					for( var i in param) {
-						if (i === '_args')
-							continue;
-						
-						var v = param[i];
-						if (v.isContainer)
-							param[i] = JSON.stringify(v);
+						if (value)
+							param[name] = value;
 					}
 					
-					param.__requestedForm = formName;
+					return param;
+				};
+				
+				var list = form.getAllDataElements();
+				buildParam(param, list);
+				
+				for( var i in param) {
+					if (i === '_args')
+						continue;
+					
+					var v = param[i];
+					if (v.isContainer)
+						param[i] = JSON.stringify(v);
 				}
+				
+				param.__requestedForm = formName;
 			}
 			
 			param.cid = p.cid;
@@ -356,10 +353,6 @@ Greencode.core = {
 		}
 	},
 	processJSON: function(request, mainElement, __jsonObject, argsEvent) {
-		if (mainElement == null)
-			mainElement = document.body;
-		
-		Greencode.tags.process(mainElement);
 		
 		if (__jsonObject == null) {
 			var jsons = mainElement.getElementsByTagName('JSON');
@@ -377,201 +370,139 @@ Greencode.core = {
 					
 					jsonDiv.parentNode.removeChild(jsonDiv);
 				}
-				
-				return;
 			}
-		} else {
-			if (!Greencode.jQuery.isArray(__jsonObject))
-				__jsonObject = [ __jsonObject ];
+			return;
+		}
+		
+		if (!Greencode.jQuery.isArray(__jsonObject))
+			__jsonObject = [ __jsonObject ];
+		
+		for( var i in __jsonObject) {
+			var jsonObject = __jsonObject[i];
 			
-			for( var i in __jsonObject) {
-				var jsonObject = __jsonObject[i];
-				
-				if (Greencode.DEBUG_LOG) {
-					console.warn('-----------------------');
-					console.warn('MainElement: ', mainElement);
-					console.warn('JSON Object: ', jsonObject);
+			if (Greencode.DEBUG_LOG) {
+				console.warn('-----------------------');
+				console.warn('MainElement: ', mainElement);
+				console.warn('JSON Object: ', jsonObject);
+			}
+			
+			var hasArgsEvent = argsEvent != null && argsEvent.length > 0 && jsonObject.args != null && jsonObject.args.length > 0;
+			if (hasArgsEvent) {
+				for(var i = -1; ++i < jsonObject.args.length;)
+					Greencode.cache.register(jsonObject.args[i], argsEvent[i]);
+			}
+			
+			if (jsonObject.comm != null && jsonObject.comm.length > 0) {
+				for(var i = -1; ++i < jsonObject.comm.length;) {
+					Greencode.core.readCommand.call(jsonObject.comm[i], mainElement);
 				}
 				
-				var hasArgsEvent = argsEvent != null && argsEvent.length > 0 && jsonObject.args != null && jsonObject.args.length > 0;
-				if (hasArgsEvent) {
-					for(var i = -1; ++i < jsonObject.args.length;)
-						Greencode.cache.register(jsonObject.args[i], argsEvent[i]);
-				}
+				if (!Greencode.DEBUG_LOG)
+					delete jsonObject.comm;
+			}
+			
+			if (hasArgsEvent) {
+				for(var i = -1; ++i < jsonObject.args.length;)
+					Greencode.cache.remove(jsonObject.args[i]);
+			}
+			
+			if (jsonObject.sync != null) {
+				var list = {}, __request, url = Greencode.CONTEXT_PATH + '/$synchronize';
 				
-				if (jsonObject.comm != null && jsonObject.comm.length > 0) {
-					for(var i = -1; ++i < jsonObject.comm.length;) {
-						Greencode.core.readCommand.call(jsonObject.comm[i], mainElement);
-					}
+				if (request != null && request.isWebSocket()) {
+					__request = request;
+					__request.setURL(url)
+				} else {
+					__request = new Request(url, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
 					
-					if (!Greencode.DEBUG_LOG)
-						delete jsonObject.comm;
+					__request.setMethodRequest("post");
+					__request.setCometType(Request.LONG_POLLING);
+					__request.reconnect(false);
 				}
 				
-				if (hasArgsEvent) {
-					for(var i = -1; ++i < jsonObject.args.length;)
-						Greencode.cache.remove(jsonObject.args[i]);
-				}
-				
-				if (jsonObject.sync != null) {
-					var list = {}, __request, url = Greencode.CONTEXT_PATH + '/$synchronize';
+				for(var sI = -1; ++sI < jsonObject.sync.list.length;) {
+					var sync = jsonObject.sync.list[sI], e = Greencode.cache.getById(sync.uid, mainElement);
 					
-					if (request != null && request.isWebSocket()) {
-						__request = request;
-						__request.setURL(url)
-					} else {
-						__request = new Request(url, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
+					if (e != null) {
+						Greencode.core.analizeJSON(mainElement, sync.command.parameters, e);
 						
-						__request.setMethodRequest("post");
-						__request.setCometType(Request.LONG_POLLING);
-						__request.reconnect(false);
-					}
-					
-					for(var sI = -1; ++sI < jsonObject.sync.list.length;) {
-						var sync = jsonObject.sync.list[sI], e = Greencode.cache.getById(sync.uid, mainElement);
+						var p = sync.command.parameters, parameters = Greencode.core.analizeParameters(p, "p", mainElement), value, strEval = '', filter, forceArray = false;
 						
-						if (e != null) {
-							Greencode.core.analizeJSON(mainElement, sync.command.parameters, e);
-							
-							var p = sync.command.parameters, parameters = Greencode.core.analizeParameters(p, "p", mainElement), value, strEval = '', filter, forceArray = false;
-							
-							if (!list[sync.uid + ""])
-								list[sync.uid + ""] = [];
-							
-							/*
-							 * TODO: Refazer sincronismo para arquivos
-							 */
-							if (sync.command.name.indexOf('__partFile') > -1) {
-								value = e;
+						if (!list[sync.uid + ""])
+							list[sync.uid + ""] = [];
+						
+						/*
+						 * TODO: Refazer sincronismo para arquivos
+						 */
+						if (sync.command.name.indexOf('__partFile') > -1) {
+							value = e;
+						} else {
+							if (sync.command.name === "#") {
+								value = {};
+								for( var i in p)
+									value[i] = e[p[i]];
 							} else {
-								if (sync.command.name === "#") {
-									value = {};
-									for( var i in p)
-										value[i] = e[p[i]];
+								if (Greencode.executorType.METHOD === sync.command.type) {
+									strEval = Greencode.core.commandToString(sync.command.name, parameters);
 								} else {
-									if (Greencode.executorType.METHOD === sync.command.type) {
-										strEval = Greencode.core.commandToString(sync.command.name, parameters);
-									} else {
-										if (Greencode.executorType.VECTOR === sync.command.type) {
-											filter = p;
-											forceArray = true;
-										} else if (Greencode.executorType.PROPERTY === sync.command.type) {
-											filter = p;
-										}
-										
-										strEval = "e." + sync.command.name;
+									if (Greencode.executorType.VECTOR === sync.command.type) {
+										filter = p;
+										forceArray = true;
+									} else if (Greencode.executorType.PROPERTY === sync.command.type) {
+										filter = p;
 									}
 									
-									value = Greencode.core.__isFirefox ? new Function('var e = arguments[0]; var p = arguments[1]; return ' + strEval)(e, p) : eval(strEval);
+									strEval = "e." + sync.command.name;
 								}
 								
-								if (forceArray || Greencode.jQuery.isArray(value))
-									value = Greencode.util.arrayToString(value, filter);
-								else if (typeof value === "object")
-									value = Greencode.util.objectToString(value, filter);
+								value = Greencode.core.__isFirefox ? new Function('var e = arguments[0]; var p = arguments[1]; return ' + strEval)(e, p) : eval(strEval);
 							}
 							
-							list[sync.uid + ""].push({
-								name: sync.varName,
-								'var': value + "",
-								cast: sync.command.cast,
-							});
+							if (forceArray || Greencode.jQuery.isArray(value))
+								value = Greencode.util.arrayToString(value, filter);
+							else if (typeof value === "object")
+								value = Greencode.util.objectToString(value, filter);
 						}
+						
+						list[sync.uid + ""].push({
+							name: sync.varName,
+							'var': value + "",
+							cast: sync.command.cast,
+						});
 					}
-					
-					var data = {
-						viewId: jsonObject.sync.viewId,
-						cid: jsonObject.sync.cid,
-						set: jsonObject.sync.set,
-						list: JSON.stringify(list)
-					};
-					
-					if (!data.set) {
-						data.accessCode = jsonObject.sync.accessCode;
-					}
-					
-					__request.send(data, null, null);
-					
-					__request = null;
-					
-					if (!Greencode.DEBUG_LOG)
-						delete jsonObject.sync;
 				}
 				
-				if (jsonObject.error != null) {
-					var divGreenCodeModalErro = document.createElement("div"), spanTitulo = document.createElement("span"), spanBotaoFechar = document.createElement("span"), topBar = document
-							.createElement("div"), contentModalError = document.createElement("div");
-					
-					divGreenCodeModalErro.setAttribute('id', 'GreenCodemodalErro');
-					for( var i in Greencode.modalErro.style)
-						divGreenCodeModalErro.style[i] = Greencode.modalErro.style[i];
-					
-					spanTitulo.appendChild(document.createTextNode('Exception:'));
-					for( var i in Greencode.modalErro.topBar.title.style)
-						spanTitulo.style[i] = Greencode.modalErro.topBar.title.style[i];
-					
-					spanBotaoFechar.appendChild(document.createTextNode('X'));
-					for( var i in Greencode.modalErro.topBar.closeButton.style)
-						spanBotaoFechar.style[i] = Greencode.modalErro.topBar.closeButton.style[i];
-					
-					spanBotaoFechar.registerEvent('click', function() {
-						divGreenCodeModalErro.parentNode.removeChild(divGreenCodeModalErro);
-					});
-					
-					for( var i in Greencode.modalErro.topBar.style)
-						topBar.style[i] = Greencode.modalErro.topBar.style[i];
-					
-					topBar.appendChild(spanTitulo);
-					topBar.appendChild(spanBotaoFechar);
-					
-					divGreenCodeModalErro.appendChild(topBar);
-					
-					contentModalError.setAttribute('class', 'content');
-					for( var i in Greencode.modalErro.content.style)
-						contentModalError.style[i] = Greencode.modalErro.content.style[i];
-					
-					divGreenCodeModalErro.appendChild(contentModalError);
-					
-					document.body.appendChild(divGreenCodeModalErro);
-					
-					var error = jsonObject.error, title = error.className + ": " + error.message, divTitle = document.createElement("div");
-					
-					for(i in Greencode.modalErro.content.title.style)
-						divTitle.style[i] = Greencode.modalErro.content.title.style[i];
-					
-					divTitle.appendChild(document.createTextNode(title));
-					
-					contentModalError.appendChild(divTitle);
-					
-					if (error.stackTrace != null) {
-						for( var i2 in error.stackTrace) {
-							var st = error.stackTrace[i2], msg = st.className + '.' + st.methodName + '(', lineDiv = document.createElement("div");
-							
-							msg += (st.lineNumber < 0 ? 'Unknown Source' : st.fileName + ':' + st.lineNumber) + ')';
-							
-							lineDiv.appendChild(document.createTextNode(msg));
-							
-							if (st.possibleError) {
-								for( var i3 in Greencode.modalErro.content.possibleErro.style)
-									lineDiv.style[i3] = Greencode.modalErro.content.possibleErro.style[i3];
-							} else {
-								for( var i3 in Greencode.modalErro.content.lineClass.style)
-									lineDiv.style[i3] = Greencode.modalErro.content.lineClass.style[i3];
-							}
-							
-							contentModalError.appendChild(lineDiv);
-						}
-					}
-					
-					if (!Greencode.DEBUG_LOG)
-						delete jsonObject.error;
+				var data = {
+					viewId: jsonObject.sync.viewId,
+					cid: jsonObject.sync.cid,
+					set: jsonObject.sync.set,
+					list: JSON.stringify(list)
+				};
+				
+				if (!data.set) {
+					data.accessCode = jsonObject.sync.accessCode;
 				}
 				
-				jsonObject = null;
+				__request.send(data, null, null);
+				
+				__request = null;
+				
+				if (!Greencode.DEBUG_LOG)
+					delete jsonObject.sync;
 			}
 			
-			__jsonObject = null;
+			if (jsonObject.error != null) {
+				Greencode.modalErro.show(jsonObject.error);
+				if (!Greencode.DEBUG_LOG)
+					delete jsonObject.error;
+			}
+			
+			jsonObject = null;
 		}
+		
+		__jsonObject = null;
+		
+		Greencode.tags.process(mainElement);
 		
 		var res = mainElement.querySelectorAll('[msg\\:key]');
 		for(var i = -1; ++i < res.length;) {
@@ -630,7 +561,7 @@ window.registerEvent('load', function() {
 		temp = null;
 	};
 	
-	Greencode.core.processJSON();
+	Greencode.core.processJSON(null, document.body);
 	
 	window.registerEvent('popstate', function(e) {
 		if (e.state != null && e.state.selector != null) {
