@@ -43,6 +43,8 @@ import javax.websocket.server.ServerEndpoint;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.RequestFacade;
 import org.apache.tomcat.util.http.MimeHeaders;
+import org.apache.tomcat.websocket.WsRemoteEndpointBase;
+import org.apache.tomcat.websocket.server.WsRemoteEndpointImplServer;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -89,14 +91,14 @@ import greencode.util.PackageUtils;
 @ServerEndpoint(value = "/coreWebSocket", configurator = WebSocketConfigurator.class)
 @WebFilter(displayName = "core", urlPatterns = "/*")
 public final class Core implements Filter {
-	public final static String INIT_METHOD_NAME = "init";
-	private final static Boolean HAS_ERROR = true;
-	private final static String[] JS_SUPPORT_FILES = {
+	final static String INIT_METHOD_NAME = "init";
+	
+	private final static Boolean HAS_ERROR = true;	
+	private final static String[]	
+	JS_SUPPORT_FILES = {
 		"json3.js",
 		"sizzle.js"
-	};
-
-	private final static String[] JS_CORE_FILES = {
+	}, JS_CORE_FILES = {
 		"iframeHttpRequest.js",
 		"request.js",
 		"greencode.js",
@@ -110,17 +112,18 @@ public final class Core implements Filter {
 		"greencode.core.js",
 	};
 	
-	
 	final static String CONTEXT_PATH = null, projectName = null, defaultLogMsg = null, SRC_CORE_JS_FOR_SCRIPT_HTML = null;
 	final static Field
 		requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request"),
 		coyoteRequestField = GenericReflection.NoThrow.getDeclaredField(Request.class, "coyoteRequest"),
 		contextRequestField =  GenericReflection.NoThrow.getDeclaredField(Request.class, "context"),
-		headersField =  GenericReflection.NoThrow.getDeclaredField(org.apache.coyote.Request.class, "headers");
+		headersField =  GenericReflection.NoThrow.getDeclaredField(org.apache.coyote.Request.class, "headers"),
+		baseRemoteField = GenericReflection.NoThrow.getDeclaredField(WsRemoteEndpointBase.class, "base");
 
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 	private HttpSession session;
+	private WsRemoteEndpointImplServer base;
 
 	@OnOpen
 	public void onOpen(Session session, EndpointConfig config) {
@@ -135,6 +138,7 @@ public final class Core implements Filter {
 			session.setMaxBinaryMessageBufferSize(GreenCodeConfig.Server.Request.Websocket.maxBinaryMessageSize);
 			session.setMaxTextMessageBufferSize(GreenCodeConfig.Server.Request.Websocket.maxTextMessageSize);
 			session.setMaxIdleTimeout(GreenCodeConfig.Server.Request.Websocket.maxIdleTimeout);
+			base = (WsRemoteEndpointImplServer) baseRemoteField.get(session.getBasicRemote());
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -160,7 +164,9 @@ public final class Core implements Filter {
 				new Thread(new Runnable() {
 					public void run() {
 						try {
-							Core.coreInit(servletPath, request, response, null, wsData);
+							synchronized (base) {
+								Core.coreInit(servletPath, request, response, null, wsData);	
+							}
 						} catch (Exception e) {
 							throw new RuntimeException(e);
 						}
@@ -298,6 +304,10 @@ public final class Core implements Filter {
 						fh.registerRequestParameter("servletPath", servletPath);
 						
 						DOMScanner.registerExecution(new JSExecutor(context, "Greencode.exec", JSExecutor.TYPE.METHOD, fh));
+						
+						if (context.userLocaleChanged) {
+							DOMScanner.registerExecution(new JSExecutor(context, "Greencode.util.loadScript", JSExecutor.TYPE.METHOD, Core.CONTEXT_PATH + "/jscript/greencode/msg_" + context.userLocale.toString() + ".js", false, GreenCodeConfig.Server.View.charset));
+						}
 						
 						throw new StopProcess();
 					}

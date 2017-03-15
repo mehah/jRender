@@ -3,7 +3,7 @@ Greencode.util = {
 		return o && typeof o === 'object' && Object.prototype.toString.call(o) == '[object Array]';
 	},
 	loadScript: function(src, asyc, charset) {
-		var request = new Request(src, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
+		var request = new Request(src, Request.XMLHttpRequest, Greencode.isRequestSingleton());
 		request.setMethodRequest("GET");
 		request.setCometType(Request.LONG_POLLING);
 		request.reconnect(false);

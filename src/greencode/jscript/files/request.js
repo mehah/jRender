@@ -282,7 +282,10 @@ var Request = function(url, type, isSingleton) {
 					var data = jsonContentType ? JSON.parse(_request.responseText) : _request.responseText;
 					c1.call(o, data);
 					
-					var reconnectByReturn = c2.call(o, data);
+					var reconnectByReturn = true;
+					
+					if (c2 != null)
+						reconnectByReturn = c2.call(o, data);
 					
 					closed = true;
 					if (o.reconnect() === true && reconnectByReturn !== false) {
