@@ -15,6 +15,7 @@ var Request = function(url, type, isSingleton) {
 	closed = true,
 	onError = null,
 	onAbort = null,
+	async = true,
 	eventReconnect = null,
 	state = 0,
 	jsonContentType = true,
@@ -35,6 +36,13 @@ var Request = function(url, type, isSingleton) {
 		if (b == null)
 			return jsonContentType;
 		jsonContentType = b;
+	};
+	
+	this.setAsync = function(c) {
+		async = c;
+	};
+	this.isAsync = function(c) {
+		return async;
 	};
 	
 	this.setCometType = function(c) {
@@ -208,7 +216,7 @@ var Request = function(url, type, isSingleton) {
 					}
 				}
 				
-				_request.open(methodRequest, url + parameters, true);
+				_request.open(methodRequest, url + parameters, this.isAsync());
 				if (hasContent)
 					_request.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=" + charset);
 				

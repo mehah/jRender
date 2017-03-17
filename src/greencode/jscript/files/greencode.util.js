@@ -8,6 +8,7 @@ Greencode.util = {
 		request.setCometType(Request.LONG_POLLING);
 		request.reconnect(false);
 		request.jsonContentType(false);
+		request.setAsync(asyc);
 		
 		if (charset)
 			request.setCharset(charset);

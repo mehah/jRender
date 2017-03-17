@@ -123,7 +123,6 @@ public final class Core implements Filter {
 	private HttpServletRequest request;
 	private HttpServletResponse response;
 	private HttpSession session;
-	private WsRemoteEndpointImplServer base;
 
 	@OnOpen
 	public void onOpen(Session session, EndpointConfig config) {
@@ -138,7 +137,6 @@ public final class Core implements Filter {
 			session.setMaxBinaryMessageBufferSize(GreenCodeConfig.Server.Request.Websocket.maxBinaryMessageSize);
 			session.setMaxTextMessageBufferSize(GreenCodeConfig.Server.Request.Websocket.maxTextMessageSize);
 			session.setMaxIdleTimeout(GreenCodeConfig.Server.Request.Websocket.maxIdleTimeout);
-			base = (WsRemoteEndpointImplServer) baseRemoteField.get(session.getBasicRemote());
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
@@ -164,9 +162,7 @@ public final class Core implements Filter {
 				new Thread(new Runnable() {
 					public void run() {
 						try {
-							synchronized (base) {
-								Core.coreInit(servletPath, request, response, null, wsData);	
-							}
+							Core.coreInit(servletPath, request, response, null, wsData);
 						} catch (Exception e) {
 							throw new RuntimeException(e);
 						}
@@ -300,14 +296,15 @@ public final class Core implements Filter {
 					}
 					
 					if(isFirstRequest) {						
+						if (context.userLocaleChanged) {
+							DOMScanner.registerExecution(new JSExecutor(context, "Greencode.util.loadScript", JSExecutor.TYPE.METHOD, Core.CONTEXT_PATH + "/jscript/greencode/msg_" + context.userLocale.toString() + ".js", false, GreenCodeConfig.Server.View.charset));
+						}
+						
 						FunctionHandle fh = new FunctionHandle((Class<Window>) requestClass, INIT_METHOD_NAME);
 						fh.registerRequestParameter("servletPath", servletPath);
 						
 						DOMScanner.registerExecution(new JSExecutor(context, "Greencode.exec", JSExecutor.TYPE.METHOD, fh));
-						
-						if (context.userLocaleChanged) {
-							DOMScanner.registerExecution(new JSExecutor(context, "Greencode.util.loadScript", JSExecutor.TYPE.METHOD, Core.CONTEXT_PATH + "/jscript/greencode/msg_" + context.userLocale.toString() + ".js", false, GreenCodeConfig.Server.View.charset));
-						}
+
 						
 						throw new StopProcess();
 					}
