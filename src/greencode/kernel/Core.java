@@ -151,6 +151,7 @@ public final class Core implements Filter {
 		wsData.headers = (MimeHeaders) session.getUserProperties().get("headers");
 		wsData.localPort = (Integer) session.getUserProperties().get("localPort");
 		wsData.remoteHost = (String) session.getUserProperties().get("remoteHost");
+		wsData.remoteAddr = (String) session.getUserProperties().get("remoteAddr");		
 		wsData.requestURI = wsData.url;
 		wsData.requestURL = new StringBuffer("http://").append(wsData.remoteHost).append(":").append(wsData.localPort).append("/").append(wsData.url);
 

@@ -294,7 +294,7 @@ public final class FileWeb {
 				}
 
 				if(importCoreJS)
-					src.head().prepend("<script type=\"text/javascript\" src=\"" + Core.SRC_CORE_JS_FOR_SCRIPT_HTML + "\"></script>");
+					src.head().prepend("<script type=\"text/javascript\" src=\"" + Core.SRC_CORE_JS_FOR_SCRIPT_HTML + "\" charset=\""+GreenCodeConfig.Server.View.charset+"\"></script>");
 
 				content = src.html();
 			} else

@@ -52,7 +52,7 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 	
 	private final boolean isAjax, isIFrameHttpRequest;
 	private final int cid, viewId, localPort;
-	private final String methodType, remoteHost, requestURI;
+	private final String methodType, remoteHost, requestURI, remoteAddr;
 	
 	private final Conversation conversation;
 	private final ServletResponse response;
@@ -78,12 +78,13 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 			this.httpSession = wsData.getHttpSession();
 			this.isIFrameHttpRequest = false;
 			this.isAjax = false;
-			this.methodType = RequestMethod.GET.name();
+			this.methodType = RequestMethod.POST.name(); // Método GET utilizar codificação de caracteres.
 			this.remoteHost = wsData.getRemoteHost();
 			this.requestURL = wsData.getRequestURL();
 			this.requestURI = wsData.getRequestURI();
 			this.localPort = wsData.getLocalPort();
 			this.headers = wsData.getHeaders();
+			this.remoteAddr = wsData.getRemoteAddr();
 		} else {
 			this.webSocketSession = null;
 			this.params = new HashMap<String, String[]>(request.getParameterMap());
@@ -95,6 +96,7 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 			this.requestURL = request.getRequestURL();
 			this.requestURI = request.getRequestURI();
 			this.localPort = request.getLocalPort();
+			this.remoteAddr = request.getRemoteAddr();
 			this.headers = null;
 		}
 
@@ -338,5 +340,9 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 
 	public boolean isIFrameHttpRequest() {
 		return isIFrameHttpRequest;
+	}
+
+	public String getRemoteAddr() {
+		return remoteAddr;
 	}
 }

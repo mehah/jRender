@@ -37,6 +37,7 @@ public class WebSocketConfigurator extends ServerEndpointConfig.Configurator {
 		config.getUserProperties().put("context", _requestFaced.getContext());
 		config.getUserProperties().put("headers", mime);
 		config.getUserProperties().put("remoteHost", _request.getRemoteHost());
-		config.getUserProperties().put("localPort", _request.getLocalPort());
+		config.getUserProperties().put("localPort", _request.getLocalPort());		
+		config.getUserProperties().put("remoteAddr", _request.getRemoteAddr());
 	}
 }

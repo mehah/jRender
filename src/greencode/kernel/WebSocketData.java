@@ -17,6 +17,7 @@ public class WebSocketData {
 	Session session;
 	
 	String remoteHost;
+	String remoteAddr;
 	StringBuffer requestURL;
 	String requestURI;
 	int localPort;
@@ -56,5 +57,9 @@ public class WebSocketData {
 
 	public Session getSession() {
 		return session;
+	}
+
+	public String getRemoteAddr() {
+		return remoteAddr;
 	}
 }
