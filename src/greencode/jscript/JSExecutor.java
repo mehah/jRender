@@ -10,7 +10,7 @@ import greencode.kernel.GreenContext;
 public final class JSExecutor {
 	
 	public static enum TYPE {
-		METHOD, PROPERTY, VECTOR
+		METHOD, PROPERTY, VECTOR, INSTANCE
 	}
 	
 	public final transient ViewSession view;

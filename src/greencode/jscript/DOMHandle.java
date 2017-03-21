@@ -38,6 +38,10 @@ public final class DOMHandle {
 	public static Window getWindow(DOM d) {
 		return d.window;
 	}
+	
+	public static void newInstance(DOM owner, String className, Object... parameters) {		
+		DOMScanner.registerExecution(new JSExecutor(new DOM[] { owner }, owner.window, className, TYPE.INSTANCE, parameters));
+	}
 
 	public static void registerFunctionHandleByCommand(FunctionHandle ret, DOM owner, String name, Object... parameters) {
 		DOMScanner.registerExecution(new JSExecutor(ret, owner, name, parameters));

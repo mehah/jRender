@@ -315,8 +315,11 @@ Greencode.core = {
 		if (this.uidSave) {
 			if (Greencode.executorType.METHOD === this.type) {
 				if (this.uidSave.length > 1) {
-					var res = Greencode.core.__isFirefox ? new Function('var e = arguments[0]; var mainElement = arguments[1]; return ' + Greencode.core.commandToString(this.name, parameters)).call(
-							this, e, mainElement) : eval(Greencode.core.commandToString(this.name, parameters));
+					var res = Greencode.core.__isFirefox ?
+						new Function('var e = arguments[0]; var mainElement = arguments[1]; return '
+							+ Greencode.core.commandToString(this.name, parameters)).call(this, e, mainElement)
+						:
+						eval(Greencode.core.commandToString(this.name, parameters));
 					
 					for(var i = -1; ++i < this.uidSave.length;) {
 						Greencode.cache.register(this.uidSave[i], res[i]);
@@ -327,12 +330,13 @@ Greencode.core = {
 				strEval = 'Greencode.cache.register(' + this.uidSave[0] + ', e.' + this.name + ');';
 			} else if (Greencode.executorType.VECTOR === this.type) {
 				strEval = 'Greencode.cache.register(' + this.uidSave[0] + ', e[' + this.name + ']' + ');';
+			} else if (Greencode.executorType.INSTANCE === this.type) {
+				strEval = 'Greencode.cache.register(' + this.uidSave[0] + ', new ' + Greencode.core.commandToString(this.name, parameters) + ');';
 			}
+		} else if (Greencode.executorType.PROPERTY === this.type) {
+			strEval = 'e.' + this.name + '=' + parameters + ';';
 		} else {
-			if (Greencode.executorType.PROPERTY === this.type)
-				strEval = 'e.' + this.name + '=' + parameters + ';';
-			else
-				strEval = Greencode.core.commandToString(this.name, parameters);
+			strEval = Greencode.core.commandToString(this.name, parameters);
 		}
 		
 		if (strEval != null) {
