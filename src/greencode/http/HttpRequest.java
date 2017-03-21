@@ -78,7 +78,7 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 			this.httpSession = wsData.getHttpSession();
 			this.isIFrameHttpRequest = false;
 			this.isAjax = false;
-			this.methodType = RequestMethod.POST.name(); // Método GET utilizar codificação de caracteres.
+			this.methodType = RequestMethod.POST.name(); // Método GET utiliza codificação de caracteres.
 			this.remoteHost = wsData.getRemoteHost();
 			this.requestURL = wsData.getRequestURL();
 			this.requestURI = wsData.getRequestURI();

@@ -418,17 +418,12 @@ public final class Core implements Filter {
 
 			String classNameBootAction = null;
 
-			if(context.request.isWebSocket()) {
+			ForceSync fs = requestedMethod.getAnnotation(ForceSync.class);
+			if (fs != null) {
 				context.forceSynchronization = true;
-				context.listAttrSyncCache = new HashMap<Integer, HashSet<String>>();
-			} else {
-				ForceSync fs = requestedMethod.getAnnotation(ForceSync.class);
-				if (fs != null) {
-					context.forceSynchronization = true;
-					context.listAttrSync = fs.value();
-					if (fs.onlyOnce())
-						context.listAttrSyncCache = new HashMap<Integer, HashSet<String>>();
-				}
+				context.listAttrSync = fs.value();
+				if (fs.onlyOnce())
+					context.listAttrSyncCache = new HashMap<Integer, HashSet<String>>();
 			}
 
 			if (hasBootaction) {
@@ -679,7 +674,6 @@ public final class Core implements Filter {
 						if (indexOf != -1) {
 							final String key = line.substring(0, indexOf).trim();
 							if (!(key.indexOf('#') != -1 || key.indexOf('!') != -1)) // Comment
-																						// Symbol
 								return "Greencode.internationalProperty['" + key + "'] = '" + line.substring(indexOf + 1, line.length()).trim() + "';";
 						}
 
