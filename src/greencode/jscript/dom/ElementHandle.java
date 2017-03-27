@@ -5,7 +5,6 @@ import java.lang.reflect.Modifier;
 
 import greencode.exception.GreencodeError;
 import greencode.jscript.DOMHandle;
-import greencode.jscript.dom.elements.SelectElementPrototype;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
 import greencode.util.LogMessage;

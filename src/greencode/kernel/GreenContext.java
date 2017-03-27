@@ -3,7 +3,6 @@ package greencode.kernel;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;

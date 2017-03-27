@@ -290,7 +290,7 @@ Element.prototype.getAllDataElements = function(param) {
 };
 
 Element.prototype.prepend = function(node) {
-	this.appendBefore(node, this.firstChild);
+	this.insertBefore(node, this.firstChild);
 	return node;
 };
 

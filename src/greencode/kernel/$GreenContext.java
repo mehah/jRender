@@ -1,6 +1,5 @@
 package greencode.kernel;
 
-import java.util.Locale;
 import java.util.Properties;
 
 import greencode.jscript.DOM;

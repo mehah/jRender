@@ -44,7 +44,6 @@ import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.RequestFacade;
 import org.apache.tomcat.util.http.MimeHeaders;
 import org.apache.tomcat.websocket.WsRemoteEndpointBase;
-import org.apache.tomcat.websocket.server.WsRemoteEndpointImplServer;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
