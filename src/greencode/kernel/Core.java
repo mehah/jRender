@@ -305,6 +305,7 @@ public final class Core implements Filter {
 						
 						DOMScanner.registerExecution(new JSExecutor(context, "Greencode.exec", JSExecutor.TYPE.METHOD, fh));
 
+						context.getRequest().getViewSession().setAttribute("REQUEST_PARAMETERS", new HashMap<String, String[]>(context.request.getParameterMap()));
 						
 						throw new StopProcess();
 					}

@@ -99,7 +99,7 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 			this.remoteAddr = request.getRemoteAddr();
 			this.headers = null;
 		}
-
+		
 		this.response = response;
 
 		contentIsHtml = Boolean.parseBoolean(getParameter("__contentIsHtml")) || isFirst();
@@ -121,6 +121,10 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 		this.conversation = new Conversation(getViewSession(), cid);
 
 		this.userPrincipal = (UserPrincipal) getSession().getAttribute("__USER_PRINCIPAL__");
+		
+		if(!isFirst()) {
+			this.params.putAll((Map<? extends String, ? extends String[]>) getViewSession().getAttribute("REQUEST_PARAMETERS"));
+		}
 	}
 	
 	public String getHeader(String name) {
