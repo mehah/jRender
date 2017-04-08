@@ -123,7 +123,10 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 		this.userPrincipal = (UserPrincipal) getSession().getAttribute("__USER_PRINCIPAL__");
 		
 		if(!isFirst()) {
-			this.params.putAll((Map<? extends String, ? extends String[]>) getViewSession().getAttribute("REQUEST_PARAMETERS"));
+			Map<? extends String, ? extends String[]> paramenters = (Map<? extends String, ? extends String[]>) getViewSession().getAttribute("REQUEST_PARAMETERS");
+			if(paramenters != null) {
+				this.params.putAll(paramenters);
+			}
 		}
 	}
 	

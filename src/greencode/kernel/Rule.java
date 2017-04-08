@@ -44,5 +44,9 @@ final class Rule {
 		if((Cache.bootAction == null || !Cache.bootAction.whenUnauthorized(context)) && !context.request.isWebSocket()) {
 			context.response.sendError(HttpServletResponse.SC_UNAUTHORIZED, LogMessage.getMessage("green-0040"));
 		}
-	}
+		
+		if(greencode.kernel.$DOMScanner.hasRegisteredCommand(context.getRequest().getViewSession())) {
+			context.response.getWriter().println("<script type=\"text/javascript\" src=\"" + Core.SRC_CORE_JS_FOR_SCRIPT_HTML + "\" charset=\""+GreenCodeConfig.Server.View.charset+"\"></script>");
+		}
+ 	}
 }

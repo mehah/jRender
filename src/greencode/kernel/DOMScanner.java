@@ -22,7 +22,7 @@ import greencode.jscript.DOMHandle;
 import greencode.jscript.JSExecutor;
 
 public class DOMScanner {
-	private final List<JSExecutor> comm = new ArrayList<JSExecutor>();
+	final List<JSExecutor> comm = new ArrayList<JSExecutor>();
 	JsonObject sync;
 	Integer[] args;
 

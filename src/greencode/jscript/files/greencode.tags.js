@@ -130,114 +130,113 @@ Greencode.tags = {
 			}
 			
 			if (o != null) {
-				element
-						.registerEvent('click',
-								function(e) {
-									e.preventDefault();
+				element.registerEvent('click',	function(e) {
+					e.preventDefault();
+					
+					var hrefOriginal = this.getAttribute('href');
+					var appendTo = this.getAttribute('appendTo'), empty = this.hasAttribute('empty'), changeURL = this.hasAttribute('changeURL'),
+					keepViewId = this.hasAttribute('keepViewId'), href = Greencode.getRealURLPath(hrefOriginal), data = {
+						__contentIsHtml: true
+					};
+					
+					if (keepViewId)
+						data.viewId = viewId;
+					
+					request = new Request(href, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
+					
+					request.setMethodRequest('GET');
+					request.setCometType(Request.STREAMING);
+					request.reconnect(false);
+					request.jsonContentType(false);
+					
+					var _data = {
+						mainElement: o,
+						target: this,
+						appendToSelector: appendTo,
+						appendToElement: o,
+						empty: empty,
+						changeURL: changeURL,
+						keepViewId: keepViewId,
+						href: href
+					};
+					
+					if (Greencode.executeEvent('beforePageRequest', _data) !== false) {
+						var dataComplete = "";
+						console.log(data)
+						request.send(data, function(data) {
+							dataComplete += data;
+						}, function(data) {
+							var tags = new Array();
+							
+							delete Greencode.cache.tags[window.location.href];
+							Greencode.cache.tags[window.location.href] = tags;
+							
+							for(var ii = -1; ++ii < o.childNodes.length;)
+								tags.push(o.childNodes[ii]);
+							
+							if (empty)
+								o.empty();
+							
+							dataComplete += data;
+							
+							o.insertAdjacentHTML('beforeEnd', dataComplete);
+							var scripts = o.querySelectorAll('script');
+							for(var s = -1; ++s < scripts.length;) {
+								var scriptElement = scripts[s];
+								if (scriptElement.src) {
+									var script = document.createElement('script'), head = document.getElementsByTagName("head")[0];
+									script.setAttribute("type", scriptElement.type ? scriptElement.type : "text/javascript");
+									script.setAttribute("src", scriptElement.src);
 									
-									var hrefOriginal = this.getAttribute('href');
-									var appendTo = this.getAttribute('appendTo'), empty = this.hasAttribute('empty'), changeURL = this.hasAttribute('changeURL'), keepViewId = this
-											.hasAttribute('keepViewId'), href = Greencode.getRealURLPath(hrefOriginal), data = {
-										__contentIsHtml: true
+									var done = false;
+									script.onload = script.onreadystatechange = function() {
+										if (!done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete")) {
+											done = true;
+											Greencode.executeEvent('scriptLoad', _data);
+											
+											script.onload = script.onreadystatechange = null;
+											if (head && script.parentNode) {
+												head.removeChild(script);
+											}
+											script = null;
+										}
 									};
 									
-									if (keepViewId)
-										data.viewId = viewId;
+									head.appendChild(script);
+								} else
+									window.eval(scriptElement.childTextConent());
+							}
+							
+							Greencode.core.processJSON(this, o);
+							
+							if (changeURL) {
+								if (history.pushState == null)
+									window.location.hash = "#!" + href;
+								else {
+									history.replaceState({
+										selector: appendTo
+									}, null, location.href);
+									history.pushState({
+										selector: appendTo
+									}, null, hrefOriginal);
 									
-									request = new Request(href, Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton());
+									tags = new Array();
+									delete Greencode.cache.tags[window.location.href];
+									Greencode.cache.tags[window.location.href] = tags;
 									
-									request.setMethodRequest('GET');
-									request.setCometType(Request.STREAMING);
-									request.reconnect(false);
-									request.jsonContentType(false);
-									
-									var _data = {
-										mainElement: o,
-										target: this,
-										appendToSelector: appendTo,
-										appendToElement: o,
-										empty: empty,
-										changeURL: changeURL,
-										keepViewId: keepViewId,
-										href: href
-									};
-									
-									if (Greencode.executeEvent('beforePageRequest', _data) !== false) {
-										var dataComplete = "";
-										request.send(data, function(data) {
-											dataComplete += data;
-										}, function(data) {
-											var tags = new Array();
-											
-											delete Greencode.cache.tags[window.location.href];
-											Greencode.cache.tags[window.location.href] = tags;
-											
-											for(var ii = -1; ++ii < o.childNodes.length;)
-												tags.push(o.childNodes[ii]);
-											
-											if (empty)
-												o.empty();
-											
-											dataComplete += data;
-											
-											o.insertAdjacentHTML('beforeEnd', dataComplete);
-											var scripts = o.querySelectorAll('script');
-											for(var s = -1; ++s < scripts.length;) {
-												var scriptElement = scripts[s];
-												if (scriptElement.src) {
-													var script = document.createElement('script'), head = document.getElementsByTagName("head")[0];
-													script.setAttribute("type", scriptElement.type ? scriptElement.type : "text/javascript");
-													script.setAttribute("src", scriptElement.src);
-													
-													var done = false;
-													script.onload = script.onreadystatechange = function() {
-														if (!done && (!this.readyState || this.readyState === "loaded" || this.readyState === "complete")) {
-															done = true;
-															Greencode.executeEvent('scriptLoad', _data);
-															
-															script.onload = script.onreadystatechange = null;
-															if (head && script.parentNode) {
-																head.removeChild(script);
-															}
-															script = null;
-														}
-													};
-													
-													head.appendChild(script);
-												} else
-													window.eval(scriptElement.childTextConent());
-											}
-											
-											Greencode.core.processJSON(this, o);
-											
-											if (changeURL) {
-												if (history.pushState == null)
-													window.location.hash = "#!" + href;
-												else {
-													history.replaceState({
-														selector: appendTo
-													}, null, location.href);
-													history.pushState({
-														selector: appendTo
-													}, null, hrefOriginal);
-													
-													tags = new Array();
-													delete Greencode.cache.tags[window.location.href];
-													Greencode.cache.tags[window.location.href] = tags;
-													
-													for(var ii = -1; ++ii < o.childNodes.length;)
-														tags.push(o.childNodes[ii]);
-												}
-											}
-											
-											Greencode.executeEvent('afterPageRequest', _data);
-											Greencode.executeEvent('pageLoad', _data);
-										});
-										request = null;
-									}
-									
-									return false;
-								});
+									for(var ii = -1; ++ii < o.childNodes.length;)
+										tags.push(o.childNodes[ii]);
+								}
+							}
+							
+							Greencode.executeEvent('afterPageRequest', _data);
+							Greencode.executeEvent('pageLoad', _data);
+						});
+						request = null;
+					}
+					
+					return false;
+				});
 			}
 		}
 		
