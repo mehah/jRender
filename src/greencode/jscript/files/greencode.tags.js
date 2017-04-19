@@ -162,7 +162,7 @@ Greencode.tags = {
 					
 					if (Greencode.executeEvent('beforePageRequest', _data) !== false) {
 						var dataComplete = "";
-						console.log(data)
+						
 						request.send(data, function(data) {
 							dataComplete += data;
 						}, function(data) {

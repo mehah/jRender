@@ -121,3 +121,12 @@ Greencode.util = {
 		return type === "array" || type !== "function" && (length === 0 || typeof length === "number" && length > 0 && (length - 1) in obj);
 	}
 };
+
+String.prototype.replaceAll = function(search, replacement, insensitive) {
+	var arg0 = 'g';
+	if(insensitive) {
+		arg0 += 'i';
+	}
+	
+    return this.replace(new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), arg0), replacement);
+};

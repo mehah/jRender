@@ -381,6 +381,8 @@ Greencode.core = {
 		if (!Greencode.jQuery.isArray(__jsonObject))
 			__jsonObject = [ __jsonObject ];
 		
+		Greencode.tags.process(mainElement);
+		
 		for( var i in __jsonObject) {
 			var jsonObject = __jsonObject[i];
 			
@@ -505,8 +507,6 @@ Greencode.core = {
 		}
 		
 		__jsonObject = null;
-		
-		Greencode.tags.process(mainElement);
 		
 		var res = mainElement.querySelectorAll('[msg\\:key]');
 		for(var i = -1; ++i < res.length;) {
