@@ -8,6 +8,10 @@ import greencode.jscript.dom.elements.attribute.WrapAttr;
 
 public class TextareaElement extends Element {
 		
+	protected TextareaElement(Window window, Class<?> typeValue) {
+		this(window);
+	}
+	
 	protected TextareaElement(Window window) { super(window, "textarea"); }
 
 	/**Only supported in HTML5.*/
