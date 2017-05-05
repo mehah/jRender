@@ -33,7 +33,7 @@ public final class GreenCodeConfig {
 	private final static String DEFAULT_CHARSET = "UTF-8";
 
 	static void load() throws IOException, ClassNotFoundException {
-		System.out.print("[" + Core.projectName + "] Setting Config Parameters ...");
+		System.out.print("[" + Core.PROJECT_NAME + "] Setting Config Parameters ...");
 		
 		InputStream configXml = Core.class.getClassLoader().getResourceAsStream("greencode.config.xml");
 
@@ -211,7 +211,7 @@ public final class GreenCodeConfig {
 				if(configs.containsKey(path))
 					return configs.get(path);
 
-				System.out.println(Core.defaultLogMsg + "Caching Database Config File: " + path);
+				System.out.println(Core.DEFAULT_LOG_MSG + "Caching Database Config File: " + path);
 
 				Document src = null;
 				try {

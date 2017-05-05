@@ -119,6 +119,23 @@ Greencode.util = {
 			return true;
 		
 		return type === "array" || type !== "function" && (length === 0 || typeof length === "number" && length > 0 && (length - 1) in obj);
+	},
+	getQueryStrings: function() {
+		var assoc = {};
+		var decode = function(s) {
+			return decodeURIComponent(s.replace(/\+/g, " "));
+		};
+		var queryString = location.search.substring(1);
+		var keyValues = queryString.split('&');
+		
+		for( var i in keyValues) {
+			var key = keyValues[i].split('=');
+			if (key.length > 1) {
+				assoc[decode(key[0])] = decode(key[1]);
+			}
+		}
+		
+		return assoc;
 	}
 };
 

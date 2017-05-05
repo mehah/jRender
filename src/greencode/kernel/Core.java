@@ -40,10 +40,10 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
+import org.apache.catalina.Context;
 import org.apache.catalina.connector.Request;
 import org.apache.catalina.connector.RequestFacade;
 import org.apache.tomcat.util.http.MimeHeaders;
-import org.apache.tomcat.websocket.WsRemoteEndpointBase;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -111,13 +111,8 @@ public final class Core implements Filter {
 		"greencode.core.js",
 	};
 	
-	final static String CONTEXT_PATH = null, projectName = null, defaultLogMsg = null, SRC_CORE_JS_FOR_SCRIPT_HTML = null;
-	final static Field
-		requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request"),
-		coyoteRequestField = GenericReflection.NoThrow.getDeclaredField(Request.class, "coyoteRequest"),
-		contextRequestField =  GenericReflection.NoThrow.getDeclaredField(Request.class, "context"),
-		headersField =  GenericReflection.NoThrow.getDeclaredField(org.apache.coyote.Request.class, "headers"),
-		baseRemoteField = GenericReflection.NoThrow.getDeclaredField(WsRemoteEndpointBase.class, "base");
+	final static String CONTEXT_PATH = null, PROJECT_NAME = null, DEFAULT_LOG_MSG = null, SRC_CORE_JS_FOR_SCRIPT_HTML = null;
+	final static Field requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request");
 
 	private HttpServletRequest request;
 	private HttpServletResponse response;
@@ -131,7 +126,7 @@ public final class Core implements Filter {
 			this.session = (HttpSession) config.getUserProperties().get("httpSession");
 
 			Request _request = (Request) GenericReflection.NoThrow.getValue(Core.requestField, this.request);
-			GenericReflection.NoThrow.setValue(contextRequestField, config.getUserProperties().get("context"), _request);
+			_request.setContext((Context) config.getUserProperties().get("context"));
 			
 			session.setMaxBinaryMessageBufferSize(GreenCodeConfig.Server.Request.Websocket.maxBinaryMessageSize);
 			session.setMaxTextMessageBufferSize(GreenCodeConfig.Server.Request.Websocket.maxTextMessageSize);
@@ -195,7 +190,7 @@ public final class Core implements Filter {
 		HttpServletRequest _request = ((HttpServletRequest) request);
 
 		final String servletPath = _request.getServletPath().substring(1);
-
+	
 		if (servletPath.equals("coreWebSocket")) {
 			request.setAttribute("httpResponse", response);
 		}
@@ -304,8 +299,6 @@ public final class Core implements Filter {
 						fh.registerRequestParameter("servletPath", servletPath);
 						
 						DOMScanner.registerExecution(new JSExecutor(context, "Greencode.exec", JSExecutor.TYPE.METHOD, fh));
-
-						context.getRequest().getViewSession().setAttribute("REQUEST_PARAMETERS", new HashMap<String, String[]>(context.request.getParameterMap()));
 						
 						throw new StopProcess();
 					}
@@ -565,12 +558,12 @@ public final class Core implements Filter {
 	}
 
 	public void init(FilterConfig fConfig) throws ServletException {
-		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "projectName", new File(fConfig.getServletContext().getRealPath("/")).getName());
-		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "defaultLogMsg", "[" + Core.projectName + "] ");
+		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "PROJECT_NAME", new File(fConfig.getServletContext().getRealPath("/")).getName());
+		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "DEFAULT_LOG_MSG", "[" + Core.PROJECT_NAME + "] ");
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "CONTEXT_PATH", fConfig.getServletContext().getContextPath());
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "SRC_CORE_JS_FOR_SCRIPT_HTML", Core.CONTEXT_PATH + "/jscript/greencode/core.js");
 
-		System.out.println("\nLoading Project: [" + projectName + "]");
+		System.out.println("\nLoading Project: [" + PROJECT_NAME + "]");
 
 		try {
 			try {
@@ -609,7 +602,7 @@ public final class Core implements Filter {
 
 			final ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-			System.out.print(defaultLogMsg + "Copying JavaScript Tools...");
+			System.out.print(DEFAULT_LOG_MSG + "Copying JavaScript Tools...");
 
 			File jScriptFolter = FileUtils.getFileInWebContent("jscript/");
 			if (!jScriptFolter.exists())
@@ -687,7 +680,7 @@ public final class Core implements Filter {
 			System.out.println(" [done]");
 			
 			if (GreenCodeConfig.Server.View.templatePaths != null) {
-				System.out.println(defaultLogMsg + "Caching Template(s)...");
+				System.out.println(DEFAULT_LOG_MSG + "Caching Template(s)...");
 
 				for (Entry<String, String> entry : GreenCodeConfig.Server.View.templatePaths.entrySet()) {
 					File f = FileUtils.getFileInWebContent(entry.getValue());
@@ -697,7 +690,7 @@ public final class Core implements Filter {
 
 					Cache.templates.put(entry.getKey(), f);
 
-					StringBuilder str = new StringBuilder(defaultLogMsg + "Template: " + entry.getValue());
+					StringBuilder str = new StringBuilder(DEFAULT_LOG_MSG + "Template: " + entry.getValue());
 					if (Cache.defaultTemplate == null && entry.getValue().equals(GreenCodeConfig.Server.View.defaultTemplatePath)) {
 						GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "defaultTemplate", f);
 						str.append(" (Default)");
@@ -707,7 +700,7 @@ public final class Core implements Filter {
 				}
 			}
 
-			System.out.print(defaultLogMsg + "Caching Classes...");
+			System.out.print(DEFAULT_LOG_MSG + "Caching Classes...");
 			Class<BootActionImplementation> classBootAction = null;
 			Class<DatabaseConnectionEvent> classDatabaseConnection = null;
 			List<Class<?>> classesTeste = PackageUtils.getClasses("/", true);
@@ -735,11 +728,11 @@ public final class Core implements Filter {
 			System.out.print(" [done]\n");
 
 			if (classDatabaseConnection != null) {
-				System.out.print(defaultLogMsg + "Initializing Database Connection Event ...");
+				System.out.print(DEFAULT_LOG_MSG + "Initializing Database Connection Event ...");
 				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "classDatabaseConnectionEvent", classDatabaseConnection);
 				System.out.println(" [done]");
 			} else {
-				System.out.print(defaultLogMsg + "Testing Database Connection ...");
+				System.out.print(DEFAULT_LOG_MSG + "Testing Database Connection ...");
 				DatabaseConnection db = new DatabaseConnection();
 				if (db.getConfig() != null) {
 					db.start();
@@ -749,7 +742,7 @@ public final class Core implements Filter {
 			}
 
 			if (classBootAction != null) {
-				System.out.print(defaultLogMsg + "Initializing Boot Action ...");
+				System.out.print(DEFAULT_LOG_MSG + "Initializing Boot Action ...");
 
 				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "bootAction", (BootActionImplementation) classBootAction.newInstance());
 
@@ -758,7 +751,7 @@ public final class Core implements Filter {
 			}
 
 			if (GreenCodeConfig.Server.Plugins.list != null) {
-				System.out.print(defaultLogMsg + "Initializing Plugins ...");
+				System.out.print(DEFAULT_LOG_MSG + "Initializing Plugins ...");
 
 				PluginImplementation[] list = new PluginImplementation[GreenCodeConfig.Server.Plugins.list.length];
 				for (int i = -1; ++i < list.length;) {
@@ -780,20 +773,20 @@ public final class Core implements Filter {
 
 	public void destroy() {
 		if (Cache.bootAction != null) {
-			System.out.print(defaultLogMsg + "Destroying BootAction...");
+			System.out.print(DEFAULT_LOG_MSG + "Destroying BootAction...");
 			Cache.bootAction.destroy();
 			System.out.print(" [done]\n");
 		}
 
 		if (Cache.plugins != null) {
-			System.out.print(defaultLogMsg + "Destroying Plugins...");
+			System.out.print(DEFAULT_LOG_MSG + "Destroying Plugins...");
 			for (PluginImplementation plugin : Cache.plugins)
 				plugin.destroy();
 			System.out.print(" [done]\n");
 		}
 
 		if (!greencode.http.$HttpRequest.getGlobalViewList().isEmpty()) {
-			System.out.print(defaultLogMsg + "Destroying " + greencode.http.$HttpRequest.getGlobalViewList().size() + " View(s)...");
+			System.out.print(DEFAULT_LOG_MSG + "Destroying " + greencode.http.$HttpRequest.getGlobalViewList().size() + " View(s)...");
 			while (!greencode.http.$HttpRequest.getGlobalViewList().isEmpty())
 				greencode.http.$HttpRequest.getGlobalViewList().get(0).invalidate();
 			System.out.print(" [done]\n");
@@ -804,7 +797,7 @@ public final class Core implements Filter {
 			Driver driver = drivers.nextElement();
 			try {
 				DriverManager.deregisterDriver(driver);
-				System.out.print(defaultLogMsg + String.format("Deregistering jdbc driver: %s\n", driver));
+				System.out.print(DEFAULT_LOG_MSG + String.format("Deregistering jdbc driver: %s\n", driver));
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}

@@ -103,7 +103,7 @@ var Request = function(url, type, isSingleton) {
 	var websocket_url = "ws://" + window.location.host + Greencode.CONTEXT_PATH + "/coreWebSocket";
 	
 	this.send = function(p, c1, c2) {
-		data = p != null ? p : {};
+		data = Greencode.jQuery.extend(Greencode.util.getQueryStrings(), p != null ? p : {});
 		data.__contentIsHtml = !jsonContentType;
 		
 		var isAutoDetection = type == 'auto';
