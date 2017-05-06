@@ -43,7 +43,7 @@ Element.prototype.childTextConent = function(v) {
 			this.textContent = v;
 		return this;
 	}
-	
+
 	return this.innerText || this.textContent;
 };
 
@@ -63,7 +63,8 @@ Element.prototype.getStyle = function(styleProp) {
 		value = this.currentStyle[styleProp];
 		if (/^\d+(em|pt|%|ex)?$/i.test(value)) {
 			return (function(value) {
-				var oldLeft = this.style.left, oldRsLeft = this.runtimeStyle.left;
+				var oldLeft = this.style.left,
+					oldRsLeft = this.runtimeStyle.left;
 				this.runtimeStyle.left = this.currentStyle.left;
 				this.style.left = value || 0;
 				value = this.style.pixelLeft + "px";
@@ -98,13 +99,15 @@ Element.prototype.replaceWith = function(e) {
 };
 
 Element.prototype.replaceWithPageURL = function(url, viewId, cid) {
-	var This = this, request = new Request(Greencode.getRealURLPath(url), Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton()), first = false;
-	
+	var This = this,
+		request = new Request(Greencode.getRealURLPath(url), Greencode.EVENT_REQUEST_TYPE, Greencode.isRequestSingleton()),
+		first = false;
+
 	request.setMethodRequest("POST");
 	request.setCometType(Request.STREAMING);
 	request.reconnect(false);
 	request.jsonContentType(false);
-	
+
 	var f = function(data) {
 		if (data) {
 			if (!first) {
@@ -115,7 +118,7 @@ Element.prototype.replaceWithPageURL = function(url, viewId, cid) {
 			Greencode.core.processJSON(this, This);
 		}
 	};
-	
+
 	request.send({
 		cid: cid,
 		viewId: viewId
@@ -126,7 +129,7 @@ Element.prototype.replaceWithPageURL = function(url, viewId, cid) {
 		};
 		Greencode.executeEvent('pageLoad', _data);
 	});
-	
+
 	request = null;
 	return this;
 };
@@ -141,7 +144,7 @@ Element.prototype.resetForm = function() {
 };
 
 Element.prototype.empty = function() {
-	for(var ii = -1; ++ii < this.childNodes.length;) {
+	for (var ii = -1; ++ii < this.childNodes.length;) {
 		var c = this.childNodes[ii];
 		c.parentNode.removeChild(c);
 		--ii;
@@ -160,34 +163,34 @@ Element.prototype.getParentByTagName = function(tagName) {
 		if (parent.tagName == tagName.toUpperCase())
 			return parent;
 	}
-	
+
 	return null;
 };
 
 Element.prototype.fillForm = function(a) {
-	for( var i in a) {
+	for (var i in a) {
 		var o = a[i];
-		
+
 		var elements = this.querySelectorAll('[name="' + o.name + '"]');
 		if (elements.length == 0)
 			continue;
-		
+
 		if (!Greencode.jQuery.isArray(o.values))
-			o.values = [ o.values ];
-		
+			o.values = [o.values];
+
 		var first = elements[0];
-		
+
 		var container = first.getParentByTagName('container');
 		if (container != null && container != this)
 			continue;
-		
+
 		if (first.tagName == 'TEXTAREA')
 			first.value = o.values;
 		else if (first.tagName == 'SELECT') {
-			for(var i2 = -1; ++i2 < first.options.length;) {
+			for (var i2 = -1; ++i2 < first.options.length;) {
 				var option = first.options[i2];
 				if (first.multiple) {
-					for( var i3 in o.values) {
+					for (var i3 in o.values) {
 						if (option.value == o.values[i3]) {
 							option.selected = true;
 							break;
@@ -201,14 +204,14 @@ Element.prototype.fillForm = function(a) {
 		} else if (first.tagName == 'INPUT') {
 			var isRadio = first.type == 'radio';
 			if (isRadio || first.type == 'checkbox') {
-				for(var i2 = -1; ++i2 < elements.length;) {
+				for (var i2 = -1; ++i2 < elements.length;) {
 					var e = elements[i2];
 					container = e.getParentByTagName('container');
 					if (container != null && container != this)
 						continue;
-					
+
 					var achou = false;
-					for( var i3 in o.values) {
+					for (var i3 in o.values) {
 						if (e.value == o.values[i3] + "") {
 							e.checked = true;
 							if (isRadio) {
@@ -216,7 +219,7 @@ Element.prototype.fillForm = function(a) {
 								break;
 							}
 						}
-						
+
 						if (achou)
 							break;
 					}
@@ -225,19 +228,19 @@ Element.prototype.fillForm = function(a) {
 				first.value = o.values[0];
 		}
 	}
-	
+
 	return this;
 };
 
 Element.prototype.getClosestChildrenByTagName = function(tagName, attrFilter) {
 	var list = new Array();
 	var search = function(e) {
-		for(var i = -1; ++i < e.children.length;) {
+		for (var i = -1; ++i < e.children.length;) {
 			var child = e.children[i];
 			if (child.tagName == tagName.toUpperCase()) {
 				var push = true;
 				if (attrFilter != null) {
-					for( var attr in attrFilter) {
+					for (var attr in attrFilter) {
 						var value = attrFilter[attr];
 						if (!((value === true || value === false) && child.hasAttribute(attr) == value || child.getAttribute(attr) == value)) {
 							push = false;
@@ -250,7 +253,7 @@ Element.prototype.getClosestChildrenByTagName = function(tagName, attrFilter) {
 					continue;
 				}
 			}
-			
+
 			search(child);
 		}
 	};
@@ -261,9 +264,10 @@ Element.prototype.getClosestChildrenByTagName = function(tagName, attrFilter) {
 Element.prototype.getAllDataElements = function(param) {
 	if (!param)
 		param = {};
-	for(var i = -1; ++i < this.children.length;) {
-		var tag = this.children[i], lastParam = param;
-		if ([ 'INPUT', 'SELECT', 'TEXTAREA' ].indexOf(tag.tagName) > -1) {
+	for (var i = -1; ++i < this.children.length;) {
+		var tag = this.children[i],
+			lastParam = param;
+		if (['INPUT', 'SELECT', 'TEXTAREA'].indexOf(tag.tagName) > -1) {
 			if (tag.tagName === 'INPUT' && tag.type === 'radio' || tag.type === 'checkbox') {
 				var list = param[tag.name];
 				if (!list) {
@@ -285,7 +289,7 @@ Element.prototype.getAllDataElements = function(param) {
 		}
 		tag.getAllDataElements(lastParam);
 	}
-	
+
 	return param;
 };
 

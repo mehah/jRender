@@ -9,7 +9,7 @@ var Greencode = {
 		tags: {},
 		generateUID: function() {
 			while (this.references[++this.lastUID])
-				;
+			;
 			return this.lastUID;
 		},
 		getById: function(id, mainElement) {
@@ -23,7 +23,7 @@ var Greencode = {
 				return document.head;
 			else if (id === Greencode.BODY_ID)
 				return document.body;
-			
+
 			return this.references[id];
 		},
 		register: function(uid, o) {
@@ -31,11 +31,11 @@ var Greencode = {
 				o = uid;
 				if (uid = o.getAttribute('uid'))
 					return parseInt(uid);
-				
+
 				uid = Greencode.cache.generateUID();
 				o.setAttribute('uid', uid);
 			}
-			
+
 			this.references[uid] = o;
 			return uid;
 		},
@@ -54,10 +54,10 @@ var Greencode = {
 			var _url = window.location.pathname.substring(Greencode.CONTEXT_PATH.length + 1);
 			var folders = _url.substring(0, _url.lastIndexOf('/') + 1);
 			url = folders + url;
-			
+
 			if (url.indexOf('../') != -1) {
 				folders = url.split('/');
-				for(var i = -1; ++i < folders.length;) {
+				for (var i = -1; ++i < folders.length;) {
 					var folder = folders[i];
 					if (folder === '..') {
 						folders.splice(--i, 2);
@@ -67,7 +67,7 @@ var Greencode = {
 				url = folders.join('/');
 			}
 		}
-		
+
 		return url;
 	}
 };
