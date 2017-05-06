@@ -16,10 +16,8 @@ import java.nio.charset.Charset;
 
 import javax.servlet.http.Part;
 
-import greencode.kernel.GreenContext;
-
 public final class FileUtils {
-	private static final String pathWebContent = GreenContext.class.getClassLoader().getResource("").getPath()+"../../";
+	private static final String PROJECT_CONTENT_PATH = null;
 	
 	private FileUtils() {}
 	
@@ -118,7 +116,7 @@ public final class FileUtils {
 	}
 	
 	public static File getFileInWebContent(String end) {
-		return new File(pathWebContent+end);
+		return new File(PROJECT_CONTENT_PATH+end);
 	}
 	
 	public interface FileRead {

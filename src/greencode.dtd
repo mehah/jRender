@@ -19,6 +19,7 @@
 			<!ATTLIST multipart maxRequestSize CDATA "-1">
 			
 		<!ELEMENT websocket EMPTY>
+			<!ATTLIST websocket port CDATA #REQUIRED>
 			<!ATTLIST websocket maxTextMessageSize CDATA #REQUIRED>
 			<!ATTLIST websocket maxBinaryMessageSize CDATA #REQUIRED>
 			<!ATTLIST websocket maxIdleTimeout CDATA #REQUIRED>

@@ -10,7 +10,7 @@
 		-->
 		<request type="auto" methodType="get">
 			<multipart autodectetion="false" maxRequestSize="2097152" />
-			<websocket maxTextMessageSize="8192" maxBinaryMessageSize="8192" maxIdleTimeout="0" />
+			<websocket port="" maxTextMessageSize="8192" maxBinaryMessageSize="8192" maxIdleTimeout="0" />
 		</request>
 
 		<!--

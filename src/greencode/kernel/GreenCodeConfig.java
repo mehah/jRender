@@ -66,6 +66,10 @@ public final class GreenCodeConfig {
 				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Multipart.class, "maxRequestSize", Integer.parseInt(subCurrentElement.attr("maxRequestSize").trim()));
 				
 				subCurrentElement = currentElement.getElementsByTag("websocket").first();
+				String port = subCurrentElement.attr("port").trim();
+				if(!port.isEmpty()) {
+					GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Websocket.class, "port", Integer.parseInt(subCurrentElement.attr("port").trim()));
+				}
 				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Websocket.class, "maxTextMessageSize", Integer.parseInt(subCurrentElement.attr("maxTextMessageSize").trim()));
 				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Websocket.class, "maxBinaryMessageSize", Integer.parseInt(subCurrentElement.attr("maxBinaryMessageSize").trim()));
 				GenericReflection.NoThrow.setFinalStaticValue(Server.Request.Websocket.class, "maxIdleTimeout", Long.parseLong(subCurrentElement.attr("maxIdleTimeout").trim()));
@@ -172,6 +176,7 @@ public final class GreenCodeConfig {
 			}
 			
 			public final static class Websocket {
+				public final static Integer port = null;
 				public final static Integer maxTextMessageSize = null;
 				public final static Integer maxBinaryMessageSize = null;
 				public final static Long maxIdleTimeout = null;

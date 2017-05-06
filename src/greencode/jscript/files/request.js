@@ -100,8 +100,8 @@ var Request = function(url, type, isSingleton) {
 		}, 1);
 	};
 	
-	var websocket_url = "ws://" + window.location.host + Greencode.CONTEXT_PATH + "/coreWebSocket";
-	
+	var port = window.location.port || Greencode.WEBSOCKET_PORT;
+	var websocket_url = "ws://" + window.location.hostname + (port ? ":"+port : "") + Greencode.CONTEXT_PATH + "/coreWebSocket";
 	this.send = function(p, c1, c2) {
 		data = Greencode.jQuery.extend(Greencode.util.getQueryStrings(), p != null ? p : {});
 		data.__contentIsHtml = !jsonContentType;

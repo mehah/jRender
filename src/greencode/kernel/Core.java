@@ -562,9 +562,10 @@ public final class Core implements Filter {
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "DEFAULT_LOG_MSG", "[" + Core.PROJECT_NAME + "] ");
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "CONTEXT_PATH", fConfig.getServletContext().getContextPath());
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "SRC_CORE_JS_FOR_SCRIPT_HTML", Core.CONTEXT_PATH + "/jscript/greencode/core.js");
-
-		System.out.println("\nLoading Project: [" + PROJECT_NAME + "]");
-
+		GenericReflection.NoThrow.setFinalStaticValue(FileUtils.class, "PROJECT_CONTENT_PATH", fConfig.getServletContext().getRealPath(""));
+		
+		System.out.println("\nLoading Project: [" + PROJECT_NAME + "]");		
+		
 		try {
 			try {
 				GreenCodeConfig.load();
@@ -634,6 +635,7 @@ public final class Core implements Filter {
 				json.addProperty("DEBUG_LOG", GreenCodeConfig.Browser.debugLog);
 				json.addProperty("EVENT_REQUEST_TYPE", GreenCodeConfig.Server.Request.type);
 				json.addProperty("REQUEST_SINGLETON", GreenCodeConfig.Browser.websocketSingleton);
+				json.addProperty("WEBSOCKET_PORT", GreenCodeConfig.Server.Request.Websocket.port);
 				
 				for (UIDReference uid : UIDReference.values()) {
 					json.addProperty(uid.name(), uid.ordinal());
