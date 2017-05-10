@@ -293,19 +293,19 @@ Element.prototype.getAllDataElements = function(param) {
 	return param;
 };
 
-Element.prototype.prepend = function(node) {
+Element.prototype.prependChild = function(node) {
 	this.insertBefore(node, this.firstChild);
 	return node;
 };
 
-Element.prototype.appendAfter = function(node) {
+Element.prototype.appendChildAfter = function(node) {
 	if (this.parentNode) {
 		this.parentNode.insertBefore(node, this.nextSibling);
 	}
 	return node;
 };
 
-Element.prototype.appendBefore = function(node) {
+Element.prototype.appendChildBefore = function(node) {
 	if (this.parentNode) {
 		this.parentNode.insertBefore(node, this);
 	}

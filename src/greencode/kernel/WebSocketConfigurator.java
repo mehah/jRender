@@ -2,6 +2,7 @@ package greencode.kernel;
 
 import java.lang.reflect.Field;
 import java.util.Enumeration;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.websocket.HandshakeResponse;
@@ -15,7 +16,6 @@ import org.apache.tomcat.websocket.server.WsHandshakeRequest;
 import greencode.util.GenericReflection;
 
 public class WebSocketConfigurator extends ServerEndpointConfig.Configurator {
-
 	private final static Field
 		_HandshakeRequest = GenericReflection.NoThrow.getDeclaredField(WsHandshakeRequest.class, "request");
 
@@ -31,13 +31,15 @@ public class WebSocketConfigurator extends ServerEndpointConfig.Configurator {
 			mime.addValue(param).setString(_requestFaced.getHeader(param));
 		}
 		
-		config.getUserProperties().put("httpRequest", _request);
-		config.getUserProperties().put("httpResponse", _request.getAttribute("httpResponse"));
-		config.getUserProperties().put("httpSession", _request.getSession());
-		config.getUserProperties().put("context", _requestFaced.getContext());
-		config.getUserProperties().put("headers", mime);
-		config.getUserProperties().put("remoteHost", _request.getRemoteHost());
-		config.getUserProperties().put("localPort", _request.getLocalPort());		
-		config.getUserProperties().put("remoteAddr", _request.getRemoteAddr());
+		Map<String, Object> properties = config.getUserProperties();
+		
+		properties.put("httpRequest", _request);
+		properties.put("httpResponse", _request.getAttribute("httpResponse"));
+		properties.put("httpSession", _request.getSession());
+		properties.put("context", _requestFaced.getContext());
+		properties.put("headers", mime);
+		properties.put("remoteHost", _request.getRemoteHost());
+		properties.put("localPort", _request.getLocalPort());		
+		properties.put("remoteAddr", _request.getRemoteAddr());
 	}
 }

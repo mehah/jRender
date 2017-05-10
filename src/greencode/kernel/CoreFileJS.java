@@ -1,11 +1,14 @@
 package greencode.kernel;
 
+import greencode.jscript.dom.event.Events.Greencode;
 import greencode.util.FileUtils;
 import greencode.util.FileUtils.FileRead;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+
+import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 
 public final class CoreFileJS {
 	private final StringBuilder core;
@@ -34,6 +37,12 @@ public final class CoreFileJS {
 	}
 	
 	public void save() throws IOException {
-		FileUtils.createFile(core.toString(), greencodePath+"/core.js");
+		String content = core.toString();
+		if(GreenCodeConfig.Server.View.useMinified) {
+			HtmlCompressor html = new HtmlCompressor();
+			html.setRemoveIntertagSpaces(true);
+			content = html.compress(content);
+		}
+		FileUtils.createFile(content, greencodePath+"/core.js");
 	}
 }

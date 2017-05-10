@@ -29,18 +29,34 @@ public abstract class ECustomFunction extends Node {
 		DOMHandle.execCommand(this, "removeClass", className);
 	}
 
-	public Node prepend(Node node) {
-		DOMHandle.execCommand(this, "prepend", node);
+	public Node prependChild(Node node) {
+		DOMHandle.execCommand(this, "prependChild", node);
+		return node;
+	}
+	
+	public void prependChild(String html) {
+		insertAdjacentHTML("afterbegin", html);
+	}
+	
+	public void appendChild(String html) {
+		insertAdjacentHTML("beforeend", html);
+	}
+
+	public Node appendChildBefore(Node node) {
+		DOMHandle.execCommand(this, "appendChildBefore", node);
 		return node;
 	}
 
-	public Node appendBefore(Node node) {
-		DOMHandle.execCommand(this, "appendBefore", node);
+	public Node appendChildAfter(Node node) {
+		DOMHandle.execCommand(this, "appendChildAfter", node);
 		return node;
 	}
-
-	public Node appendAfter(Node node) {
-		DOMHandle.execCommand(this, "appendAfter", node);
-		return node;
+	
+	public void appendChildBefore(String html) {
+		insertAdjacentHTML("beforebegin", html);
+	}
+	
+	public void appendChildAfter(String html) {
+		insertAdjacentHTML("afterend", html);
 	}
 }

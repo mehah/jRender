@@ -229,23 +229,21 @@ public final class GreenContext {
 	}
 	
 	void destroy() {
-		if(this.webSocketData != null) {
-			try {
-				if(GreenCodeConfig.Browser.websocketSingleton) {
+		try {
+			if(this.webSocketData != null) {
+				if(!GreenCodeConfig.Browser.websocketSingleton) {
+					this.webSocketData.session.close();					
+				} else if(this.webSocketData.session.isOpen()) {
 					this.webSocketData.session.getBasicRemote().sendText(DOMScanner.getCloseEventId(webSocketData));
-				}else
-					this.webSocketData.session.close();
-			} catch (Exception e) {
-				e.printStackTrace();
+				}
 			}
-		}
+		} catch (Exception e) { e.printStackTrace(); }
 		
 		if(this.databaseConnection != null) {
 			try {
 				this.databaseConnection.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			} finally {
+			} catch (SQLException e) { e.printStackTrace(); }
+			finally {
 				this.databaseConnection = null;
 			}
 		}
@@ -259,6 +257,7 @@ public final class GreenContext {
 		this.listAttrSyncCache = null;
 		this.destroyed = true;
 		
+		greenContext.get().clear();
 		greenContext.remove();
 	}
 }

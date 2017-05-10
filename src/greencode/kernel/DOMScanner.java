@@ -88,6 +88,12 @@ public class DOMScanner {
 	}
 
 	private static void send(GreenContext context, Object o, Gson gson) throws IOException {
+		final boolean isWebSocket = context.request.isWebSocket();
+		
+		if(isWebSocket && !context.request.getWebSocketSession().isOpen()) {
+			return;
+		}
+		
 		final StringBuilder json = new StringBuilder();
 		if (o != null) {
 			try {
@@ -99,7 +105,7 @@ public class DOMScanner {
 			}
 		}
 
-		if (context.request.isWebSocket()) {
+		if (isWebSocket) {
 			Basic basicRemote = context.request.getWebSocketSession().getBasicRemote();
 			if (greencode.http.$HttpRequest.contentIsHtml(context.request)) {
 				json.insert(0, "<json style=\"display: none;\">").append("</json>");
@@ -118,8 +124,9 @@ public class DOMScanner {
 					}
 				}
 			}
-		} else
-			context.response.getWriter().write(json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());
+		} else {
+			context.response.getWriter().write(json.insert(0, "<json style=\"display: none;\">").append("</json>").toString());	
+		}
 	}
 	
 	static void synchronize(final String servletPath, final HttpServletRequest httpServletRequest, ServletResponse response, final WebSocketData webSocketData) throws IOException {
