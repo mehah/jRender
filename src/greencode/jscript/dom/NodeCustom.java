@@ -3,8 +3,8 @@ package greencode.jscript.dom;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.dom.elements.SelectElementPrototype;
 
-public abstract class ECustomFunction extends Node {
-	protected ECustomFunction(Window window) {
+public abstract class NodeCustom extends EventTarget {
+	protected NodeCustom(Window window) {
 		super(window);
 	}
 
@@ -15,31 +15,17 @@ public abstract class ECustomFunction extends Node {
 		}
 	}
 
-	public Element getElementOrCreateByTagName(String tagName) {
-		Element e = new Element(greencode.jscript.$DOMHandle.getWindow(this));
-		DOMHandle.registerReturnByCommand(this, e, "getElementOrCreateByTagName", tagName);
-		return e;
-	}
-
-	public void addClass(String className) {
-		DOMHandle.execCommand(this, "addClass", className);
-	}
-
-	public void removeClass(String className) {
-		DOMHandle.execCommand(this, "removeClass", className);
-	}
-
 	public Node prependChild(Node node) {
 		DOMHandle.execCommand(this, "prependChild", node);
 		return node;
 	}
 	
 	public void prependChild(String html) {
-		insertAdjacentHTML("afterbegin", html);
+		((Node)this).insertAdjacentHTML("afterbegin", html);
 	}
 	
 	public void appendChild(String html) {
-		insertAdjacentHTML("beforeend", html);
+		((Node)this).insertAdjacentHTML("beforeend", html);
 	}
 
 	public Node appendChildBefore(Node node) {
@@ -53,10 +39,10 @@ public abstract class ECustomFunction extends Node {
 	}
 	
 	public void appendChildBefore(String html) {
-		insertAdjacentHTML("beforebegin", html);
+		((Node)this).insertAdjacentHTML("beforebegin", html);
 	}
 	
 	public void appendChildAfter(String html) {
-		insertAdjacentHTML("afterend", html);
+		((Node)this).insertAdjacentHTML("afterend", html);
 	}
 }

@@ -15,4 +15,5 @@ public @interface ElementValue {
 	public Validator[] validators() default {};
 	public Class<? extends Converter>[] converters() default {};
 	public boolean trim() default false;
+	public boolean removeMultipleSpaces() default false;
 }

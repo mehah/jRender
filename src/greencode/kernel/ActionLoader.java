@@ -37,55 +37,64 @@ final class ActionLoader {
 	static void process(final GreenContext context, final HttpAction controller, final Method requestMethod) throws UnsupportedEncodingException, IllegalArgumentException, IllegalAccessException, SecurityException, InvocationTargetException, NoSuchMethodException {
 		Field[] fields = GenericReflection.getDeclaredFieldsByConditionId(controller.getClass(), "httpAction:annotations");
 
-		if(fields == null)
+		if (fields == null)
 			fields = GenericReflection.getDeclaredFieldsByCondition(controller.getClass(), "httpAction:annotations", conditionAnnotationField, true);
 
-		for(Field f: fields) {
+		for (Field f : fields) {
 			Class<?> fieldType = f.getType();
-			if(f.isAnnotationPresent(In.class)) {
+			if (f.isAnnotationPresent(In.class)) {
 				In in = f.getAnnotation(In.class);
 
 				final boolean isDiffConversation = in.conversationId() != Conversation.CURRENT && in.conversationId() != context.getRequest().getConversationId();
 
 				Conversation conversation = isDiffConversation ? greencode.http.$Conversation.getInstance(context.getRequest(), in.conversationId()) : context.getRequest().getConversation();
 
-				if(ClassUtils.isParent(fieldType, Window.class)) {
+				if (ClassUtils.isParent(fieldType, Window.class)) {
 					f.set(controller, in.create() ? WindowHandle.getInstance((Class<Window>) fieldType, conversation) : greencode.jscript.dom.$Window.getMap(conversation).get(fieldType));
 				}
-			} else if(f.isAnnotationPresent(RequestParameter.class)) {
-				if(ClassUtils.isPrimitiveOrWrapper(fieldType)) {
-					String parametro = ((RequestParameter) f.getAnnotation(RequestParameter.class)).value();
+			} else if (f.isAnnotationPresent(RequestParameter.class)) {
+				if (ClassUtils.isPrimitiveOrWrapper(fieldType)) {
+					RequestParameter requestParameterAnnotation = f.getAnnotation(RequestParameter.class);
+					String parametro = requestParameterAnnotation.value();
 
-					if(parametro.isEmpty())
+					if (parametro.isEmpty())
 						parametro = f.getName();
 
 					Object value = context.request.getParameter(parametro);
-					if(value != null) {
+					if (value != null) {
 						value = fieldType.equals(String.class) ? StringUtils.toCharset((String) value, GreenCodeConfig.Server.View.charset) : GenericReflection.getDeclaredMethod(ClassUtils.toWrapperClass(fieldType), "valueOf", String.class).invoke(null, context.request.getParameter(parametro));
+
+						if (requestParameterAnnotation.trim())
+							value = ((String) value).trim();
+
+						if (requestParameterAnnotation.removeMultipleSpaces())
+							value = StringUtils.removeMultipleSpaces(((String) value));
+
 						f.set(controller, value);
-					} else
+					} else {
 						f.set(controller, ClassUtils.getDefaultValue(fieldType));
-				}/*
-				 * TODO: Verificar se será necessário isso no futuro. else
-				 * f.set(controller,
-				 * HttpParameter.Context.getObjectRequest(context
-				 * .request.getParameter(parametro)));
-				 */
-			} else if(f.isAnnotationPresent(SessionAttribute.class))
+					}
+				} /*
+					 * TODO: Verificar se será necessário isso no futuro. else
+					 * f.set(controller,
+					 * HttpParameter.Context.getObjectRequest(context
+					 * .request.getParameter(parametro)));
+					 */
+			} else if (f.isAnnotationPresent(SessionAttribute.class))
 				f.set(controller, context.request.getSession().getAttribute(f.getName()));
-			else if(f.isAnnotationPresent(ViewSessionAttribute.class))
+			else if (f.isAnnotationPresent(ViewSessionAttribute.class))
 				f.set(controller, context.request.getViewSession().getAttribute(f.getName()));
-			else if(f.isAnnotationPresent(ConversationAttribute.class))
+			else if (f.isAnnotationPresent(ConversationAttribute.class))
 				f.set(controller, context.request.getConversation().getAttribute(f.getName()));
-			else if(f.isAnnotationPresent(UserPrincipal.class))
+			else if (f.isAnnotationPresent(UserPrincipal.class))
 				f.set(controller, context.request.getUserPrincipal());
 		}
 
-		if(requestMethod.isAnnotationPresent(Validate.class)) {
+		if (requestMethod.isAnnotationPresent(Validate.class)) {
 			DataValidation data = new DataValidation(context, requestMethod.getAnnotation(Validate.class));
 
 			String classNameBootAction = null;
-			if(Cache.bootAction != null) {
+			if (Cache.bootAction != null) {
 				classNameBootAction = Cache.bootAction.getClass().getSimpleName();
 				Console.log("Calling BeforeValidation: [" + classNameBootAction + "]");
 				Cache.bootAction.beforeValidation(data);
@@ -93,7 +102,7 @@ final class ActionLoader {
 
 			greencode.kernel.Validate.validate(context, requestMethod, context.requestedForm, null, data);
 
-			if(Cache.bootAction != null) {
+			if (Cache.bootAction != null) {
 				Console.log("Calling AfterValidation: [" + classNameBootAction + "]");
 				Cache.bootAction.afterValidation(context.requestedForm, data);
 			}
@@ -105,17 +114,20 @@ final class ActionLoader {
 
 	public static DatabaseConnectionEvent connection(GreenContext context, Method requestMethod) throws SQLException, InstantiationException, IllegalAccessException {
 		DatabaseConnectionEvent databaseConnectionEvent = null;
-		if(requestMethod.isAnnotationPresent(Connection.class)) {
+		if (requestMethod.isAnnotationPresent(Connection.class)) {
 			Connection cA = requestMethod.getAnnotation(Connection.class);
-			if(Cache.classDatabaseConnectionEvent == null) {
+			if (Cache.classDatabaseConnectionEvent == null) {
 				Database.startConnection(context, cA);
-				
+
 				context.getDatabaseConnection().setAutoCommit(GreenCodeConfig.Server.DataBase.autocommit);
-				if(!GreenCodeConfig.Server.DataBase.autocommit) {
+				if (!GreenCodeConfig.Server.DataBase.autocommit) {
 					databaseConnectionEvent = new DatabaseConnectionEvent() {
-						public void onSuccess(GreenContext context) {}
-						public void beforeRequest(GreenContext context, Connection connection) {}
-						
+						public void onSuccess(GreenContext context) {
+						}
+
+						public void beforeRequest(GreenContext context, Connection connection) {
+						}
+
 						public void onError(GreenContext context, Exception e) {
 							try {
 								context.getDatabaseConnection().rollback();
@@ -123,21 +135,21 @@ final class ActionLoader {
 								throw new RuntimeException(e1);
 							}
 						}
-						
+
 						public void afterRequest(GreenContext context) {
 							try {
-								if(greencode.database.$DatabaseConnection.hasError(context.getDatabaseConnection())) {
+								if (greencode.database.$DatabaseConnection.hasError(context.getDatabaseConnection())) {
 									context.getDatabaseConnection().rollback();
 								} else {
 									context.getDatabaseConnection().commit();
-								}								
+								}
 							} catch (SQLException e) {
 								throw new RuntimeException(e);
 							}
 						}
 					};
 				}
-				
+
 			} else {
 				databaseConnectionEvent = (DatabaseConnectionEvent) Cache.classDatabaseConnectionEvent.newInstance();
 				databaseConnectionEvent.beforeRequest(context, cA);

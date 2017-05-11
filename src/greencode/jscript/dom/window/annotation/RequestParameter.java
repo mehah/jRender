@@ -9,4 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface RequestParameter {
 	public String value() default "";
+	public boolean trim() default false;
+	public boolean removeMultipleSpaces() default false;
 }

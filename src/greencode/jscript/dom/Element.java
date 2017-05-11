@@ -4,7 +4,7 @@ import greencode.http.Conversation;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.dom.window.annotation.Page;
 import greencode.kernel.GreenContext;
-public class Element extends ECustomFunction {
+public class Element extends ElementCustom {
 	
 	protected Element(Window window) { super(window); }
 	protected Element(Window window, String tagName) { super(window); DOMHandle.setVariableValue(this, "tagName", tagName); }

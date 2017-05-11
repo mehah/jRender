@@ -3,11 +3,11 @@ package greencode.jscript.dom;
 import greencode.jscript.DOMHandle;
 import greencode.util.GenericReflection;
 
-public class Node extends EventTarget {
+public class Node extends NodeCustom {
 	
 	protected Node(Window window) { super(window); }
 	
-	public Node appendChild(Node node) {
+	public<N extends Node> N appendChild(N node) {
 		DOMHandle.execCommand(this, "appendChild", node);
 		return node;
 	}

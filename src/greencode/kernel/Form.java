@@ -149,6 +149,9 @@ final class Form {
 								if(_value instanceof String) {
 									if(element.trim())
 										_value = ((String) _value).trim();
+									
+									if(element.removeMultipleSpaces())
+										_value = StringUtils.removeMultipleSpaces(((String) _value));
 
 									if(METHOD_TYPE_IS_GET)
 										_value = StringUtils.toCharset((String) _value, GreenCodeConfig.Server.View.charset);
@@ -180,6 +183,9 @@ final class Form {
 							if(valor instanceof String) {
 								if(element.trim())
 									valor = ((String) valor).trim();
+								
+								if(element.removeMultipleSpaces())
+									valor = StringUtils.removeMultipleSpaces(((String) valor));
 
 								if(METHOD_TYPE_IS_GET)
 									valor = StringUtils.toCharset((String) valor, GreenCodeConfig.Server.View.charset);

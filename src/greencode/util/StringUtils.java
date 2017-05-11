@@ -22,6 +22,10 @@ public final class StringUtils {
 		return list;
 	}
 	
+	public final static String removeMultipleSpaces(String text) {
+		return text.replaceAll("\\s+", " ");
+	}
+	
 	public static boolean isEmpty(String str) { return str == null || str.length() == 0; }
 	
 	/* Java Commons */

@@ -143,15 +143,6 @@ Element.prototype.resetForm = function() {
 	return this;
 };
 
-Element.prototype.empty = function() {
-	for (var ii = -1; ++ii < this.childNodes.length;) {
-		var c = this.childNodes[ii];
-		c.parentNode.removeChild(c);
-		--ii;
-	}
-	return this;
-};
-
 Element.prototype.getElementOrCreateByTagName = function(tagName) {
 	var list = this.querySelector(tagName);
 	return list.length == 0 ? this.appendChild(document.createElement(tagName)) : list[0];
@@ -293,19 +284,28 @@ Element.prototype.getAllDataElements = function(param) {
 	return param;
 };
 
-Element.prototype.prependChild = function(node) {
+Node.prototype.empty = function() {
+	for (var ii = -1; ++ii < this.childNodes.length;) {
+		var c = this.childNodes[ii];
+		c.parentNode.removeChild(c);
+		--ii;
+	}
+	return this;
+};
+
+Node.prototype.prependChild = function(node) {
 	this.insertBefore(node, this.firstChild);
 	return node;
 };
 
-Element.prototype.appendChildAfter = function(node) {
+Node.prototype.appendChildAfter = function(node) {
 	if (this.parentNode) {
 		this.parentNode.insertBefore(node, this.nextSibling);
 	}
 	return node;
 };
 
-Element.prototype.appendChildBefore = function(node) {
+Node.prototype.appendChildBefore = function(node) {
 	if (this.parentNode) {
 		this.parentNode.insertBefore(node, this);
 	}
