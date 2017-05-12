@@ -237,4 +237,8 @@ public class Element extends ElementCustom {
 	public void focus() { DOMHandle.execCommand(this, "focus"); }
 	
 	public void remove() { DOMHandle.execCommand(this, "remove"); }
+	
+	public void insertAdjacentHTML(String position, String text, Object... args) {
+		DOMHandle.execCommand(this, "insertAdjacentHTML", position, text, args.length > 0 ? args : null);
+	}
 }

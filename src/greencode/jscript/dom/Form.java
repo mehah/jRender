@@ -6,6 +6,7 @@ import java.util.Map;
 
 import greencode.exception.GreencodeError;
 import greencode.http.enumeration.RequestMethod;
+import greencode.jscript.DOM;
 import greencode.jscript.DOMHandle;
 import greencode.jscript.dom.annotation.QuerySelector;
 import greencode.jscript.dom.elements.custom.ContainerElement;
@@ -90,7 +91,9 @@ public abstract class Form extends Element implements ContainerElementImplementa
 			} else {
 				if(!type.isArray()) {
 					ElementValue aev = f.getAnnotation(ElementValue.class);
-					String selector = "[name='" + (aev.name().isEmpty() ? f.getName() : aev.name()) + "']";
+					
+					String name = aev.name().isEmpty() ? f.getName() : aev.name();
+					String selector = "[name='" + name + "']";
 				
 					Class<?> typeValue = null;
 					
@@ -99,8 +102,8 @@ public abstract class Form extends Element implements ContainerElementImplementa
 					}
 					
 					v = this.querySelector(selector, type, typeValue);
+					DOMHandle.setVariableValue((DOM)v, "name", name);
 				}
-
 			}
 
 			GenericReflection.NoThrow.setValue(f, v, this);

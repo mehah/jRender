@@ -26,10 +26,6 @@ public class Node extends NodeCustom {
 	
 	public Node parentNode() { return parentNode(Node.class); }
 	
-	public void insertAdjacentHTML(String position, String text) {
-		DOMHandle.execCommand(this, "insertAdjacentHTML", position, text);
-	}
-	
 	public<C extends Node> Node nextSibling(Class<C> cast) {
 		try {
 			C node = GenericReflection.getDeclaredConstrutor(cast, Window.class).newInstance(this.window);

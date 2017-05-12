@@ -20,4 +20,20 @@ public abstract class ElementCustom extends Node {
 	public void removeClass(String className) {
 		DOMHandle.execCommand(this, "removeClass", className);
 	}
+	
+	public void prependChild(String html, Object... args) {
+		((Element)this).insertAdjacentHTML("afterbegin", html, args);
+	}
+
+	public void appendChild(String html, Object... args) {
+		((Element)this).insertAdjacentHTML("beforeend", html, args);
+	}
+
+	public void appendChildBefore(String html, Object... args) {
+		((Element)this).insertAdjacentHTML("beforebegin", html, args);
+	}
+
+	public void appendChildAfter(String html, Object... args) {
+		((Element)this).insertAdjacentHTML("afterend", html, args);
+	}
 }

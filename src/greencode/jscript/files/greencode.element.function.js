@@ -318,3 +318,17 @@ Element.prototype.selectOptionByValue = function(v) {
 		e.selected = true;
 	return this;
 };
+
+{
+	var _insertAdjacentHTML = Element.prototype.insertAdjacentHTML
+	Element.prototype.insertAdjacentHTML = function(position, text, args) {
+		if(args != null) {
+			for(var i = -1; ++i < args.length;) {0				
+				var arg = args[i];
+				text = text.replace("\{"+i+"\}", arg)
+			}
+		}
+		
+		_insertAdjacentHTML.call(this, position, text);
+	};
+}

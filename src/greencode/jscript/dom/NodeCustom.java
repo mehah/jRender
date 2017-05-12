@@ -19,14 +19,6 @@ public abstract class NodeCustom extends EventTarget {
 		DOMHandle.execCommand(this, "prependChild", node);
 		return node;
 	}
-	
-	public void prependChild(String html) {
-		((Node)this).insertAdjacentHTML("afterbegin", html);
-	}
-	
-	public void appendChild(String html) {
-		((Node)this).insertAdjacentHTML("beforeend", html);
-	}
 
 	public Node appendChildBefore(Node node) {
 		DOMHandle.execCommand(this, "appendChildBefore", node);
@@ -36,13 +28,5 @@ public abstract class NodeCustom extends EventTarget {
 	public Node appendChildAfter(Node node) {
 		DOMHandle.execCommand(this, "appendChildAfter", node);
 		return node;
-	}
-	
-	public void appendChildBefore(String html) {
-		((Node)this).insertAdjacentHTML("beforebegin", html);
-	}
-	
-	public void appendChildAfter(String html) {
-		((Node)this).insertAdjacentHTML("afterend", html);
 	}
 }
