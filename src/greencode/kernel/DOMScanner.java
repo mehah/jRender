@@ -26,15 +26,11 @@ public class DOMScanner {
 	JsonObject sync;
 	Integer[] args;
 
-	private DOMScanner() {
+	DOMScanner() {
 	}
 
 	static DOMScanner getElements(ViewSession viewSession) {
-		DOMScanner elements = (DOMScanner) viewSession.getAttribute("_ELEMENTS");
-		if (elements == null)
-			viewSession.setAttribute("_ELEMENTS", elements = new DOMScanner());
-
-		return elements;
+		return greencode.http.$ViewSession.getDOMScanner(viewSession);
 	}
 
 	public static void registerExecution(JSExecutor execution) {
@@ -80,11 +76,11 @@ public class DOMScanner {
 	}
 
 	static String getMsgEventId(WebSocketData wsData) {
-		return GreenCodeConfig.Browser.websocketSingleton ? "{-websocket-msg-:" + wsData.eventId + "}" : "";
+		return GreenCodeConfig.Client.websocketSingleton ? "{-websocket-msg-:" + wsData.eventId + "}" : "";
 	}
 
 	static String getCloseEventId(WebSocketData wsData) {
-		return GreenCodeConfig.Browser.websocketSingleton ? "{-websocket-close-:" + wsData.eventId + "}" : "";
+		return GreenCodeConfig.Client.websocketSingleton ? "{-websocket-close-:" + wsData.eventId + "}" : "";
 	}
 
 	private static void send(GreenContext context, Object o, Gson gson) throws IOException {

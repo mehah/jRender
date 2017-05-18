@@ -349,6 +349,8 @@ public final class FileWeb {
 					pReference.mobileFile = mobileFileWeb;
 				} else
 					throw new GreencodeError(LogMessage.getMessage("green-0014", page.mobile().path()));
+			} else {
+				
 			}
 
 			if(!page.jsModule().isEmpty()) {

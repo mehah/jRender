@@ -14,8 +14,7 @@ public class Conversation {
 	
 	Conversation(ViewSession view, int id) {
 		this.viewSession = view;
-		this.id = id;
-		this.map = getMap(view, id);
+		changeConversation(id);
 	}
 	
 	public int getId() { return this.id; }
@@ -35,37 +34,21 @@ public class Conversation {
 			return;
 		
 		this.id = id;
-		this.map = getMap(viewSession, id);
-	}
-
-	private static Map<String, Object> getMap(ViewSession view, int cid) {
-		Map<Integer, Map<String, Object>> conversations = getConverstionMap(view);
 		
-		Map<String, Object> map = conversations.get(cid);
+		this.map = viewSession.conversations.get(id);
 		if(map == null)
-			conversations.put(cid, map = new HashMap<String, Object>());
-		
-		return map;
-	}
-	
-	static Map<Integer, Map<String, Object>> getConverstionMap(ViewSession view) {
-		@SuppressWarnings("unchecked")
-		Map<Integer, Map<String, Object>> conversations = (Map<Integer, Map<String, Object>>) view.getAttribute("CONVERSATION_LIST");
-		if(conversations == null)
-			view.setAttribute("CONVERSATION_LIST", conversations = new HashMap<Integer, Map<String, Object>>());
-		
-		return conversations;
+			viewSession.conversations.put(id, this.map = new HashMap<String, Object>());
 	}
 	
 	static Conversation getInstance(HttpRequest request, int cid) {
 		if(cid == FIRST)
-			cid = getConverstionMap(request.getViewSession()).keySet().iterator().next();
+			cid = request.getViewSession().conversations.keySet().iterator().next();
 		else if(cid == NEXT)
 			return request.getConversation().next();
 		else if(cid == CURRENT)
 			return request.getConversation();
 		else if(cid == LAST) {
-			final Iterator<Integer> it = getConverstionMap(request.getViewSession()).keySet().iterator();
+			final Iterator<Integer> it = request.getViewSession().conversations.keySet().iterator();
 			while (it.hasNext()) cid = it.next();
 		}
 		

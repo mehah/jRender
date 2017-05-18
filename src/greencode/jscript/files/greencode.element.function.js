@@ -320,12 +320,12 @@ Element.prototype.selectOptionByValue = function(v) {
 };
 
 {
-	var _insertAdjacentHTML = Element.prototype.insertAdjacentHTML
+	var _insertAdjacentHTML = Element.prototype.insertAdjacentHTML;
 	Element.prototype.insertAdjacentHTML = function(position, text, args) {
 		if(args != null) {
-			for(var i = -1; ++i < args.length;) {0				
+			for(var i = -1; ++i < args.length;) {				
 				var arg = args[i];
-				text = text.replace("\{"+i+"\}", arg)
+				text = text.replace("\{"+i+"\}", arg);
 			}
 		}
 		

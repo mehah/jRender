@@ -96,10 +96,10 @@ var Request = function(url, type, isSingleton) {
 			} else if (_request.readyState == WebSocket.OPEN) {
 				_request.send(data ? JSON.stringify(data) : null);
 			}
-		}, 1);
+		}, 5);
 	};
 
-	var port = window.location.port || Greencode.WEBSOCKET_PORT;
+	var port = Greencode.WEBSOCKET_PORT || window.location.port;
 	var websocket_url = "ws://" + window.location.hostname + (port ? ":" + port : "") + Greencode.CONTEXT_PATH + "/coreWebSocket";
 	this.send = function(p, c1, c2) {
 		data = Greencode.jQuery.extend(Greencode.util.getQueryStrings(), p != null ? p : {});

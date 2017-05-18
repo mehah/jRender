@@ -426,7 +426,7 @@ public final class Core implements Filter {
 				databaseConnectionEvent.onError(context, e);			
 			}
 			
-			if(GreenCodeConfig.Browser.printExceptionServer) {
+			if(GreenCodeConfig.Client.printExceptionServer) {
 				Throwable thr = e.getCause() == null ? e : e.getCause();
 	
 				JsonArray stackTrace = new JsonArray();
@@ -546,8 +546,9 @@ public final class Core implements Filter {
 
 			final CoreFileJS coreFileJS = new CoreFileJS(greencodePath);
 
-			for (String fileName : JS_CORE_FILES)
+			for (String fileName : JS_CORE_FILES) {
 				coreFileJS.append(classLoader.getResource("greencode/jscript/files/" + fileName));
+			}
 			
 			{			
 				JsonObject json = new JsonObject();
@@ -561,9 +562,9 @@ public final class Core implements Filter {
 				json.add("className", className);
 				
 				json.addProperty("CONTEXT_PATH", Core.CONTEXT_PATH);
-				json.addProperty("DEBUG_LOG", GreenCodeConfig.Browser.debugLog);
+				json.addProperty("DEBUG_LOG", GreenCodeConfig.Client.debugLog);
 				json.addProperty("EVENT_REQUEST_TYPE", GreenCodeConfig.Server.Request.type);
-				json.addProperty("REQUEST_SINGLETON", GreenCodeConfig.Browser.websocketSingleton);
+				json.addProperty("REQUEST_SINGLETON", GreenCodeConfig.Client.websocketSingleton);
 				json.addProperty("WEBSOCKET_PORT", GreenCodeConfig.Server.Request.Websocket.port);
 				
 				for (UIDReference uid : UIDReference.values()) {
@@ -576,6 +577,14 @@ public final class Core implements Filter {
 					executorType.addProperty(type.name(), type.ordinal());
 				}
 				
+				if(GreenCodeConfig.Client.parameters != null) {
+					JsonObject parameters = new JsonObject();
+					for(Entry<String, String> entry : GreenCodeConfig.Client.parameters.entrySet()){
+						parameters.addProperty(entry.getKey(), entry.getValue());
+					}
+					json.add("parameters", parameters);
+				}
+				
 				json.add("executorType", executorType);
 
 				coreFileJS.append("Greencode.jQuery.extend(Greencode,").append(json).append(");");
@@ -583,9 +592,10 @@ public final class Core implements Filter {
 				coreFileJS.save();
 			}
 
-			for (String fileName : JS_SUPPORT_FILES)
+			for (String fileName : JS_SUPPORT_FILES) {
 				FileUtils.createFile(FileUtils.getContentFile(classLoader.getResource("greencode/jscript/files/" + fileName)), greencodePath + "/" + fileName);
-
+			}
+			
 			final Charset charset = Charset.forName(GreenCodeConfig.Server.View.charset);
 			final long currentTime = new Date().getTime();
 			for (GreenCodeConfig.Server.Internationalization.Variant v : GreenCodeConfig.Server.Internationalization.pagesLocale) {

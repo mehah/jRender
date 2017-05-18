@@ -1,15 +1,20 @@
 <!-- Greencode DTD -->
 
-<!ELEMENT greencode-config (browser, server)>
+<!ELEMENT greencode-config (client, server)>
 
-<!ELEMENT browser EMPTY>
-	<!ATTLIST browser debugLog ( true | false ) "true" >
-	<!ATTLIST browser printExceptionServer ( true | false ) "true" >
-	<!ATTLIST browser websocket-singleton ( true | false ) "true">
+<!ELEMENT parameters (parameter+)>
+	<!ELEMENT parameter EMPTY>
+		<!ATTLIST parameter name CDATA #REQUIRED>
+		<!ATTLIST parameter value CDATA #REQUIRED>
+
+<!ELEMENT client (parameters?)>
+	<!ATTLIST client debugLog ( true | false ) "true" >
+	<!ATTLIST client printExceptionServer ( true | false ) "true" >
+	<!ATTLIST client websocket-singleton ( true | false ) "true">
 	
-<!ELEMENT server (request, view, database?, internationalization?, plugins?)>
+<!ELEMENT server (parameters?, request, view, database?, internationalization?, plugins?)>
 	<!ATTLIST server log ( true | false ) "true" >
-	
+
 	<!ELEMENT request (multipart, websocket)>
 		<!ATTLIST request type ( auto | websocket | iframe | ajax ) "auto">
 		<!ATTLIST request methodType ( post | get ) "get">

@@ -64,12 +64,18 @@ final class ActionLoader {
 					if (value != null) {
 						value = fieldType.equals(String.class) ? StringUtils.toCharset((String) value, GreenCodeConfig.Server.View.charset) : GenericReflection.getDeclaredMethod(ClassUtils.toWrapperClass(fieldType), "valueOf", String.class).invoke(null, context.request.getParameter(parametro));
 
-						if (requestParameterAnnotation.trim())
-							value = ((String) value).trim();
+						if(value instanceof String) {
+							if (requestParameterAnnotation.trim())
+								value = ((String) value).trim();
 
-						if (requestParameterAnnotation.removeMultipleSpaces())
-							value = StringUtils.removeMultipleSpaces(((String) value));
-
+							if (requestParameterAnnotation.removeMultipleSpaces())
+								value = StringUtils.removeMultipleSpaces(((String) value));
+							
+							if(((String) value).isEmpty()) {
+								value = null;
+							}
+						}
+						
 						f.set(controller, value);
 					} else {
 						f.set(controller, ClassUtils.getDefaultValue(fieldType));

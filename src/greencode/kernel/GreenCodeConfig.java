@@ -44,13 +44,37 @@ public final class GreenCodeConfig {
 
 		String value;
 
-		Element browser = greencodeCofig.getElementsByTag("browser").first();
-		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "debugLog", Boolean.parseBoolean(browser.attr("debugLog").trim()));
-		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "printExceptionServer", Boolean.parseBoolean(browser.attr("printExceptionServer").trim()));
-		GenericReflection.NoThrow.setFinalStaticValue(Browser.class, "websocketSingleton", Boolean.parseBoolean(browser.attr("websocket-singleton").trim()));
+		Element client = greencodeCofig.getElementsByTag("client").first();
+		{
+			GenericReflection.NoThrow.setFinalStaticValue(Client.class, "debugLog", Boolean.parseBoolean(client.attr("debugLog").trim()));
+			GenericReflection.NoThrow.setFinalStaticValue(Client.class, "printExceptionServer", Boolean.parseBoolean(client.attr("printExceptionServer").trim()));
+			GenericReflection.NoThrow.setFinalStaticValue(Client.class, "websocketSingleton", Boolean.parseBoolean(client.attr("websocket-singleton").trim()));
+			
+			Element _parameters = client.getElementsByTag("parameters").first();
+			if(_parameters != null) {
+				Map<String, String> map = new HashMap<String, String>();
+				Elements parameters = _parameters.getElementsByTag("parameter");
+				for (Element element : parameters) {
+					map.put(element.attr("name"), element.attr("value"));
+				}
+				GenericReflection.NoThrow.setFinalStaticValue(Client.class, "parameters", Collections.unmodifiableMap(map));
+			}
+		}		
 
 		Element server = greencodeCofig.getElementsByTag("server").first();
 		{
+			Element _parameters = server.getElementsByTag("parameters").first();
+			if(_parameters != null) {
+				Map<String, String> map = new HashMap<String, String>();
+				
+				Elements parameters = _parameters.getElementsByTag("parameter");
+				for (Element element : parameters) {
+					map.put(element.attr("name"), element.attr("value"));
+				}
+				
+				GenericReflection.NoThrow.setFinalStaticValue(Server.class, "parameters", Collections.unmodifiableMap(map));
+			}
+			
 			GenericReflection.NoThrow.setFinalStaticValue(Server.class, "log", Boolean.parseBoolean(server.attr("log").trim()));
 
 			Element currentElement;
@@ -157,14 +181,16 @@ public final class GreenCodeConfig {
 		System.out.println(" [done]");
 	}
 
-	public final static class Browser {
+	public final static class Client {
 		public final static Boolean debugLog = false;
 		public final static Boolean printExceptionServer = false;
 		public final static Boolean websocketSingleton = false;
+		public final static Map<String, String> parameters = null;
 	}
 
 	public final static class Server {
 		public final static Boolean log = true;
+		public final static Map<String, String> parameters = null;
 
 		public final static class Request {
 			public final static String type = null;

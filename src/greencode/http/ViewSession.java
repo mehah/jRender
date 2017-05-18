@@ -3,6 +3,7 @@ package greencode.http;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -18,6 +19,7 @@ import org.apache.catalina.session.StandardSessionFacade;
 import greencode.jscript.dom.$Window;
 import greencode.jscript.dom.Window;
 import greencode.jscript.dom.WindowHandle;
+import greencode.kernel.DOMScanner;
 import greencode.kernel.GreenCodeConfig;
 import greencode.util.GenericReflection;
 
@@ -40,6 +42,9 @@ public final class ViewSession implements Serializable {
 	private final StandardSession session;
 
 	private final ViewSession This = this;
+	
+	final DOMScanner domScanner = greencode.kernel.$DOMScanner.getInstance();
+	final Map<Integer, Map<String, Object>> conversations = new HashMap<Integer, Map<String, Object>>();
 
 	private final Runnable task = new Runnable() {
 		public void run() {
@@ -109,8 +114,7 @@ public final class ViewSession implements Serializable {
 	}
 
 	public void invalidate() {
-		Map<Integer, Map<String, Object>> conversationMap = Conversation.getConverstionMap(this);
-		for (Integer key : conversationMap.keySet()) {
+		for (Integer key : this.conversations.keySet()) {
 			final Conversation conversation = new Conversation(this, key);
 			Map<Class<? extends Window>, Window> list = $Window.getMap(conversation);
 			for (Class<? extends Window> clazz : list.keySet()) {

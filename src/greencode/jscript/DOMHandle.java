@@ -154,8 +154,7 @@ public final class DOMHandle {
 				v = context.gsonInstance.fromJson((String) v, cast);
 		}
 
-		// Substitua o antigo valor String para o novo valor com o formato
-		// certo.
+		// Substitua o antigo valor String para o novo valor com o formato certo.
 		owner.variables.put(varName, v);
 		return (C) v;
 	}

@@ -17,15 +17,11 @@ public final class JSExecutor {
 	
 	private final Integer[] uidSave;
 	
-	private final int uid;
-	
-	private final String name;
-	
-	private final int type;
-		
 	private final Object[] parameters;
+		
+	private final String name, cast;
 	
-	private final String cast;
+	private final int type, uid;
 	
 	public JSExecutor(DOM owner, String commandName, TYPE type, Object... args) {
 		this.view = greencode.jscript.$DOMHandle.getViewSession(owner);

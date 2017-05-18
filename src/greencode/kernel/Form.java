@@ -187,8 +187,11 @@ final class Form {
 								if(element.removeMultipleSpaces())
 									valor = StringUtils.removeMultipleSpaces(((String) valor));
 
-								if(METHOD_TYPE_IS_GET)
+								if(((String) valor).isEmpty()) {
+									valor = null;
+								} else if(METHOD_TYPE_IS_GET) {
 									valor = StringUtils.toCharset((String) valor, GreenCodeConfig.Server.View.charset);
+								}
 							}
 						}
 

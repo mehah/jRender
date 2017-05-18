@@ -231,7 +231,7 @@ public final class GreenContext {
 	void destroy() {
 		try {
 			if(this.webSocketData != null) {
-				if(!GreenCodeConfig.Browser.websocketSingleton) {
+				if(!GreenCodeConfig.Client.websocketSingleton) {
 					this.webSocketData.session.close();					
 				} else if(this.webSocketData.session.isOpen()) {
 					this.webSocketData.session.getBasicRemote().sendText(DOMScanner.getCloseEventId(webSocketData));
