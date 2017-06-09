@@ -198,7 +198,7 @@ final class Form {
 						if(greencode.jscript.dom.elements.$Element.isElementWithValue(fieldType)) {
 							DOMHandle.setVariableValue((Element) f.get(container), "value", valor);
 						} else {
-							f.set(container, valor);
+							f.set(container, fieldType.isEnum() ? GenericReflection.getEnumValue(fieldType, (String) valor) : valor);
 						}
 					} catch(UnknownFormatConversionException e) {
 						throw new GreencodeError(LogMessage.getMessage("green-0013", f.getName(), container.getClass().getSimpleName(), "Date", ConvertDateTime.class.getSimpleName()));

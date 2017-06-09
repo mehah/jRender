@@ -221,6 +221,22 @@ public final class GenericReflection {
 		return interfs.contains(Interface);
 	}
 	
+	public static Enum<?> getEnumValue(Class<?> clazz, String name) {
+		if(name == null) {
+			return null;
+		}
+		
+		Object[] enums = clazz.getEnumConstants();
+		for (int i = -1, s = enums.length; ++i < s;) {
+			Enum<?> _enum = (Enum<?>) enums[i];
+			if(_enum.name().equals(name)) {
+				return _enum;
+			}
+		}
+		
+		return null;
+	}
+	
 	public static class NoThrow {
 		
 		public static Object getValue(Field field, Object reference) {
@@ -238,7 +254,7 @@ public final class GenericReflection {
 		public static void setFinalValue(Class<?> c, String fieldName, Object value, Object reference) {
 			GenericReflection.NoThrow.setFinalValue(GenericReflection.NoThrow.getDeclaredField(c, fieldName), value, reference);
 		}
-		
+	
 		public static void setFinalValue(Field field, Object value, Object reference) {
 			try {
 				setFinalAccessible(field);
@@ -288,9 +304,35 @@ public final class GenericReflection {
 			}
 		}
 		
+		public static Object invakeMethod(Class<?> Class, String methodName, Object... objs) {
+			try {
+				Class<?>[] parameters = new Class<?>[objs.length];
+				for (int i = -1, s = parameters.length; ++i < s;) {
+					parameters[i] = objs[i].getClass();
+				}
+				
+				return GenericReflection.getMethod(Class, methodName, parameters).invoke(objs);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
 		public static Method getDeclaredMethod(Class<?> Class, String methodName, Class<?>... parameterTypes) {
 			try {
 				return GenericReflection.getDeclaredMethod(Class, methodName, parameterTypes);
+			} catch (Exception e) {
+				throw new RuntimeException(e);
+			}
+		}
+		
+		public static Object invakeDeclaredMethod(Class<?> Class, String methodName, Object... objs) {
+			try {
+				Class<?>[] parameters = new Class<?>[objs.length];
+				for (int i = -1, s = parameters.length; ++i < s;) {
+					parameters[i] = objs[i].getClass();
+				}
+				
+				return GenericReflection.getDeclaredMethod(Class, methodName, parameters).invoke(objs);
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
