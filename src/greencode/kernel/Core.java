@@ -682,15 +682,6 @@ public final class Core implements Filter {
 				System.out.println(" [done]");
 			}
 
-			if (classBootAction != null) {
-				System.out.print(DEFAULT_LOG_MSG + "Initializing Boot Action ...");
-
-				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "bootAction", (BootActionImplementation) classBootAction.newInstance());
-
-				Cache.bootAction.init(greencodePath, classLoader, fConfig.getServletContext(), coreFileJS);
-				System.out.println(" [done]");
-			}
-
 			if (GreenCodeConfig.Server.Plugins.list != null) {
 				System.out.print(DEFAULT_LOG_MSG + "Initializing Plugins ...");
 
@@ -705,6 +696,15 @@ public final class Core implements Filter {
 
 				System.out.println(" [done]");
 			}
+			
+			if (classBootAction != null) {
+				System.out.print(DEFAULT_LOG_MSG + "Initializing Boot Action ...");
+
+				GenericReflection.NoThrow.setFinalStaticValue(Cache.class, "bootAction", (BootActionImplementation) classBootAction.newInstance());
+
+				Cache.bootAction.init(greencodePath, classLoader, fConfig.getServletContext(), coreFileJS);
+				System.out.println(" [done]");
+			}			
 
 			GenericReflection.NoThrow.setFinalStaticValue(Core.class, "HAS_ERROR", false);
 		} catch (Exception e) {

@@ -26,6 +26,7 @@ import greencode.util.LogMessage;
 
 public final class FunctionHandle {
 	private static final transient Map<Class<?>, Method> methodsInitCached = new HashMap<Class<?>, Method>();
+	private static final Map<Integer, JsonObject[]> argsCached = new HashMap<Integer, JsonObject[]>();
 	
 	private final transient GreenContext context = GreenContext.getInstance();
 	
@@ -40,6 +41,9 @@ public final class FunctionHandle {
 	private JsonObject[] args;
 	
 	private JsonObject requestParameters;
+	
+	private boolean pd = true;	
+	private boolean sp;
 	
 	public FunctionHandle(String commandName, Object... parameters) {
 		this.url = '#'+commandName;
@@ -68,8 +72,14 @@ public final class FunctionHandle {
 		
 		this.requestParameters.addProperty(parameter, value);
 	}
-		
-	private static final Map<Integer, JsonObject[]> argsCached = new HashMap<Integer, JsonObject[]>();
+	
+	public void allowDefault() {
+		this.pd = false;
+	}
+	
+	public void stopPropagation() {
+		this.sp = true;
+	}
 	
 	private FunctionHandle setArguments(final Class<?>... args) {		
 		if(args.length > 0) {

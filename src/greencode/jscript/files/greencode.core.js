@@ -7,10 +7,17 @@ Greencode.core = {
 				if (p) {
 					if (p.url && p.requestMethod) {
 						j[i] = function(event) {
-							if (event == null)
-								event = {
-									type: p.url || 'undefined'
-								};
+							if (event == null) {
+								event = {type: p.url || 'undefined'};
+							} else {
+								if(event.pd) {
+									event.preventDefault();
+								}
+								
+								if(event.sp) {
+									event.stopPropagation();
+								}								
+							}
 
 							Greencode.core.callRequestMethod(mainElement, event.target || target || {}, event, p, arguments);
 						};
