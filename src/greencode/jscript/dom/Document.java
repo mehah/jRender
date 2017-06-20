@@ -27,11 +27,11 @@ public class Document extends Node {
 	@SuppressWarnings("unchecked")
 	public <F extends Form> F forms(Class<F> formClass) {
 		F form = (F) forms.get(formClass);
-		if(form == null) {
+		if (form == null) {
 			try {
 				forms.put((Class<? extends Form>) formClass, form = formClass.newInstance());
 				form.processAnnotation();
-			} catch(Exception e) {
+			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
 		}
@@ -42,41 +42,40 @@ public class Document extends Node {
 	public Element createElement(String tagName) {
 		Element e = new Element(this.window);
 
-		DOMHandle.registerReturnByCommand((Node)e, this, "createElement", tagName);
+		DOMHandle.registerReturnByCommand((Node) e, this, "createElement", tagName);
 		DOMHandle.setVariableValue(e, "tagName", tagName);
 
 		return e;
 	}
-	
+
 	public <E extends Element> E createElement(Class<E> element) {
 		return createElement(element, null);
 	}
 
 	public <E extends Element, T> E createElement(Class<E> element, Class<T> typeValue) {
 		try {
-			
 			E e;
 			try {
-				if(typeValue == null) {
-					if(element.getTypeParameters().length > 0)
-						typeValue = (Class<T>) String.class;			
-				} else if(element.getTypeParameters().length == 0)
+				if (typeValue == null) {
+					if (element.getTypeParameters().length > 0)
+						typeValue = (Class<T>) String.class;
+				} else if (element.getTypeParameters().length == 0)
 					throw new GreencodeError(LogMessage.getMessage("green-0048"));
-			
+
 				e = typeValue == null ? ElementHandle.getInstance(element, window) : ElementHandle.getInstance(element, window, typeValue);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				e = GenericReflection.NoThrow.getDeclaredConstrutor(element).newInstance();
 			}
 			DOMHandle.registerReturnByCommand(e, this, "createElement", DOMHandle.getVariableValue(e, "tagName", String.class));
 
-			if(DOMHandle.containVariableKey(e, "type"))
+			if (DOMHandle.containVariableKey(e, "type"))
 				DOMHandle.setProperty(e, "type", DOMHandle.getVariableValue(e, "type", String.class));
-			
-			if(e instanceof SelectMultipleElement)
+
+			if (e instanceof SelectMultipleElement)
 				e.setAttribute("multiple", "multiple");
 
 			return e;
-		} catch(Exception e1) {
+		} catch (Exception e1) {
 			throw new RuntimeException(e1);
 		}
 	}
@@ -103,46 +102,46 @@ public class Document extends Node {
 	}
 
 	public <E extends Element> E getElementById(String id, Class<E> cast) {
-		if(cast.getTypeParameters().length > 0) {
+		if (cast.getTypeParameters().length > 0) {
 			return getElementById(id, cast, String.class);
 		}
-		
+
 		E e = ElementHandle.getInstance(cast, window);
 		DOMHandle.registerReturnByCommand(e, this, "getElementById", id);
-		
+
 		return e;
 	}
-	
+
 	public <E extends Element> E getElementById(String id, Class<E> cast, Class<?> typeValue) {
 		Element e;
-		if(cast == null) {
+		if (cast == null) {
 			e = new Element(this.window);
 		} else {
-			if(typeValue == null) {
-				if(cast.getTypeParameters().length > 0)
-					typeValue = String.class;			
-			} else if(cast.getTypeParameters().length == 0)
+			if (typeValue == null) {
+				if (cast.getTypeParameters().length > 0)
+					typeValue = String.class;
+			} else if (cast.getTypeParameters().length == 0)
 				throw new GreencodeError(LogMessage.getMessage("green-0048"));
-		
+
 			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
 		}
-		
+
 		DOMHandle.registerReturnByCommand(e, this, "getElementById", id);
 		return (E) e;
 	}
-	
+
 	public <E extends Element> E getElementById(String id, Element e) {
 		Class<?> classUnnamed = e.getClass();
 		Class<?> clazz = classUnnamed.getSuperclass();
-		if(clazz.getTypeParameters().length == 0)
+		if (clazz.getTypeParameters().length == 0)
 			throw new GreencodeError(LogMessage.getMessage("green-0044"));
-		
-		if(!classUnnamed.isAnonymousClass())
+
+		if (!classUnnamed.isAnonymousClass())
 			throw new GreencodeError(LogMessage.getMessage("green-0045", clazz.getSimpleName()));
-		
-		if(classUnnamed.getGenericSuperclass() instanceof Class)
-			throw new GreencodeError(LogMessage.getMessage("green-0046", ((Class<?>)classUnnamed.getGenericSuperclass()).getSimpleName()));
-		
+
+		if (classUnnamed.getGenericSuperclass() instanceof Class)
+			throw new GreencodeError(LogMessage.getMessage("green-0046", ((Class<?>) classUnnamed.getGenericSuperclass()).getSimpleName()));
+
 		DOMHandle.registerReturnByCommand(e, this, "getElementById", id);
 		return (E) e;
 	}
@@ -163,37 +162,38 @@ public class Document extends Node {
 		return querySelector(selector, null, null);
 	}
 
-	public <E extends Element> E querySelector(String selector, Class<E> cast) {		
+	public <E extends Element> E querySelector(String selector, Class<E> cast) {
 		return querySelector(selector, cast, null);
 	}
-	
-	public <E extends Element> E querySelector(String selector, Class<E> cast, Class<?> typeValue /* Default: String */) {
+
+	public <E extends Element> E querySelector(String selector, Class<E> cast,
+			Class<?> typeValue /* Default: String */) {
 		Element e;
-		if(cast == null) {
+		if (cast == null) {
 			e = new Element(this.window);
 		} else {
-			if(typeValue == null && cast.getTypeParameters().length > 0)
+			if (typeValue == null && cast.getTypeParameters().length > 0)
 				typeValue = String.class;
-			
+
 			e = typeValue == null ? ElementHandle.getInstance(cast, window) : ElementHandle.getInstance(cast, window, typeValue);
 		}
-		
+
 		DOMHandle.registerReturnByCommand(e, this, "querySelector", selector);
-		
+
 		return (E) e;
 	}
-	
+
 	public <E extends Element> E querySelector(String selector, Element e) {
 		Class<?> classUnnamed = e.getClass();
 		Class<?> clazz = classUnnamed.getSuperclass();
-		if(clazz.getTypeParameters().length == 0)
+		if (clazz.getTypeParameters().length == 0)
 			throw new GreencodeError(LogMessage.getMessage("green-0044"));
-		
-		if(!classUnnamed.isAnonymousClass())
+
+		if (!classUnnamed.isAnonymousClass())
 			throw new GreencodeError(LogMessage.getMessage("green-0045", clazz.getSimpleName()));
-		
+
 		DOMHandle.registerReturnByCommand(e, this, "querySelector", selector);
-		
+
 		return (E) e;
 	}
 
@@ -205,7 +205,7 @@ public class Document extends Node {
 		final int qnt = DOMHandle.getVariableValueByPropertyNoCache(this, varName, Integer.class, command + "('" + tagName + "').length");
 
 		Element[] elements = new Element[qnt];
-		for(int i = -1; ++i < qnt;)
+		for (int i = -1; ++i < qnt;)
 			elements[i] = new Element(this.window);
 
 		DOMHandle.registerReturnsByCommand(elements, this, command, tagName);
@@ -237,7 +237,7 @@ public class Document extends Node {
 		return DOMHandle.getVariableValueByProperty(this, "referrer", String.class, "referrer");
 	}
 
-	public Node renameNode(Node node, String namespaceURI, String nodename) {
+	public <N extends Node> N renameNode(N node, String namespaceURI, String nodename) {
 		DOMHandle.execCommand(this, "renameNode", node, namespaceURI, nodename);
 		return node;
 	}

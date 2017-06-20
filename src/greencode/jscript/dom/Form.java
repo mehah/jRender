@@ -1,7 +1,9 @@
 package greencode.jscript.dom;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.net.URLEncoder;
 import java.util.Map;
 
 import greencode.exception.GreencodeError;
@@ -16,6 +18,7 @@ import greencode.jscript.dom.form.annotation.Event;
 import greencode.jscript.dom.form.annotation.Name;
 import greencode.jscript.dom.form.annotation.RegisterEvent;
 import greencode.jscript.dom.form.annotation.Visible;
+import greencode.kernel.GreenCodeConfig;
 import greencode.kernel.GreenContext;
 import greencode.util.ClassUtils;
 import greencode.util.GenericReflection;
@@ -206,5 +209,40 @@ public abstract class Form extends Element implements ContainerElementImplementa
 
 	public void fill() {
 		greencode.jscript.dom.$Container.fill(this, elementFields);
+	}
+	
+	public String toString() {
+		try {
+			StringBuilder query = new StringBuilder();
+			Field[] fields = greencode.jscript.dom.$Container.getElementFields(this);
+			for (int i = -1, s = fields.length; ++i < s;) {
+				Field f = fields[i];
+				
+				Object value = f.get(this);
+				if(Modifier.isTransient(f.getModifiers()) || value == null) {
+					continue;
+				}
+				
+				if (value instanceof Element) {
+					value = DOMHandle.getVariableValue((Element)value, "value", Object.class);
+					if(value == null) {
+						continue;
+					}
+				}
+				
+				if(i > 0) {
+					query.append('&');
+				}
+				
+				ElementValue aev = f.getAnnotation(ElementValue.class);
+				query.append(aev.name().isEmpty() ? f.getName() : aev.name()).append('=').append(value.toString());	
+			}
+			
+			return URLEncoder.encode(query.toString(), GreenCodeConfig.Server.View.charset);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 }

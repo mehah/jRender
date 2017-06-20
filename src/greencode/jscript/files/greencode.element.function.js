@@ -89,7 +89,7 @@ Element.prototype.addClass = function(className) {
 
 Element.prototype.removeClass = function(className) {
 	if (this.hasClass(className))
-		this.className = this.className.replace(new RegExp('(\\s|^)' + cls + '(\\s|$)'), ' ');
+		this.className = this.className.replace(new RegExp('(\\s|^)' + className + '(\\s|$)'), ' ');
 	return this;
 };
 

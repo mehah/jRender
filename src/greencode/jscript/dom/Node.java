@@ -139,7 +139,7 @@ public class Node extends NodeCustom {
 		return node;
 	}
 		
-	public Node replaceChild(Node newNode, Node oldNode) {
+	public <N extends Node> N replaceChild(Node newNode, N oldNode) {
 		DOMHandle.execCommand(this, "replaceChild", newNode, oldNode);
 		return oldNode;
 	}

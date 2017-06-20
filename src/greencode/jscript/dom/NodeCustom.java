@@ -15,17 +15,17 @@ public abstract class NodeCustom extends EventTarget {
 		}
 	}
 
-	public Node prependChild(Node node) {
+	public<N extends Node> N prependChild(N node) {
 		DOMHandle.execCommand(this, "prependChild", node);
 		return node;
 	}
 
-	public Node appendChildBefore(Node node) {
+	public<N extends Node> N appendChildBefore(N node) {
 		DOMHandle.execCommand(this, "appendChildBefore", node);
 		return node;
 	}
 
-	public Node appendChildAfter(Node node) {
+	public<N extends Node> N appendChildAfter(N node) {
 		DOMHandle.execCommand(this, "appendChildAfter", node);
 		return node;
 	}
