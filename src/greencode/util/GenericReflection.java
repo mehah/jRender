@@ -304,7 +304,7 @@ public final class GenericReflection {
 			}
 		}
 		
-		public static Object invakeMethod(Class<?> Class, String methodName, Object... objs) {
+		public static Object invokeMethod(Class<?> Class, String methodName, Object... objs) {
 			try {
 				Class<?>[] parameters = new Class<?>[objs.length];
 				for (int i = -1, s = parameters.length; ++i < s;) {

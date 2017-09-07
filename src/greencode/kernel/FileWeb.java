@@ -134,7 +134,7 @@ public final class FileWeb {
 	// TODO: Verificar futuramente para possíveis otimizações.
 	private static FileWeb loadStructure(File file, FileWeb fileWeb, boolean importCoreJS) throws IOException {
 		final String ext = FileUtils.getExtension(file.getName());
-
+		
 		final boolean
 			isCss = ext.equals("css"),
 			isJs = ext.equals("js"),
@@ -148,7 +148,7 @@ public final class FileWeb {
 			if(isView) {
 				if(fileWeb == null) {
 					path = file.toURI().toURL().getPath();
-					path = path.substring(path.indexOf("WEB-INF/classes/../../") + 22);
+					path = path.substring(Core.PROJECT_CONTENT_PATH.length()+1);
 
 					fileWeb = files.get(path);
 				} else
@@ -269,29 +269,46 @@ public final class FileWeb {
 				}
 
 				List<Element> joins = src.head().getElementsByAttribute("join");
-				for(Element e: joins) {
-					String filePath = e.attr("file");
-					if(filePath.isEmpty())
-						throw new GreencodeError(LogMessage.getMessage("green-0021", "file", e.tagName(), file.getName()));
-
-					String[] filesName = e.attr("join").split(",");
-
-					File[] files = new File[filesName.length];
-					for(int i = -1; ++i < filesName.length;) {
-						String name = filesName[i].trim();
-						File f = FileUtils.getFileInWebContent(name);
-						if(!f.exists()) {
-							throw new GreencodeError(LogMessage.getMessage("green-0020", name, e.tagName(), file.getName()));
+				if(GreenCodeConfig.Server.View.seekChange && !joins.isEmpty()) {
+					StringBuilder links = new StringBuilder();
+					for(Element e: joins) {
+						String[] filesName = e.attr("join").split(",");
+						for (String fileName : filesName) {
+							Element newElement = e.clone();
+							newElement.attr(newElement.tagName().toLowerCase().equals("link") ? "href" : "src", Core.CONTEXT_PATH+'/'+fileName.trim());
+							newElement.removeAttr("join");
+							newElement.removeAttr("file");
+							links.append(newElement.outerHtml());
 						}
-						files[i] = f;
+						e.remove();
 					}
+					joins.clear();
+					src.head().prepend(links.toString());
+				} else {
+					for(Element e: joins) {
+						String filePath = e.attr("file");
+						if(filePath.isEmpty())
+							throw new GreencodeError(LogMessage.getMessage("green-0021", "file", e.tagName(), file.getName()));
 
-					MergedFile mergedFile = new MergedFile(FileUtils.getFileInWebContent(e.attr("file")).toURI(), files);
+						String[] filesName = e.attr("join").split(",");
 
-					Cache.mergedFiles.put(filePath, mergedFile);
+						File[] files = new File[filesName.length];
+						for(int i = -1; ++i < filesName.length;) {
+							String name = filesName[i].trim();
+							File f = FileUtils.getFileInWebContent(name);
+							if(!f.exists()) {
+								throw new GreencodeError(LogMessage.getMessage("green-0020", name, e.tagName(), file.getName()));
+							}
+							files[i] = f;
+						}
 
-					e.removeAttr("join").removeAttr("file");
-				}
+						MergedFile mergedFile = new MergedFile(FileUtils.getFileInWebContent(e.attr("file")).toURI(), files);
+
+						Cache.mergedFiles.put(filePath, mergedFile);
+
+						e.removeAttr("join").removeAttr("file");
+					}
+				}				
 
 				if(importCoreJS)
 					src.head().prepend("<script type=\"text/javascript\" src=\"" + Core.SRC_CORE_JS_FOR_SCRIPT_HTML + "\" charset=\""+GreenCodeConfig.Server.View.charset+"\"></script>");

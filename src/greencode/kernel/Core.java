@@ -102,6 +102,7 @@ public final class Core implements Filter {
 		CONTEXT_PATH = null,
 		PROJECT_NAME = null,
 		DEFAULT_LOG_MSG = null,
+		PROJECT_CONTENT_PATH = null,
 		SRC_CORE_JS_FOR_SCRIPT_HTML = null;
 	
 	final static Field requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request");
@@ -136,8 +137,9 @@ public final class Core implements Filter {
 
 		final boolean hasBootaction = Cache.bootAction != null;
 
-		if (hasBootaction)
-			Cache.bootAction.onRequest(httpServletRequest, (HttpServletResponse) response);
+		if (hasBootaction && !Cache.bootAction.onRequest(httpServletRequest, (HttpServletResponse) response)) {
+			return;
+		}
 
 		final String controllerName, methodName;
 		final FileWeb page;
@@ -491,7 +493,7 @@ public final class Core implements Filter {
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "DEFAULT_LOG_MSG", "[" + Core.PROJECT_NAME + "] ");
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "CONTEXT_PATH", fConfig.getServletContext().getContextPath());
 		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "SRC_CORE_JS_FOR_SCRIPT_HTML", Core.CONTEXT_PATH + "/jscript/greencode/core.js");
-		GenericReflection.NoThrow.setFinalStaticValue(FileUtils.class, "PROJECT_CONTENT_PATH", fConfig.getServletContext().getRealPath(""));
+		GenericReflection.NoThrow.setFinalStaticValue(Core.class, "PROJECT_CONTENT_PATH", fConfig.getServletContext().getRealPath("").replaceAll("\\\\", "/"));
 		
 		System.out.println("\nLoading Project: [" + PROJECT_NAME + "]");		
 		
@@ -743,5 +745,9 @@ public final class Core implements Filter {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static BootActionImplementation getBoot() {
+		return Cache.bootAction;
 	}
 }

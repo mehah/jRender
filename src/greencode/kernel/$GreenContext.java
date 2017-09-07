@@ -9,6 +9,8 @@ import greencode.jscript.dom.Window;
 public final class $GreenContext {
 	private $GreenContext() {}
 	
+	public static String getProjectContentPath() { return Core.PROJECT_CONTENT_PATH; }	
+	
 	public static boolean flushed(GreenContext context) { return context.flushed; }	
 	public static void flushed(GreenContext context, boolean flushed) { context.flushed = flushed; }	
 	public static boolean isForcingSynchronization(GreenContext context, final DOM dom, String name) { return context.isForcingSynchronization(dom, name); }	

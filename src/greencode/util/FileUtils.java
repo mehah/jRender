@@ -16,37 +16,27 @@ import java.nio.charset.Charset;
 
 import javax.servlet.http.Part;
 
-public final class FileUtils {
-	private static final String PROJECT_CONTENT_PATH = null;
-	
+import greencode.kernel.GreenCodeConfig;
+
+public final class FileUtils {	
 	private FileUtils() {}
 	
 	public final static String getExtension(String filePath) { return filePath.substring(filePath.lastIndexOf(".")+1); }
 	
 	public final static String getContentFile(URL file) throws IOException {
-		InputStream fstream = null;		
-		DataInputStream in = null;
-		BufferedReader br = null;		
-		try {
-			fstream = file.openStream();			
-			in = new DataInputStream(fstream);
-			br = new BufferedReader(new InputStreamReader(in));
-						
-			String strLine;
-			StringBuilder str = new StringBuilder();
-			while ((strLine = br.readLine()) != null)
-				str.append(str.length() == 0 ? "" : "\n").append(strLine);
-			
-			return str.toString();
-		} finally {
-			if(fstream != null) fstream.close();
-			if(in != null) in.close();
-			if(br != null) br.close();
-		}
+		return getContentFile(file, GreenCodeConfig.Server.View.charset);
+	}
+	
+	public final static String getContentFile(URL file, boolean preserveNewLine) throws IOException {
+		return getContentFile(file, GreenCodeConfig.Server.View.charset, preserveNewLine);
 	}
 	
 	public final static String getContentFile(URL file, String charsetName) throws IOException {
 		return getContentFile(file, Charset.forName(charsetName), null);
+	}
+	
+	public final static String getContentFile(URL file, String charsetName, boolean preserveNewLine) throws IOException {
+		return getContentFile(file, Charset.forName(charsetName), null, preserveNewLine);
 	}
 	
 	public final static String getContentFile(URL file, Charset charset) throws IOException {
@@ -54,6 +44,10 @@ public final class FileUtils {
 	}
 	
 	public final static String getContentFile(URL file, Charset charset, FileRead read) throws IOException {
+		return getContentFile(file, charset, read, false);
+	}
+	
+	public final static String getContentFile(final URL file, final Charset charset, final FileRead read, final boolean preserveNewLine) throws IOException {
 		InputStream fstream = null;		
 		DataInputStream in = null;
 		BufferedReader br = null;		
@@ -64,8 +58,15 @@ public final class FileUtils {
 						
 			String strLine;
 			StringBuilder str = new StringBuilder();
-			while (((strLine = br.readLine()) != null) && (read == null || read != null && (strLine = read.reading(strLine)) != null))
+			while (((strLine = br.readLine()) != null) && (read == null || read != null && (strLine = read.reading(strLine)) != null)) {
 				str.append(strLine);
+				if(preserveNewLine) {
+					str.append("\n");
+				}
+			}
+			if(preserveNewLine) {
+				str.setLength(str.length()-1);
+			}
 			
 			return str.toString();
 		} finally {
@@ -116,7 +117,7 @@ public final class FileUtils {
 	}
 	
 	public static File getFileInWebContent(String end) {
-		return new File(PROJECT_CONTENT_PATH+end);
+		return new File(greencode.kernel.$GreenContext.getProjectContentPath()+end);
 	}
 	
 	public interface FileRead {

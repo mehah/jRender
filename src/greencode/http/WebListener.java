@@ -1,7 +1,10 @@
 package greencode.http;
 
+import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
+
+import greencode.kernel.Core;
 
 @javax.servlet.annotation.WebListener
 public final class WebListener implements HttpSessionListener {
@@ -10,8 +13,13 @@ public final class WebListener implements HttpSessionListener {
 	
 	public void sessionCreated(HttpSessionEvent arg0) {}
 
-	public void sessionDestroyed(HttpSessionEvent arg0) {		
-		ViewSessionContext context = new ViewSessionContext(arg0.getSession());
+	public void sessionDestroyed(HttpSessionEvent arg0) {
+		HttpSession session = arg0.getSession();
+		if (Core.getBoot() != null) {
+			Core.getBoot().sessionDestroyed(session);
+		}
+		
+		ViewSessionContext context = new ViewSessionContext(session);
 		for (ViewSession view : context.views.values())
 			view.invalidate();			
 	}

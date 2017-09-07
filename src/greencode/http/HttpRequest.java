@@ -200,7 +200,7 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 	}
 	
 	public Principal getUserPrincipal() {
-		return this.userPrincipal;
+		return getUserPrincipal(getSession());
 	}
 
 	public void setUserPrincipal(UserPrincipal user) {
@@ -344,5 +344,9 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 
 	public String getRemoteAddr() {
 		return remoteAddr;
+	}
+	
+	public static UserPrincipal getUserPrincipal(HttpSession session) {
+		return (UserPrincipal) session.getAttribute("__USER_PRINCIPAL__");
 	}
 }
