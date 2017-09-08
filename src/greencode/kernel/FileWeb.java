@@ -55,6 +55,7 @@ public final class FileWeb {
 	Document document;
 
 	private FileWeb mobileFile;
+	private boolean isMobile;
 
 	private FileWeb getCurrent(GreenContext context) {
 		return mobileFile != null && context.getRequest().isMobile() ? mobileFile : this;
@@ -118,7 +119,7 @@ public final class FileWeb {
 				file.selector = null;
 				file.ajaxSelector = null;
 				file.lastModified = 0;
-				FileWeb.loadStructure(file.file, null, isPrincipal);
+				FileWeb.loadStructure(file.file, file.isMobile ? this : null, isPrincipal);
 			} catch(IOException e) {
 				throw new GreencodeError(e);
 			}
@@ -152,7 +153,7 @@ public final class FileWeb {
 
 					fileWeb = files.get(path);
 				} else
-					path = fileWeb.pageAnnotation.path();
+					path = fileWeb.isMobile ? fileWeb.pageAnnotation.mobile().path() : fileWeb.pageAnnotation.path();
 
 				if(fileWeb != null && !fileWeb.changed())
 					return fileWeb;
@@ -359,6 +360,7 @@ public final class FileWeb {
 				File file = FileUtils.getFileInWebContent(page.mobile().path());
 				if(file.exists()) {
 					mobileFileWeb.file = file;
+					mobileFileWeb.isMobile = true;
 
 					if(GreenCodeConfig.Server.View.bootable)
 						loadStructure(file, mobileFileWeb, true);
