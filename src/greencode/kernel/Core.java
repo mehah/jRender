@@ -10,6 +10,7 @@ import java.nio.charset.Charset;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.NumberFormat;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -73,6 +74,7 @@ import greencode.util.FileUtils;
 import greencode.util.FileUtils.FileRead;
 import greencode.util.GenericReflection;
 import greencode.util.LogMessage;
+import greencode.util.ObjectUtils;
 import greencode.util.PackageUtils;
 
 @WebFilter(displayName = "core", urlPatterns = "/*")
@@ -273,9 +275,15 @@ public final class Core implements Filter {
 			final Map<Integer, Function> registeredFunctions;
 			if (hashcodeRequestMethod != null) {
 				registeredFunctions = greencode.jscript.dom.$Window.getRegisteredFunctions((Window) requestController);
-				requestController = (HttpAction) registeredFunctions.get(hashcodeRequestMethod);
-				if (requestController == null) {
-
+				HttpAction _requestController = (HttpAction) registeredFunctions.get(hashcodeRequestMethod);
+				if (_requestController == null) {
+					if(Cache.bootAction != null) {
+						Cache.bootAction.onRegisteredEventLost(context, (Window)requestController);
+					}
+					throw new StopProcess();
+				} else {
+					requestController = _requestController;
+					_requestController = null;
 				}
 
 				requestClass = requestController.getClass();
@@ -582,7 +590,15 @@ public final class Core implements Filter {
 				if(GreenCodeConfig.Client.parameters != null) {
 					JsonObject parameters = new JsonObject();
 					for(Entry<String, String> entry : GreenCodeConfig.Client.parameters.entrySet()){
-						parameters.addProperty(entry.getKey(), entry.getValue());
+						String value = entry.getValue();
+						if(ObjectUtils.isBoolean(value)) {
+							parameters.addProperty(entry.getKey(), Boolean.parseBoolean(value));
+						}else if(ObjectUtils.isBoolean(value)) {
+							parameters.addProperty(entry.getKey(), NumberFormat.getInstance().parse(value));
+						} else {
+							parameters.addProperty(entry.getKey(), value);
+						}
+						
 					}
 					json.add("parameters", parameters);
 				}

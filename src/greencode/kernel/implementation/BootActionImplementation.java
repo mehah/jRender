@@ -1,6 +1,7 @@
 package greencode.kernel.implementation;
 
 import greencode.jscript.dom.Form;
+import greencode.jscript.dom.Window;
 import greencode.kernel.GreenContext;
 import greencode.validator.DataValidation;
 
@@ -28,4 +29,6 @@ public abstract interface BootActionImplementation extends PluginImplementation 
 	public boolean whenUnauthorized(GreenContext context);
 	
 	public void sessionDestroyed(HttpSession session);
+	
+	public void onRegisteredEventLost(GreenContext context, Window window);
 }

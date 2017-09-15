@@ -12,5 +12,5 @@ public final class ObjectUtils {
 		}
 	}
 	
-	public final static boolean isBoolean(Object o) { return o != null && String.valueOf(o) == "true"; }
+	public final static boolean isBoolean(Object o) { return (o != null) && (String.valueOf(o).equals("true") || String.valueOf(o).equals("false")); }
 }
