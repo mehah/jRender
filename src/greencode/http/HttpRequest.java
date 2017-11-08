@@ -211,7 +211,8 @@ public final class HttpRequest extends HttpServletRequestWrapper implements Http
 	}
 	
 	static boolean isMobile(HttpServletRequest request) {
-		return pattern.matcher(request.getHeader("user-agent")).find();
+		String userAgent = request.getHeader("user-agent");
+		return userAgent != null && pattern.matcher(userAgent).find();
 	}
 
 	public boolean isMobile() {

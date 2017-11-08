@@ -27,7 +27,7 @@
 
 		<!--
 			bootable: Cache de página. (True: Na inicialização do servidor / False: Na inicialização da página solicitada.
-			seek-change: Cada solicitação feita a página, é verificado se ouve mudanças no arquivo e atualiza o cache.
+			seek-change: Cada solicitação feita a página, é verificado se houve mudanças no arquivo e atualiza o cache.
 			
 			Para produção, aconselho essas configurações.
 			bootable=true
