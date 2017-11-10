@@ -273,12 +273,18 @@ public final class FileWeb {
 				if(GreenCodeConfig.Server.View.seekChange && !joins.isEmpty()) {
 					StringBuilder links = new StringBuilder();
 					for(Element e: joins) {
-						String[] filesName = e.attr("join").split(",");
+						final boolean isLink = e.tagName().toLowerCase().equals("link");
+						final String[] filesName = e.attr("join").split(",");
 						for (String fileName : filesName) {
 							Element newElement = e.clone();
-							newElement.attr(newElement.tagName().toLowerCase().equals("link") ? "href" : "src", Core.CONTEXT_PATH+'/'+fileName.trim());
+							
+							newElement.attr(isLink ? "href" : "src", Core.CONTEXT_PATH+'/'+fileName.trim());
 							newElement.removeAttr("join");
-							newElement.removeAttr("file");
+							
+							if(!isLink) {
+								newElement.removeAttr("async");	
+							}
+							
 							links.append(newElement.outerHtml());
 						}
 						e.remove();
@@ -286,33 +292,44 @@ public final class FileWeb {
 					joins.clear();
 					src.head().prepend(links.toString());
 				} else {
+					final String SRC_CORE_JS_FOR_SCRIPT_HTML = Core.SRC_CORE_JS_FOR_SCRIPT_HTML.substring(Core.CONTEXT_PATH.length()+1);
 					for(Element e: joins) {
-						String filePath = e.attr("file");
-						if(filePath.isEmpty())
-							throw new GreencodeError(LogMessage.getMessage("green-0021", "file", e.tagName(), file.getName()));
+						String attrPath = e.tagName().toLowerCase().equals("link") ? "href" : "src";						
+						if(attrPath.isEmpty())
+							throw new GreencodeError(LogMessage.getMessage("green-0021", attrPath, e.tagName(), file.getName()));
 
-						String[] filesName = e.attr("join").split(",");
-
-						File[] files = new File[filesName.length];
+						final boolean isCoreJS = e.attr(attrPath).equals(SRC_CORE_JS_FOR_SCRIPT_HTML);
+						final String[] filesName = e.attr("join").split(",");						
+						final File[] files = new File[filesName.length];
 						for(int i = -1; ++i < filesName.length;) {
 							String name = filesName[i].trim();
 							File f = FileUtils.getFileInWebContent(name);
 							if(!f.exists()) {
 								throw new GreencodeError(LogMessage.getMessage("green-0020", name, e.tagName(), file.getName()));
 							}
-							files[i] = f;
+							
+							if(isCoreJS) {
+								Core.CORE_FILE_JS_OBJECT.append(f.toURI().toURL(), GreenCodeConfig.Server.View.charset);
+							} else {
+								files[i] = f;
+							}
 						}
 
-						MergedFile mergedFile = new MergedFile(FileUtils.getFileInWebContent(e.attr("file")).toURI(), files);
-
-						Cache.mergedFiles.put(filePath, mergedFile);
-
-						e.removeAttr("join").removeAttr("file");
+						if(isCoreJS) {
+							e.remove();
+							Core.CORE_FILE_JS_OBJECT.save();
+						} else {
+							String filePath = e.attr(attrPath);
+							MergedFile mergedFile = new MergedFile(FileUtils.getFileInWebContent(filePath).toURI(), files);
+							Cache.mergedFiles.put(filePath, mergedFile);
+							e.removeAttr("join").attr(attrPath, Core.CONTEXT_PATH+"/"+filePath);							
+						}
 					}
 				}				
 
-				if(importCoreJS)
+				if(importCoreJS) {
 					src.head().prepend("<script type=\"text/javascript\" src=\"" + Core.SRC_CORE_JS_FOR_SCRIPT_HTML + "\" charset=\""+GreenCodeConfig.Server.View.charset+"\"></script>");
+				}
 
 				content = src.html();
 			} else

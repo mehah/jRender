@@ -107,6 +107,8 @@ public final class Core implements Filter {
 		PROJECT_CONTENT_PATH = null,
 		SRC_CORE_JS_FOR_SCRIPT_HTML = null;
 	
+	final static CoreFileJS CORE_FILE_JS_OBJECT = null;
+	
 	final static Field requestField = GenericReflection.NoThrow.getDeclaredField(RequestFacade.class, "request");
 
 	public void doFilter(final ServletRequest request, ServletResponse response, final FilterChain chain) throws IOException, ServletException {
@@ -555,6 +557,7 @@ public final class Core implements Filter {
 			final String greencodePath = greencodeFolder.getPath();
 
 			final CoreFileJS coreFileJS = new CoreFileJS(greencodePath);
+			GenericReflection.NoThrow.setFinalStaticValue(Core.class, "CORE_FILE_JS_OBJECT", coreFileJS);
 
 			for (String fileName : JS_CORE_FILES) {
 				coreFileJS.append(classLoader.getResource("greencode/jscript/files/" + fileName));

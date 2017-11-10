@@ -539,7 +539,7 @@ Greencode.core = {
 	}
 };
 
-window.registerEvent('load', function() {
+var onLoadedEvent = function(event) { 
 	if (window.location.hash.indexOf('#!') === 0) {
 		window.location.href = Greencode.CONTEXT_PATH + '/' + window.location.hash.substring(2);
 		return;
@@ -601,4 +601,11 @@ window.registerEvent('load', function() {
 	};
 
 	Greencode.executeEvent('pageLoad', _data);
-});
+};
+
+/* EVENT: ON LOADED PAGE */
+if (document.addEventListener) { /* IE 9+, Edge, firefox... */
+	document.registerEvent("DOMContentLoaded", onLoadedEvent);
+} else { /* IE8 or less */
+	window.registerEvent('load', onLoadedEvent);
+}

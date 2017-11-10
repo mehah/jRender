@@ -3,6 +3,8 @@ package greencode.kernel;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 
@@ -12,6 +14,7 @@ import greencode.util.FileUtils.FileRead;
 public final class CoreFileJS {
 	private final StringBuilder core;
 	private final String greencodePath;
+	private final Set<URL> mergedFiles = new HashSet<URL>();
 
 	CoreFileJS(String greencodePath) {
 		this.core = new StringBuilder();
@@ -28,10 +31,29 @@ public final class CoreFileJS {
 	}
 
 	public StringBuilder append(URL file) throws IOException {
+		if(mergedFiles.contains(file)) {
+			return null;
+		}
+		
+		mergedFiles.add(file);
 		return core.append(FileUtils.getContentFile(file));
 	}
 
+	public StringBuilder append(URL file, String charset) throws IOException {
+		if(mergedFiles.contains(file)) {
+			return null;
+		}
+		
+		mergedFiles.add(file);
+		return core.append(FileUtils.getContentFile(file, charset));
+	}
+	
 	public StringBuilder append(URL file, Charset charset, FileRead read) throws IOException {
+		if(mergedFiles.contains(file)) {
+			return null;
+		}
+		
+		mergedFiles.add(file);
 		return core.append(FileUtils.getContentFile(file, charset, read));
 	}
 
