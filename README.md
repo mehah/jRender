@@ -1,7 +1,12 @@
-Greencode
+jRender
 =========
+Is a java library that gives you the power to manipulate the DOM exactly like javascript, taking advantage of Object Guidance and language typing, rendering and validating your application with more security and performance.
 
-Framework that works similar to desktop applications-oriented events, such as Java Swing. Being able to call javascript functions, record events, fill out the form, all through Java without intervention in HTML programming.
+## Security:
+All of its logic, as well as rendering and validation, can be performed inside the server, this way we hide the code from more intentional people.
+
+## Performance:
+The client-server communication is done with JSON, with this we have fewer bytes passing, which can be accomplished with either ajax, iframe or websocket.
 
 Requirements
 - Java 1.6
