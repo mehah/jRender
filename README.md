@@ -37,10 +37,46 @@ IndexController.java
 ```java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
-	private static int visitorsCount = 0;
+	private static int VISITORS_COUNT = 0;
 	
 	public void init(JRenderContext arg0) {
-		document.getElementById("count").textContent((++visitorsCount)+"");		
+		document.getElementById("count").textContent((++VISITORS_COUNT)+"");		
+	}
+}
+```
+**OR**
+Real time visitor count, so that a refresh page isnt necessary.
+```java
+@Page(name="index", path="index.html")
+public class IndexController extends Window {
+	private static boolean ENABLE_REAL_TIME_UPDATE = true;	
+	
+	private static int VISITORS_COUNT = 0;
+	
+	private final Element spanCount = document.getElementById("count");
+	
+	public void init(JRenderContext arg0) {		
+		spanCount.textContent((++VISITORS_COUNT)+"");		
+		
+		if(ENABLE_REAL_TIME_UPDATE) {
+			setTimeout(new FunctionHandle("realTimeUpdate"), 1000);
+		}
+	}
+	
+	public void realTimeUpdate() {
+		int lastCount = VISITORS_COUNT;
+		try {
+			while(true) {
+				if(lastCount != VISITORS_COUNT) {
+					lastCount = VISITORS_COUNT;
+					spanCount.textContent(VISITORS_COUNT+"");
+					flush();
+				}
+				Thread.sleep(1000);
+			}
+		} catch (Exception e) { // Thread and ConnectionLost Excetion
+			e.printStackTrace();
+		}
 	}
 }
 ```
