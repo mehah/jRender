@@ -22,14 +22,18 @@ Javascript Cross-Browser Lib Support
 
 Example
 ========
+Small example of visitor counts.
 
 index.html
 ```html
-<html><body>
-	Quantidade de pessoas que já visitaram essa página: <span id="count"></span>
-</body></html>
+<html>
+	<body>
+		Amount of people that had seen this page: <span id="count"></span>
+	</body>
+</html>
 ```
 
+IndexController.java
 ```java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
@@ -43,9 +47,9 @@ public class IndexController extends Window {
 
 **Understand:**
 - Annotation
-	- [Page and RegisterPage](/understand/pageRegisterPage.md)  
+	- [Page and RegisterPage](/understand/pageRegisterPage.md)
 
-Examples:  
+**More examples:**
 - [Basic](/samples/basic.md)  
 - [Basic Form ](/samples/formBasic.md)  
 - [Basic Form With outside Button](/samples/formBasicWithOutsideButton.md)  
