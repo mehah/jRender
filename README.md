@@ -75,7 +75,7 @@ public class IndexController extends Window {
 				}
 				Thread.sleep(1000);
 			}
-		} catch (Exception e) { // Thread and ConnectionLost Excetion
+		} catch (Exception e) { // Thread or ConnectionLost Excetion
 			e.printStackTrace();
 		}
 	}
