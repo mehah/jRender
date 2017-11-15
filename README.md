@@ -45,6 +45,7 @@ public class IndexController extends Window {
 }
 ```
 **OR**
+
 Real time visitor count, so that a refresh page isnt necessary.
 ```java
 @Page(name="index", path="index.html")
