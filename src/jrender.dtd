@@ -1,0 +1,62 @@
+<!-- Greencode DTD -->
+
+<!ELEMENT config (client, server)>
+
+<!ELEMENT parameters (parameter+)>
+	<!ELEMENT parameter EMPTY>
+		<!ATTLIST parameter name CDATA #REQUIRED>
+		<!ATTLIST parameter value CDATA #REQUIRED>
+
+<!ELEMENT client (parameters?)>
+	<!ATTLIST client debugLog ( true | false ) "true" >
+	<!ATTLIST client printExceptionServer ( true | false ) "true" >
+	<!ATTLIST client websocket-singleton ( true | false ) "true">
+	
+<!ELEMENT server (parameters?, request, view, database?, internationalization?, plugins?)>
+	<!ATTLIST server log ( true | false ) "true" >
+
+	<!ELEMENT request (multipart, websocket)>
+		<!ATTLIST request type ( auto | websocket | iframe | ajax ) "auto">
+		<!ATTLIST request methodType ( post | get ) "get">
+		
+		<!ELEMENT multipart EMPTY>
+			<!ATTLIST multipart autodectetion ( true | false ) "false" >
+			<!ATTLIST multipart maxRequestSize CDATA "-1">
+			
+		<!ELEMENT websocket EMPTY>
+			<!ATTLIST websocket port CDATA #REQUIRED>
+			<!ATTLIST websocket maxTextMessageSize CDATA #REQUIRED>
+			<!ATTLIST websocket maxBinaryMessageSize CDATA #REQUIRED>
+			<!ATTLIST websocket maxIdleTimeout CDATA #REQUIRED>
+			
+	<!ELEMENT view (templates?, session)>
+		<!ATTLIST view bootable ( true | false ) "false" >
+		<!ATTLIST view seek-change ( true | false ) "true" >
+		<!ATTLIST view use-minified ( true | false ) "true" >	
+		<!ATTLIST view charset CDATA #REQUIRED>
+		<!ELEMENT templates (file+)>
+			<!ELEMENT file EMPTY>
+				<!ATTLIST file name CDATA #REQUIRED>
+				<!ATTLIST file path CDATA #REQUIRED>
+				<!ATTLIST file default CDATA #FIXED "default">
+		
+		<!ELEMENT session EMPTY>
+			<!ATTLIST session maxInactiveInterval CDATA #REQUIRED>
+		
+	<!ELEMENT default-max-request ANY>
+	<!ELEMENT database (default-config-file, show-query?, drivers)>
+		<!ATTLIST database autocommit ( true | false ) "false" >
+		<!ELEMENT default-config-file ANY>
+		<!ELEMENT show-query ANY>
+		<!ELEMENT drivers ANY>
+		
+	<!ELEMENT internationalization (locale+)>
+		<!ELEMENT locale EMPTY>
+			<!ATTLIST locale language CDATA #REQUIRED>
+			<!ATTLIST locale country CDATA #REQUIRED>
+			<!ATTLIST locale file CDATA #REQUIRED>
+			<!ATTLIST locale charset CDATA #REQUIRED>
+			
+	<!ELEMENT plugins (plugin+)>
+		<!ELEMENT plugin EMPTY>
+			<!ATTLIST plugin class CDATA #REQUIRED>
