@@ -15,11 +15,33 @@ Min. Requirements
 - [JSOUP](http://jsoup.org/)  
 - [HTMLCompressor](https://code.google.com/p/htmlcompressor/) (Optional)  
 
-Javascript Cross-Browser Lib
+Javascript Cross-Browser Lib Support
 - [Sizzle](http://sizzlejs.com/)  
 - [JSON3](http://bestiejs.github.io/json3/)
 
-Understand:  
+
+Example
+========
+
+index.html
+```html
+<html><body>
+	Quantidade de pessoas que já visitaram essa página: <span id="count"></span>
+</body></html>
+```
+
+```java
+@Page(name="index", path="index.html")
+public class IndexController extends Window {
+	private static int visitorsCount = 0;
+	
+	public void init(JRenderContext arg0) {
+		document.getElementById("count").textContent((++visitorsCount)+"");		
+	}
+}
+```
+
+**Understand:**
 - Annotation
 	- [Page and RegisterPage](/understand/pageRegisterPage.md)  
 
