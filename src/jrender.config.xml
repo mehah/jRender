@@ -57,7 +57,7 @@
 			<locale language="es" country="MX" file="msg_es-MX.properties" charset="utf-8"/>
 		</internationalization>
 		<plugins>
-			<plugin class="greencode.sengi.Core"/>
+			<plugin class="com.jrender.sengi.Core"/>
 		</plugins>
 		-->
 	</server>
