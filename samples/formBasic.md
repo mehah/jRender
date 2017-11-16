@@ -37,32 +37,32 @@ Html: index.html
 Java: IndexController.java
 
 ```java
-@Page(name="index", path="index.html")
+@Page(name = "index", path = "index.html")
 public class IndexController extends Window {
-	
-    public void init(JRenderContext context) {
-    	document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
-    }
-    
-    public void register() {
-    	MaintainUserForm form = document.forms(MaintainUserForm.class);
-    	
-    	System.out.println("Name: "+form.getName());
-    	System.out.println("Sex: "+(form.getSex().equals('M') ? "Male" : "Female"));
-    	System.out.println("City: "+form.getCity());    	
-    	System.out.print("Countries: ");
-    	StringBuilder countries = new StringBuilder(' ');
-    	if(form.getCountries() != null) {
-	    	for (int i = -1, s = form.getCountries().length; ++i < s;) {
-	    		if(i > 0)
-	    			countries.append(',');
-	    		countries.append(form.getCountries()[i]);
+
+	public void init(JRenderContext context) {
+		document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
+	}
+
+	public void register() {
+		MaintainUserForm form = document.forms(MaintainUserForm.class);
+
+		System.out.println("Name: " + form.getName());
+		System.out.println("Sex: " + (form.getSex().equals('M') ? "Male" : "Female"));
+		System.out.println("City: " + form.getCity());
+		System.out.print("Countries: ");
+		StringBuilder countries = new StringBuilder(' ');
+		if (form.getCountries() != null) {
+			for (int i = -1, s = form.getCountries().length; ++i < s;) {
+				if (i > 0)
+					countries.append(',');
+				countries.append(form.getCountries()[i]);
 			}
-    	} else {
-    		countries.append("none");
-    	}
-    	System.out.println(countries.toString());
-    }
+		} else {
+			countries.append("none");
+		}
+		System.out.println(countries.toString());
+	}
 }
 ```
 
