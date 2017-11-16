@@ -119,7 +119,8 @@ Java: RequiredValidator.java
 ```java
 // Implements Class Validator
 public class RequiredValidator implements Validator {
-	public boolean validate(Window window, Form form, ContainerElement<?> container, Element element, String name, Object value, String[] labels, DataValidation data) {
+	public boolean validate(Window window, Form form, ContainerElement<?> container, Element element,
+	String name, Object value, String[] labels, DataValidation data) {
 
 		// Get cached element
 		Element e = DOMHandle.getVariableValue(window, "element_" + name, Element.class);
