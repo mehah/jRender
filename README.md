@@ -61,7 +61,8 @@ public class IndexController extends Window {
 		
 		if(ENABLE_REAL_TIME_UPDATE) {
 			/*
-			use setInterval to not have to use while, but will open a connection in the time configured in the function, so that this does not occur, you must be using websocket-singleton.
+			use setInterval to not have to use while, but will open a connection in the time configured in the
+			function, so that this does not occur, you must be using websocket-singleton.
 			*/
 			setTimeout(new FunctionHandle("realTimeUpdate"), 1000);
 		}
