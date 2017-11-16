@@ -1,7 +1,5 @@
 Html: index.html
-
 ```html
-<!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8">
@@ -14,7 +12,12 @@ Html: index.html
 	<form name="maintainUserForm">
 		<div><label for="name">Name</label> <input type="text" name="name"/></div>
 		<div><label for="sex">Sex</label> <input type="radio" name="sex" value="M" checked="checked"/> Male <input type="radio" name="sex" value="F"/> Female</div>
-		<div><label for="city">City</label> <select name="city" id="city"></select></div>
+		<div><label for="city">City</label>
+			<select name="city" id="city">
+				<option value="Rio de Janeiro">Rio de Janeiro</option>
+				<option value="Curitiba">Curitiba</option>
+			</select>
+		</div>
 		<div>
 			<div>Which countries have you visit?</div>
 			<ul>
@@ -23,8 +26,7 @@ Html: index.html
 				<li><input type="checkbox" name="countries" value="Brazil" /> Brazil</li>
 				<li><input type="checkbox" name="countries" value="Cuba" /> Cuba</li>
 				<li><input type="checkbox" name="countries" value="Egypt" /> Egypt</li>
-				<li><input type="checkbox" name="countries" value="United States" /> United States</li>
-				<li style="padding: 10px 0px;"><input type="checkbox" name="allOptions" id="allOptions" /> All options above</li>				
+				<li><input type="checkbox" name="countries" value="United States" /> United States</li>			
 			</ul>
 		</div>
 		<button type="button" name="buttonRegister" id="buttonRegister">Register</button>
@@ -38,7 +40,7 @@ Java: IndexController.java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 	
-    public void init(GreenContext context) {
+    public void init(JRenderContext context) {
     	document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
     }
     
@@ -49,20 +51,22 @@ public class IndexController extends Window {
     	System.out.println("Sex: "+(form.getSex().equals('M') ? "Male" : "Female"));
     	System.out.println("City: "+form.getCity());    	
     	System.out.print("Countries: ");
+    	StringBuilder countries = new StringBuilder(' ');
     	if(form.getCountries() != null) {
 	    	for (int i = -1, s = form.getCountries().length; ++i < s;) {
-	    		Character separator = ' ';
 	    		if(i > 0)
-	    			separator = ',';
-	    		System.out.print(separator+form.getCountries()[i]);
+	    			countries.append(',');
+	    		countries.append(form.getCountries()[i]);
 			}
+    	} else {
+    		countries.append("none");
     	}
-    	System.out.println();
+    	System.out.println(countries.toString());
     }
 }
 ```
-Java: MaintainUserForm.java
 
+Java: MaintainUserForm.java
 ```java
 // Same name in html
 @Name("maintainUserForm")
