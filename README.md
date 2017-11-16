@@ -60,14 +60,14 @@ public class IndexController extends Window {
 		spanCount.textContent((++VISITORS_COUNT)+"");		
 		
 		if(ENABLE_REAL_TIME_UPDATE) {
-			/*
-			use setInterval to not have to use while, but will open a connection in the time configured in the
-			function, so that this does not occur, you must be using websocket-singleton.
-			*/
 			setTimeout(new FunctionHandle("realTimeUpdate"), 1000);
 		}
 	}
-	
+
+	/*
+	use setInterval to not have to use while, but will open a connection in the time configured
+	in the function, so that this does not occur, you must be using websocket-singleton.
+	*/
 	public void realTimeUpdate() {
 		int lastCount = VISITORS_COUNT;
 		try {
@@ -91,9 +91,8 @@ public class IndexController extends Window {
 	- [Page and RegisterPage](/understand/pageRegisterPage.md)
 
 **More examples:**
-- [Basic](/samples/basic.md)  
-- [Basic Form ](/samples/formBasic.md)  
-- [Basic Form With outside Button](/samples/formBasicWithOutsideButton.md)  
+- [Form](/samples/formBasic.md)  
+- [Form With outside Button](/samples/formBasicWithOutsideButton.md)  
 - [Form Validation](/samples/formValidation.md)  
 - [Form With Data Manipulation](/samples/formWithManipulation.md)  
 - [Comet](/samples/comet.md)  
