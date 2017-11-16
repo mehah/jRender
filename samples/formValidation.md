@@ -133,7 +133,7 @@ public class RequiredValidator implements Validator {
 		}
 
 		// Check if value is empty
-		if (value == null || value.equals("")) {
+		if (value == null) {
 
 			// Set Color
 			e.style("color", "red");
