@@ -157,6 +157,18 @@ public class Document extends Node {
 	public Element[] getElementsByClassName(String tagName) {
 		return getElementsBy("getElementsByClassName.length", "getElementsByClassName", tagName);
 	}
+	
+	public <E extends Element> E[] getElementsByName(String tagName, Class<E> cast) {
+		return ElementHandle.cast(getElementsByName(tagName), cast);
+	}
+
+	public <E extends Element> E[] getElementsByTagName(String tagName, Class<E> cast) {
+		return ElementHandle.cast(getElementsByTagName(tagName), cast);
+	}
+
+	public <E extends Element> E[] getElementsByClassName(String tagName, Class<E> cast) {
+		return ElementHandle.cast(getElementsByClassName(tagName), cast);
+	}	
 
 	public Element querySelector(String selector) {
 		return querySelector(selector, null, null);
