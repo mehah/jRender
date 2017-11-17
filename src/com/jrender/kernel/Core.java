@@ -234,6 +234,7 @@ public final class Core implements Filter {
 						fh.registerRequestParameter("servletPath", servletPath);
 						
 						DOMScanner.registerExecution(new JSExecutor(context, "JRender.exec", JSExecutor.TYPE.METHOD, fh));
+						DOMScanner.registerExecution(new JSExecutor(context, "JRender.currentViewId", JSExecutor.TYPE.PROPERTY, context.request.getViewSession().getId()));
 						
 						throw new StopProcess();
 					}

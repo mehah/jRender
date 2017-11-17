@@ -148,7 +148,7 @@ JRender.tags = {
 						};
 
 					if (keepViewId)
-						data.viewId = viewId;
+						data.viewId = JRender.currentViewId;
 
 					request = new Request(href, JRender.EVENT_REQUEST_TYPE, JRender.isRequestSingleton());
 
