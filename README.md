@@ -1,12 +1,15 @@
 jRender
 =========
-Is a java library that gives you the power to manipulate the DOM exactly like javascript, taking advantage of Object Orientation and language typing, rendering and validating your application with more security and performance.
+It's a library that allows Java to manipulate DOM, exactly like Javascript, using object orientation and language typing Java. Render and validate your application with more security and performance
 
 **Security:**
  All of its logic, as well as rendering and validation, can be performed inside the server, this way we hide code.
 
 **Performance:**
 The client-server communication is done with JSON, with this we have fewer bytes passing, which can be accomplished with either ajax, iframe or websocket.
+
+**Frameworks Javascripts:**
+As the library allows interac with Dom, then it will have access to any framework created for Javascript, but to let the writing more close to Javascript, it will be necessary to create plug-ins, for example : [jQuery](https://github.com/mehah/JQuery) and [jQueryUI](https://github.com/mehah/JQueryUI).
 
 Min. Requirements
 - Java 1.6
