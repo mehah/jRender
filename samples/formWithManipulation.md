@@ -35,59 +35,60 @@ Html: index.html
 Java: IndexController.java
 
 ```java
-@Page(name="index", path="index.html")
+@Page(name = "index", path = "index.html")
 public class IndexController extends Window {
-	
-    public void init(GreenContext context) {
-    	document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
-    	
-    	final InputCheckboxElement<String>[] countries = ElementHandle.cast(document.getElementsByName("countries"), InputCheckboxElement.class);
-    	final InputCheckboxElement<String> checkboxAllOptions = document.getElementById("allOptions", InputCheckboxElement.class);
-    	
-    	checkboxAllOptions.addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {			
-    		@ForceSync("checked")
-			public void init(GreenContext context) {
-    			for (InputCheckboxElement<String> inputCheckboxElement : countries) {
-    				inputCheckboxElement.checked(checkboxAllOptions.checked());
+	private static final String[] CITYS = new String[] { "New York", "Los Angeles", "Chicago", "Houston" };
+
+	private final MaintainUserForm form = document.forms(MaintainUserForm.class);
+
+	public void init(JRenderContext context) {
+		document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
+
+		final InputCheckboxElement<String>[] countries = document.getElementsByName("countries", InputCheckboxElement.class);
+
+		form.getAllOptions().addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
+			@ForceSync("checked")
+			public void init(JRenderContext context) {
+				for (InputCheckboxElement<String> inputCheckboxElement : countries) {
+					inputCheckboxElement.checked(form.getAllOptions().checked());
 				}
 			}
 		}));
-    	
-    	SelectElement<String> citySelect = SelectElement.cast(document.getElementById("city"));
-    	
-    	String[] citys = new String[] {"New York", "Los Angeles", "Chicago", "Houston"};
-    	
-    	for (String c : citys) {
-        	OptionElement option = document.createElement(OptionElement.class);
-        	option.value(c);
-        	option.text(c);
-        	citySelect.add(option);			
+
+		for (String c : CITYS) {
+			OptionElement<String> option = document.createElement(OptionElement.class, String.class);
+			option.value(c);
+			option.text(c);
+
+			form.getCity().add(option);
 		}
-    }
-    
-    public void register() {
-    	MaintainUserForm form = document.forms(MaintainUserForm.class);
-    	
-    	System.out.println("Name: "+form.getName());
-    	System.out.println("Sex: "+(form.getSex().equals('M') ? "Male" : "Female"));
-    	System.out.println("City: "+form.getCity());    	
-    	System.out.print("Countries: ");
-    	if(form.getCountries() != null) {
-	    	for (int i = -1, s = form.getCountries().length; ++i < s;) {
-	    		Character separator = ' ';
-	    		if(i > 0)
-	    			separator = ',';
-	    		System.out.print(separator+form.getCountries()[i]);
+		
+		form.reset();
+	}
+
+	public void register() {
+		System.out.println("Name: " + form.getName());
+		System.out.println("Sex: " + (form.getSex().equals('M') ? "Male" : "Female"));
+		System.out.println("City: " + form.getCity().selectedValue());
+		System.out.print("Countries: ");
+		StringBuilder countries = new StringBuilder(' ');
+		if (form.getCountries() != null) {
+			for (int i = -1, s = form.getCountries().length; ++i < s;) {
+				if (i > 0)
+					countries.append(',');
+				countries.append(form.getCountries()[i]);
 			}
-    	}
-    	System.out.println();
-    }
+		} else {
+			countries.append("none");
+		}
+		System.out.println(countries.toString());
+	}
 }
 ```
 Java: MaintainUserForm.java
 
 ```java
-// Same name in html
+//Same name in html
 @Name("maintainUserForm")
 public class MaintainUserForm extends Form {
 	
@@ -100,10 +101,13 @@ public class MaintainUserForm extends Form {
 	private Character sex;
 	
 	@ElementValue
-	private String city;
+	private SelectElement<String> city;
 	
 	@ElementValue
 	private String[] countries;
+	
+	@ElementValue
+	private InputCheckboxElement<String> allOptions;
 	
 	public String getName() {
 		return name;
@@ -113,12 +117,20 @@ public class MaintainUserForm extends Form {
 		return sex;
 	}
 
-	public String getCity() {
+	public SelectElement<String> getCity() {
 		return city;
 	}
 
 	public String[] getCountries() {
 		return countries;
+	}
+
+	public InputCheckboxElement<String> getAllOptions() {
+		return allOptions;
+	}
+
+	public void setAllOptions(InputCheckboxElement<String> allOptions) {
+		this.allOptions = allOptions;
 	}
 }
 ```

@@ -3,7 +3,7 @@ jRender
 Is a java library that gives you the power to manipulate the DOM exactly like javascript, taking advantage of Object Orientation and language typing, rendering and validating your application with more security and performance.
 
 **Security:**
-All of its logic, as well as rendering and validation, can be performed inside the server, this way we hide the code from more intentional people.
+ All of its logic, as well as rendering and validation, can be performed inside the server, this way we hide code.
 
 **Performance:**
 The client-server communication is done with JSON, with this we have fewer bytes passing, which can be accomplished with either ajax, iframe or websocket.
@@ -15,18 +15,84 @@ Min. Requirements
 - [JSOUP](http://jsoup.org/)  
 - [HTMLCompressor](https://code.google.com/p/htmlcompressor/) (Optional)  
 
-Javascript Cross-Browser Lib
+Javascript Cross-Browser Lib Support
 - [Sizzle](http://sizzlejs.com/)  
 - [JSON3](http://bestiejs.github.io/json3/)
 
-Understand:  
-- Annotation
-	- [Page and RegisterPage](/understand/pageRegisterPage.md)  
 
-Examples:  
-- [Basic](/samples/basic.md)  
-- [Basic Form ](/samples/formBasic.md)  
-- [Basic Form With outside Button](/samples/formBasicWithOutsideButton.md)  
+Example
+========
+Small example of visitor counts.
+
+index.html
+```html
+<html>
+	<body>
+		Amount of people that had seen this page: <span id="count"></span>
+	</body>
+</html>
+```
+
+IndexController.java
+```java
+@Page(name="index", path="index.html")
+public class IndexController extends Window {
+	private static int VISITORS_COUNT = 0;
+	
+	public void init(JRenderContext arg0) {
+		document.getElementById("count").textContent((++VISITORS_COUNT)+"");		
+	}
+}
+```
+**OR**
+
+Real time visitor count, so that a refresh page isnt necessary.
+```java
+@Page(name="index", path="index.html")
+public class IndexController extends Window {
+	private static boolean ENABLE_REAL_TIME_UPDATE = true;	
+	
+	private static int VISITORS_COUNT = 0;
+	
+	private final Element spanCount = document.getElementById("count");
+	
+	public void init(JRenderContext arg0) {		
+		spanCount.textContent((++VISITORS_COUNT)+"");		
+		
+		if(ENABLE_REAL_TIME_UPDATE) {
+			setTimeout(new FunctionHandle("realTimeUpdate"), 1000);
+		}
+	}
+
+	/*
+	use setInterval to not have to use while, but will open a connection in the time configured
+	in the function, so that this does not occur, you must be using websocket-singleton.
+	*/
+	public void realTimeUpdate() {
+		int lastCount = VISITORS_COUNT;
+		try {
+			while(true) {
+				if(lastCount != VISITORS_COUNT) {
+					lastCount = VISITORS_COUNT;
+					spanCount.textContent(VISITORS_COUNT+"");
+					flush();
+				}
+				Thread.sleep(1000);
+			}
+		} catch (Exception e) { // InterruptedException or ConnectionLost
+			e.printStackTrace();
+		}
+	}
+}
+```
+
+**Understand:**
+- Annotation
+	- [Page and RegisterPage](/understand/pageRegisterPage.md)
+
+**More examples:**
+- [Form](/samples/formBasic.md)  
+- [Form With outside Button](/samples/formBasicWithOutsideButton.md)  
 - [Form Validation](/samples/formValidation.md)  
 - [Form With Data Manipulation](/samples/formWithManipulation.md)  
 - [Comet](/samples/comet.md)  

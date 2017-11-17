@@ -39,36 +39,40 @@ Html: index.html
 Java: IndexController.java
 
 ```java
-@Page(name="index", path="index.html")
+@Page(name = "index", path = "index.html")
 public class IndexController extends Window {
+	// Get Form by Class
+	private final MaintainUserForm form = document.forms(MaintainUserForm.class);
 
-    public void init() {
-        // Get Element By Id and register Event
-        document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
-    }
+	public void init(JRenderContext context) {
+		// Get Element By Id and register Event
+		document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
+		
+		// Reset Form
+		form.reset();
+	}
 
-    // Take a note that says that will be a validation to execute the method
-    @Validate
-    public void register() {
+	// Take a note that says that will be a validation to execute the method
+	@Validate
+	public void register() {
 
-        // Get Form by Class
-        MaintainUserForm form = document.forms(MaintainUserForm.class);
-
-        // Print result on console
-        System.out.println("Name: "+form.getName());
-        System.out.println("Sex: "+(form.getSex().equals('M') ? "Male" : "Female"));
-        System.out.println("City: "+form.getCity());        
-        System.out.print("Countries: ");
-        if(form.getCountries() != null) {
-            for (int i = -1, s = form.getCountries().length; ++i < s;) {
-                Character separator = ' ';
-                if(i > 0)
-                    separator = ',';
-                System.out.print(separator+form.getCountries()[i]);
-            }
-        }
-        System.out.println();
-    }
+		// Print result on console
+		System.out.println("Name: " + form.getName());
+		System.out.println("Sex: " + (form.getSex().equals('M') ? "Male" : "Female"));
+		System.out.println("City: " + form.getCity());
+		System.out.print("Countries: ");
+		StringBuilder countries = new StringBuilder(' ');
+		if (form.getCountries() != null) {
+			for (int i = -1, s = form.getCountries().length; ++i < s;) {
+				if (i > 0)
+					countries.append(',');
+				countries.append(form.getCountries()[i]);
+			}
+		} else {
+			countries.append("none");
+		}
+		System.out.println(countries.toString());
+	}
 }
 ```
 Java: MaintainUserForm.java
@@ -115,34 +119,36 @@ Java: RequiredValidator.java
 ```java
 // Implements Class Validator
 public class RequiredValidator implements Validator {
-	public boolean validate(Window window, Form form, String name, Object value, String[] labels) {
-		
+	public boolean validate(Window window, Form form, ContainerElement<?> container, Element element,
+	String name, Object value, String[] labels, DataValidation data) {
+
 		// Get cached element
-		Element e = DOMHandle.getVariableValue(window, "element_"+name, Element.class);
-		if(e == null) {
+		Element e = DOMHandle.getVariableValue(window, "element_" + name, Element.class);
+		if (e == null) {
 			// Search Element Label by attribute 'for'
-			e = window.principalElement().querySelector("label[for='"+name+"']");
-			
+			e = window.principalElement().querySelector("label[for='" + name + "']");
+
 			// Cache Element
-			DOMHandle.setVariableValue(window, "element_"+name, e);
+			DOMHandle.setVariableValue(window, "element_" + name, e);
 		}
-		
+
 		// Check if value is empty
-		if(value == null || value.equals("")) {
-			
+		if (value == null) {
+
 			// Set Color
 			e.style("color", "red");
-			
+
 			// Show Message
-			window.alert("The "+name+" field is required.");
-			
+			window.alert("The " + name + " field is required.");
+
 			return false;
-		}else if(e.style("color").equals("red")) {			
+		} else if (e.style("color").equals("red")) {
 			// Reset Color to Black
 			e.style("color", "black");
-		}		
-		
+		}
+
 		return true;
 	}
+
 }
 ```

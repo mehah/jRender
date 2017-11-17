@@ -39,35 +39,38 @@ Html: index.html
 Java: IndexController.java
 
 ```java
-@Page(name="index", path="index.html")
+@Page(name = "index", path = "index.html")
 public class IndexController extends Window {
-	
-    public void init(GreenContext context) {
-    	document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
-    }
-    
-    /* As the button(id: buttonregister) is out of the form, it requires to set which one is gonna be used,
-     * cuz the button doesnt have any bound with the form. The framework knows which form to use,
-     * when the atribute 'form' is filled
-    */
-    @Form(MaintainUserForm.class)
-    public void register() {
-    	MaintainUserForm form = document.forms(MaintainUserForm.class);
-    	
-    	System.out.println("Name: "+form.getName());
-    	System.out.println("Sex: "+(form.getSex().equals('M') ? "Male" : "Female"));
-    	System.out.println("City: "+form.getCity());    	
-    	System.out.print("Countries: ");
-    	if(form.getCountries() != null) {
-	    	for (int i = -1, s = form.getCountries().length; ++i < s;) {
-	    		Character separator = ' ';
-	    		if(i > 0)
-	    			separator = ',';
-	    		System.out.print(separator+form.getCountries()[i]);
+
+	public void init(JRenderContext context) {
+		document.getElementById("buttonRegister").addEventListener(Events.CLICK, new FunctionHandle("register"));
+	}
+
+	/*
+	 * As the button(id: buttonregister) is out of the form, it requires to set
+	 * which one is gonna be used, cuz the button doesnt have any bound with the
+	 * form. The framework knows which form to use, when the atribute 'form' is
+	 * filled
+	 */
+	@Form(MaintainUserForm.class)
+	public void register() {
+		MaintainUserForm form = document.forms(MaintainUserForm.class);
+		System.out.println("Name: " + form.getName());
+		System.out.println("Sex: " + (form.getSex().equals('M') ? "Male" : "Female"));
+		System.out.println("City: " + form.getCity());
+		System.out.print("Countries: ");
+		StringBuilder countries = new StringBuilder(' ');
+		if (form.getCountries() != null) {
+			for (int i = -1, s = form.getCountries().length; ++i < s;) {
+				if (i > 0)
+					countries.append(',');
+				countries.append(form.getCountries()[i]);
 			}
-    	}
-    	System.out.println();
-    }
+		} else {
+			countries.append("none");
+		}
+		System.out.println(countries.toString());
+	}
 }
 ```
 Java: MaintainUserForm.java
