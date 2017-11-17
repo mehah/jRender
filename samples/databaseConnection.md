@@ -27,13 +27,13 @@ Java: IndexController.java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 	private final TbodyElement tbody = document.getElementById("userList").querySelector("tbody", TbodyElement.class);
-	private final InputTextElement<String> userNameInput = document.getElementById("userName", InputTextElement.class);
+	private final InputTextElement<String> userNameInput = document.getElementById("userName", InputTextElement.class, String.class);
 	
 	@Connection
-    public void init(GreenContext context) {
+    public void init(JRenderContext context) {
 		document.getElementById("register").addEventListener(Events.CLICK, new FunctionHandle("register"));
 		
-		DatabaseConnection connection = GreenContext.getInstance().getDatabaseConnection();
+		DatabaseConnection connection = context.getDatabaseConnection();
 		
 		try {
 			ResultSet rs = connection.createStatement().executeQuery("SELECT * FROM users");
@@ -48,7 +48,7 @@ public class IndexController extends Window {
 	
 	@ForceSync
 	@Connection
-	public void register(GreenContext context) {
+	public void register(JRenderContext context) {
 		try {
 			String value = userNameInput.value().trim();
 			
@@ -101,16 +101,14 @@ XML: src/database.config.xml
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xml>
-<database-config>
-	<server-name>127.0.0.1</server-name>
-	<database>mysql</database>
-	<schema>sample</schema>
-	<username>root</username>
-	<password></password>
-	
-	<!-- <reconnect chance="5">
-		<connection></connection>
-	</reconnect> -->
+<database-config
+	server-name="127.0.0.1"
+	database="mysql"
+	schema="sample"
+	username="root"
+	password=""
+>	
+	<!-- <reconnect chance="5" file="" /> -->
 </database-config>
 ```
 
