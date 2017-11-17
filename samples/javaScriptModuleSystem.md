@@ -4,7 +4,7 @@ Html: index.html
 <html>
   <head>
   <meta charset="UTF-8">
-    <title>Greencode</title>
+    <title>jRender</title>
   </head>
   <body></body>
 </html>
@@ -14,7 +14,7 @@ Java: IndexController.java
 ```java
 @Page(name="index", path="index.html", jsModule="package.index")
 public class IndexController extends Window {
-    public void init(GreenContext context) {}
+    public void init(JRenderContext context) {}
     
     public void teste() {
     	alert("Alert on Java Controller");	
