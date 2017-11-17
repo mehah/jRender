@@ -41,34 +41,34 @@ Html: register.html
 Java: IndexController.java
 
 ```java
-@Page(name="index", path="index.html")
-public class IndexController extends Window {	
-    public void init(GreenContext context) {
+@Page(name = "index", path = "index.html")
+public class IndexController extends Window {
+	public void init(JRenderContext context) {
 		document.getElementById("redirect").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
-			public void init() {
+			public void init(JRenderContext context) {
 				location.href(RegisterController.class);
 			}
 		}));
-    }
+	}
 }
 ```
 
 Java: RegisterController.java
 
 ```java
-@Page(name="register", path="register.html", ajaxSelector="body")
-public class RegisterController extends Window {	
-    public void init() {
-    	final InputTextElement inputText = document.getElementById("name", InputTextElement.class);
-    	
-    	Element button = document.getElementById("alertName");
-    	
-    	button.addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {    		
-    		@ForceSync
-			public void init() {
-				alert("Name: "+inputText.value());
+@Page(name = "register", path = "register.html", ajaxSelector = "body")
+public class RegisterController extends Window {
+	public void init(JRenderContext context) {
+		final InputTextElement<String> inputText = document.getElementById("name", InputTextElement.class, String.class);
+
+		Element button = document.getElementById("alertName");
+
+		button.addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
+			@ForceSync
+			public void init(JRenderContext context) {
+				alert("Name: " + inputText.value());
 			}
 		}));
-    }
+	}
 }
 ```
