@@ -49,38 +49,24 @@ public class IndexController extends Window {
 Real time visitor count, so that a refresh page isnt necessary.
 ```java
 @Page(name="index", path="index.html")
-public class IndexController extends Window {
-	private static boolean ENABLE_REAL_TIME_UPDATE = true;	
-	
+public class IndexController extends Window {	
 	private static int VISITORS_COUNT = 0;
 	
 	private final Element spanCount = document.getElementById("count");
 	
-	public void init(JRenderContext arg0) {		
-		spanCount.textContent((++VISITORS_COUNT)+"");		
+	private int lastCount;
+	
+	public void init(JRenderContext context) {		
+		spanCount.textContent((++VISITORS_COUNT)+"");
 		
-		if(ENABLE_REAL_TIME_UPDATE) {
-			setTimeout(new FunctionHandle("realTimeUpdate"), 1000);
-		}
+		this.lastCount = VISITORS_COUNT;
+		setInterval(new FunctionHandle("realTimeUpdate"), 1000);
 	}
-
-	/*
-	use setInterval to not have to use while, but will open a connection in the time configured
-	in the function, so that this does not occur, you must be using websocket-singleton.
-	*/
+	
 	public void realTimeUpdate() {
-		int lastCount = VISITORS_COUNT;
-		try {
-			while(true) {
-				if(lastCount != VISITORS_COUNT) {
-					lastCount = VISITORS_COUNT;
-					spanCount.textContent(VISITORS_COUNT+"");
-					flush();
-				}
-				Thread.sleep(1000);
-			}
-		} catch (Exception e) { // InterruptedException or ConnectionLost
-			e.printStackTrace();
+		if(this.lastCount != VISITORS_COUNT) {
+			this.lastCount = VISITORS_COUNT;
+			spanCount.textContent(VISITORS_COUNT+"");
 		}
 	}
 }
