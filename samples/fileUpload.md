@@ -20,7 +20,7 @@ Java: IndexController.java
 @MultipartConfig // Or set multipart autodectetion="true" in greencode.config.xml
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
-    public void init(GreenContext context) {
+    public void init(JRenderContext context) {
     	document.getElementById("send").addEventListener(Events.CLICK, new FunctionHandle("send"));
     }
     
