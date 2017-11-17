@@ -5,7 +5,7 @@ Html: index.html
 	<head>
 		<title>Join Files Header</title>
 		<!-- HERE -->
-		<link href="GREENCODE:{CONTEXT_PATH}/css/main.css" join="css/css1.css, css/css2.css" file="css/main.css" media="all" rel="stylesheet" type="text/css" />
+		<link href="css/main.css" join="css/css1.css, css/css2.css" media="all" rel="stylesheet" type="text/css" />
 	</head>
 	<body>
 		<span class="class1 class2">Joined</span>
