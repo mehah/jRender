@@ -13,7 +13,8 @@ Html: index.html
 <body>
 	<div>Teste</div>
 	<div>
-		<button type="button" name="showContent" id="showContent">Show Content in newContent.html</button><button type="button" name="empty" id="empty">Empty</button>
+		<button type="button" name="showContent" id="showContent">Show page newContent.html</button>
+		<button type="button" name="empty" id="empty">Empty</button>
 	</div>
 	<div id="content"></div>
 </body>
@@ -32,16 +33,16 @@ Java: IndexController.java
 public class IndexController extends Window {
 	private final Element div = document.getElementById("content");
 	
-    public void init(GreenContext context) {
+    public void init(JRenderContext context) {
 		document.getElementById("showContent").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
-			public void init(GreenContext context) {
+			public void init(JRenderContext context) {
 				div.replaceWith(AnyController.class);
 			}
 		}));
 		
 		document.getElementById("empty").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
-			public void init(GreenContext context) {
-				ElementHandle.empty(div); // OR div.innerHTML("");
+			public void init(JRenderContext context) {
+				div.empty();
 			}
 		}));
     }
@@ -52,6 +53,6 @@ Java: AnyController.java
 ```java
 @Page(name="any", path="newContent.html")
 public class AnyController extends Window {	
-    public void init(GreenContext context) {}
+    public void init(JRenderContext context) {}
 }
 ```

@@ -38,49 +38,35 @@ Html: index.html
 Java: IndexController.java
 
 ```java
-@Page(name="index", path="index.html")
+@Page(name = "index", path = "index.html")
 public class IndexController extends Window {
 	private final TbodyElement tbody = document.getElementById("userList").querySelector("tbody", TbodyElement.class);
-	private final InputTextElement<String> userNameInput = document.getElementById("userName", InputTextElement.class);
-	
+	private final InputTextElement<String> userNameInput = document.getElementById("userName", InputTextElement.class, String.class);
+
 	@Connection
-    public void init(GreenContext context) {
+	public void init(JRenderContext context) {
 		document.getElementById("register").addEventListener(Events.CLICK, new FunctionHandle("register"));
-		
+
 		List<User> users = (List<User>) HibernateUtil.getCurrentSession().getNamedQuery("User.findAll").list();
-		
-		for (User user : users)
-			addUser(user.getId(), user.getName());
-    }
-	
+
+		for (User user : users) {
+			tbody.appendChild("<tr><td>{0}</td><td>{1}</td></tr>", user.getId(), user.getName());
+		}
+	}
+
 	@ForceSync
 	@Connection
 	public void register() {
 		String value = userNameInput.value().trim();
-		
+
 		User user = new User();
 		user.setName(value);
-		
+
 		int id = (Integer) HibernateUtil.getCurrentSession().save(user);
-		
+
 		addUser(id, value);
-		
+
 		userNameInput.value("");
-	}
-	
-	private void addUser(int id, String name) {
-		Element tr = document.createElement("tr");
-		
-		Element idTd = document.createElement("td");
-		Element nameTd = document.createElement("td");
-		
-		tr.appendChild(idTd);
-		tr.appendChild(nameTd);
-		
-		idTd.textContent(id+"");
-		nameTd.textContent(name);
-		
-		tbody.appendChild(tr);
 	}
 }
 ```
@@ -88,34 +74,11 @@ Java: BootAction.java
 
 ```java
 public class BootAction implements BootActionImplementation {
-	
-	public void init(String projectName, ClassLoader classLoader, ServletContext context, CoreFileJS coreFileJS) {}
-
 	public void destroy() {
 		HibernateUtil.destroy();
 	}
 	
-	public void initUserContext(GreenContext context) {}
-	
-	public void onRequest() {}
-
-	public boolean beforeAction(GreenContext context, Method requestMethod) {
-		return true;
-	}
-
-	public void afterAction(GreenContext context, Method requestMethod) {}
-	
-	public void beforeValidation(DataValidation dataValidation) {}
-
-	public void afterValidation(Form form, DataValidation dataValidation) {}
-
-	public void onRequest(HttpServletRequest request, HttpServletResponse response) {}
-
-	public void onException(GreenContext context, Exception e) {}
-
-	public boolean whenUnauthorized(GreenContext context) {
-		return false;
-	}
+	...
 }
 ```
 Java: HibernateUtil.java
@@ -123,59 +86,58 @@ Java: HibernateUtil.java
 ```java
 public class HibernateUtil implements DatabaseConnectionEvent {
 	private static final SessionFactory sessionFactory;
-    	
-    static {
-       Configuration configuration = new Configuration();
-        
-       configuration.addAnnotatedClass(User.class);
-       
-        /*try {
-			for (Class<?> c : PackageUtils.getClasses("database.model")) {
-				configuration.addAnnotatedClass(c);	
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}*/
-        
-        configuration.configure();
-        sessionFactory = configuration.buildSessionFactory(new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry());    	
-    }
-    
-    private Session session = sessionFactory.getCurrentSession();
-    private Transaction transaction = null;
-    
+
+	static {
+		Configuration configuration = new Configuration();
+
+		configuration.addAnnotatedClass(User.class);
+
+		/*
+		 * try { for (Class<?> c : PackageUtils.getClasses("database.model")) {
+		 * configuration.addAnnotatedClass(c); } } catch (IOException e) {
+		 * e.printStackTrace(); }
+		 */
+
+		configuration.configure();
+		sessionFactory = configuration.buildSessionFactory(new ServiceRegistryBuilder().applySettings(configuration.getProperties()).buildServiceRegistry());
+	}
+
+	private Session session = sessionFactory.getCurrentSession();
+	private Transaction transaction = null;
+
 	public void beforeRequest(Connection connection) {
 		if (session.getTransaction() != null && session.getTransaction().isActive())
 			this.transaction = session.getTransaction();
-	    else
-	    	this.transaction = session.beginTransaction();
+		else
+			this.transaction = session.beginTransaction();
 	}
-	
+
 	public void afterRequest() {
 		this.transaction.commit();
 		close();
 	}
-	
+
 	public void onError(Exception e) {
 		this.transaction.rollback();
 		close();
 	}
 
-	public void onSuccess() {}
-	
+	public void onSuccess() {
+	}
+
 	public void close() {
-		if(session.isConnected())
+		if (session.isConnected())
 			session.close();
 	}
-	
+
 	public static void destroy() {
 		sessionFactory.close();
 	}
-	
+
 	public Session getSession() {
 		return session;
 	}
-	
+
 	public static Session getCurrentSession() {
 		return sessionFactory.getCurrentSession();
 	}

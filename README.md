@@ -1,12 +1,15 @@
 jRender
 =========
-Is a java library that gives you the power to manipulate the DOM exactly like javascript, taking advantage of Object Orientation and language typing, rendering and validating your application with more security and performance.
+It's a library that allows Java to manipulate DOM, exactly like Javascript, using object orientation and language typing Java. Render and validate your application with more security and performance
 
 **Security:**
  All of its logic, as well as rendering and validation, can be performed inside the server, this way we hide code.
 
 **Performance:**
 The client-server communication is done with JSON, with this we have fewer bytes passing, which can be accomplished with either ajax, iframe or websocket.
+
+**JavaScript frameworks:**
+As the library allows interac with Dom, then it will have access to any framework created for Javascript, but to let the writing more close to Javascript, it will be necessary to create plug-ins, for example : [jQuery](https://github.com/mehah/JQuery) and [jQueryUI](https://github.com/mehah/JQueryUI).
 
 Min. Requirements
 - Java 1.6
@@ -49,38 +52,24 @@ public class IndexController extends Window {
 Real time visitor count, so that a refresh page isnt necessary.
 ```java
 @Page(name="index", path="index.html")
-public class IndexController extends Window {
-	private static boolean ENABLE_REAL_TIME_UPDATE = true;	
-	
+public class IndexController extends Window {	
 	private static int VISITORS_COUNT = 0;
 	
 	private final Element spanCount = document.getElementById("count");
 	
-	public void init(JRenderContext arg0) {		
-		spanCount.textContent((++VISITORS_COUNT)+"");		
+	private int lastCount;
+	
+	public void init(JRenderContext context) {		
+		spanCount.textContent((++VISITORS_COUNT)+"");
 		
-		if(ENABLE_REAL_TIME_UPDATE) {
-			setTimeout(new FunctionHandle("realTimeUpdate"), 1000);
-		}
+		this.lastCount = VISITORS_COUNT;
+		setInterval(new FunctionHandle("realTimeUpdate"), 1000);
 	}
-
-	/*
-	use setInterval to not have to use while, but will open a connection in the time configured
-	in the function, so that this does not occur, you must be using websocket-singleton.
-	*/
+	
 	public void realTimeUpdate() {
-		int lastCount = VISITORS_COUNT;
-		try {
-			while(true) {
-				if(lastCount != VISITORS_COUNT) {
-					lastCount = VISITORS_COUNT;
-					spanCount.textContent(VISITORS_COUNT+"");
-					flush();
-				}
-				Thread.sleep(1000);
-			}
-		} catch (Exception e) { // InterruptedException or ConnectionLost
-			e.printStackTrace();
+		if(this.lastCount != VISITORS_COUNT) {
+			this.lastCount = VISITORS_COUNT;
+			spanCount.textContent(VISITORS_COUNT+"");
 		}
 	}
 }
