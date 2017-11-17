@@ -8,7 +8,7 @@ It's a library that allows Java to manipulate DOM, exactly like Javascript, usin
 **Performance:**
 The client-server communication is done with JSON, with this we have fewer bytes passing, which can be accomplished with either ajax, iframe or websocket.
 
-**Frameworks Javascripts:**
+**JavaScript frameworks:**
 As the library allows interac with Dom, then it will have access to any framework created for Javascript, but to let the writing more close to Javascript, it will be necessary to create plug-ins, for example : [jQuery](https://github.com/mehah/JQuery) and [jQueryUI](https://github.com/mehah/JQueryUI).
 
 Min. Requirements
