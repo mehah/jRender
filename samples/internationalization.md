@@ -26,33 +26,33 @@ Html: index.html
 Java: IndexController.java
 
 ```java
-@Page(name="index", path="index.html")
+@Page(name = "index", path = "index.html")
 public class IndexController extends Window {
-	
-    public void init(GreenContext context) {
-    	// Set default user locale to pt-BR
-    	context.setUserLocale(new Locale("pt", "BR"));
-    	
-    	// Get element by Id(language)
-    	final SelectElement selectElement = document.getElementById("language", SelectElement.class);
-    	
-    	// Register Event 'Change'
-    	selectElement.addEventListener(Events.CHANGE, new FunctionHandle(new SimpleFunction() {
-    		
-    		// Force sync only for the selectedIndex atribute
-    		@ForceSync("selectedIndex")
-			public void init(GreenContext context) {
-    			// Retrieve the index highlighted from select
-    			Integer selectedIndex = selectElement.selectedIndex();
-    			
-    			// The method options(eager = true), retrieve all the options at once with their respective atributes
-    			for (OptionElement option : selectElement.options(true)) {
-					if(selectedIndex.equals(option.index())) {
+
+	public void init(JRenderContext context) {
+		// Set default user locale to pt-BR
+		context.setUserLocale(new Locale("pt", "BR"));
+
+		// Get element by Id(language)
+		final SelectElement<String> selectElement = document.getElementById("language", SelectElement.class, String.class);
+
+		// Register Event 'Change'
+		selectElement.addEventListener(Events.CHANGE, new FunctionHandle(new SimpleFunction() {
+
+			// Force sync only for the selectedIndex atribute
+			@ForceSync("selectedIndex")
+			public void init(JRenderContext context) {
+				// Retrieve the index highlighted from select
+				Integer selectedIndex = selectElement.selectedIndex();
+
+				// The method options(eager = true), retrieve all the options at once with their respective atributes
+				for (OptionElement<String> option : selectElement.options(true)) {
+					if (selectedIndex.equals(option.index())) {
 						String[] language = option.value().split("-");
-						
+
 						// Sets user locale according to selected option.
 						context.setUserLocale(new Locale(language[0], language[1]));
-						
+
 						// Show on console the current property of userLocale
 						System.out.println(Message.getMessage("message.messageByController"));
 						break;
@@ -60,7 +60,7 @@ public class IndexController extends Window {
 				}
 			}
 		}));
-    }
+	}
 }
 ```
 
