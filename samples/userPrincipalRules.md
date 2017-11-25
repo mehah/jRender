@@ -4,7 +4,7 @@ Html: index.html
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>Greencode</title>
+		<title>jRender</title>
 	</head>
 	<body>
 		<form name="loginForm">
@@ -21,7 +21,7 @@ Html: home.html
 <html>
 	<head>
 		<meta charset="UTF-8">
-		<title>Greencode</title>
+		<title>jRender</title>
 	</head>
 	<body>
 		<a href="#" id="exit">Exit</a>
@@ -31,43 +31,42 @@ Html: home.html
 Java: IndexController.java
 
 ```java
-@Page(name="index", path="index.html")
+@Page(name = "index", path = "index.html")
 public class IndexController extends Window {
-    public void init(GreenContext context) {
-    	document.getElementById("login").addEventListener(Events.CLICK, new FunctionHandle("login"));
-    	    	
-    	if(context.getRequest().getUserPrincipal() != null) {
-    		location.href(HomeController.class);
-    	}
-    }
-    
-    public void login(GreenContext context) {
-    	LoginForm form = document.forms(LoginForm.class);
-    	
-    	if(form.getName() != null && form.getPassword() != null &&
-    		form.getName().equals("greencode") && form.getPassword().equals("123456")){
-    		context.getRequest().setUserPrincipal(new Usuario("Greencode"));
-    		location.href(HomeController.class);
-    	}else
-    		alert("User: greencode / Password: 123456");
-    }
+	public void init(JRenderContext context) {
+		document.getElementById("login").addEventListener(Events.CLICK, new FunctionHandle("login"));
+
+		if (context.getRequest().getUserPrincipal() != null) {
+			location.href(HomeController.class);
+		}
+	}
+
+	public void login(JRenderContext context) {
+		LoginForm form = document.forms(LoginForm.class);
+
+		if (form.getName() != null && form.getPassword() != null && form.getName().equals("greencode") && form.getPassword().equals("123456")) {
+			context.getRequest().setUserPrincipal(new Usuario("Greencode"));
+			location.href(HomeController.class);
+		} else
+			alert("User: greencode / Password: 123456");
+	}
 }
 ```
 Java: HomeController.java
 
 ```java
-@Page(name="home", path="home.html", rules="ACCESS_HOME")
+@Page(name = "home", path = "home.html", rules = "ACCESS_HOME")
 public class HomeController extends Window {
-	
+
 	// OR @RulesAllowed("ACCESS_HOME")
-    public void init(GreenContext context) {
-    	document.getElementById("exit").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
+	public void init(JRenderContext context) {
+		document.getElementById("exit").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
 			public void init(GreenContext context) {
 				context.getRequest().getSession().invalidate();
 				location.href(IndexController.class);
 			}
 		}));
-    }
+	}
 }
 ```
 Java: LoginForm.java
