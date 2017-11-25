@@ -25,19 +25,16 @@ final class Rule {
 		}
 	}
 	
-	private static boolean process(JRenderContext context, String[] rules) throws IOException {
-		boolean hasAccess = false;
-		
+	private static boolean process(JRenderContext context, String[] rules) throws IOException {		
 		if(context.request.getUserPrincipal() != null) {
 			for (String rule : rules) {
 				if(((UserPrincipal)context.request.getUserPrincipal()).hasRule(rule)) {
-					hasAccess = true;
-					break;
+					return true;
 				}
 			}
 		}		
 	
-		return hasAccess;
+		return false;
 	}
 	
 	static void runAuthorizationMethod(JRenderContext context) throws IOException {
