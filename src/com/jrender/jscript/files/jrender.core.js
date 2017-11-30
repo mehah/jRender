@@ -2,8 +2,7 @@ JRender.core = {
 	__isFirefox: window.mozInnerScreenX != null,
 	analizeJSON: function(mainElement, j, target) {
 		if (j && (JRender.jQuery.isPlainObject(j) || JRender.jQuery.isArray(j))) {
-
-			var f = function(p) {
+			var f = function(p, i) {
 				if (p) {
 					if (p.url && p.requestMethod) {
 						j[i] = function(event) {
@@ -26,8 +25,8 @@ JRender.core = {
 				}
 			};
 
-			for (var i = -1; ++i < j.length;) {
-				f(j[i]);
+			for(i in j) {
+				f(j[i], i);
 			}
 		}
 	},
