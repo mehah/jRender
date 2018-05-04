@@ -32,8 +32,7 @@ Java: IndexController.java
 @Page(name="index", path="index.html")
 public class IndexController extends Window {
 	private final Element div = document.getElementById("content");
-	
-    public void init(JRenderContext context) {
+	public void init(JRenderContext context) {
 		document.getElementById("showContent").addEventListener(Events.CLICK, new FunctionHandle(new SimpleFunction() {
 			public void init(JRenderContext context) {
 				div.replaceWith(AnyController.class);
@@ -45,7 +44,7 @@ public class IndexController extends Window {
 				div.empty();
 			}
 		}));
-    }
+	}
 }
 ```
 Java: AnyController.java
