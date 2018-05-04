@@ -12,8 +12,8 @@ import com.jrender.util.LogMessage;
 final class Rule {
 
 	static boolean forClass(JRenderContext context, FileWeb page) throws IOException {
-		if(page.pageAnnotation.rules().length > 0) 
-			return process(context, page.pageAnnotation.rules());
+		if(page.router.rules != null) 
+			return process(context, page.router.rules);
 		
 		return true;
 	}

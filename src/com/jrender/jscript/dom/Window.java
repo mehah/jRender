@@ -9,8 +9,8 @@ import com.jrender.jscript.DOMHandle;
 import com.jrender.jscript.DOMHandle.UIDReference;
 import com.jrender.jscript.dom.function.implementation.Function;
 import com.jrender.jscript.dom.function.implementation.SimpleFunction;
-import com.jrender.jscript.dom.window.annotation.Page;
 import com.jrender.kernel.JRenderContext;
+import com.jrender.kernel.Router;
 
 public abstract class Window extends EventTarget implements HttpAction {
 	
@@ -21,7 +21,7 @@ public abstract class Window extends EventTarget implements HttpAction {
 	public final Location location;
 	public final History history;
 	public final Navigator navigator;
-	final Page currentPageAnnotation;
+	final Router currentRouter;
 	
 	private final Element principalElement; 
 	
@@ -34,7 +34,7 @@ public abstract class Window extends EventTarget implements HttpAction {
 			com.jrender.kernel.$JRenderContext.setCurrentWindow(context, this);			
 		}
 		
-		this.currentPageAnnotation = context.currentPageAnnotation();
+		this.currentRouter = context.currentRouter();
 		
 		com.jrender.jscript.$DOMHandle.setUID(this, UIDReference.WINDOW_ID.ordinal());
 		

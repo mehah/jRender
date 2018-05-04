@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.jrender.http.Conversation;
 import com.jrender.jscript.dom.function.implementation.Function;
 import com.jrender.jscript.dom.window.annotation.Page;
+import com.jrender.kernel.Router;
 
 public class $Window {
 	private $Window() {}
@@ -24,8 +25,8 @@ public class $Window {
 		return window.functions == null ? window.functions = new HashMap<Integer, Function>() : window.functions;
 	}
 	
-	public static Page getCurrentPageAnnotation(Window window) {
-		return window.currentPageAnnotation;
+	public static Router getCurrentRouter(Window window) {
+		return window.currentRouter;
 	}
 	
 	public static Element getElementInstance(Window window) {

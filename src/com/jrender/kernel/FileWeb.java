@@ -23,7 +23,6 @@ import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 import com.jrender.exception.JRenderError;
 import com.jrender.jscript.dom.FunctionHandle;
 import com.jrender.jscript.dom.Window;
-import com.jrender.jscript.dom.window.annotation.Page;
 import com.jrender.util.FileUtils;
 import com.jrender.util.GenericReflection;
 import com.jrender.util.LogMessage;
@@ -34,9 +33,9 @@ public final class FileWeb {
 	final static Map<String, FileWeb> files = new HashMap<String, FileWeb>();
 	private final static HashSet<String> requestsCached = new HashSet<String>();
 
-	FileWeb(Class<? extends Window> window, Page pageAnnotation) {
+	FileWeb(Class<? extends Window> window, Router router) {
 		this.window = window;
-		this.pageAnnotation = pageAnnotation;
+		this.router = router;
 	}
 
 	FileWeb() {
@@ -44,7 +43,7 @@ public final class FileWeb {
 	}
 
 	final Class<? extends Window> window;
-	final Page pageAnnotation;
+	final Router router;
 
 	private File file;
 	private String content, selector, selectedContent, ajaxSelector, ajaxSelectedContent;
@@ -152,7 +151,7 @@ public final class FileWeb {
 
 					fileWeb = files.get(path);
 				} else
-					path = fileWeb.isMobile ? fileWeb.pageAnnotation.mobile().path() : fileWeb.pageAnnotation.path();
+					path = fileWeb.isMobile ? fileWeb.router.mobile.path : fileWeb.router.path;
 
 				if(fileWeb != null && !fileWeb.changed())
 					return fileWeb;
@@ -362,18 +361,22 @@ public final class FileWeb {
 
 		return null;
 	}
+	
+	static void unregisterPage(String path) {
+		files.remove(path);
+	}
 
-	static void registerPage(ClassLoader classLoader, Class<? extends Window> c, Page page, File jrenderFolder) throws IOException {
-		String path = page.path();
-		if(files.containsKey(path) && page.URLName().isEmpty() || !(path = page.URLName()).isEmpty() && files.containsKey(path)) {
+	static void registerPage(ClassLoader classLoader, Class<? extends Window> c, Router router, File jrenderFolder) throws IOException {
+		String path = router.path;
+		if(files.containsKey(path) && router.urlName == null || (path = router.urlName) != null && files.containsKey(path)) {
 			Console.warning(LogMessage.getMessage("0022", path, c.getSimpleName(), files.get(path).window.getSimpleName()));
 		} else {
-			FileWeb pReference = new FileWeb(c, page);
+			FileWeb pReference = new FileWeb(c, router);
 
-			if(!page.mobile().path().isEmpty()) {
-				FileWeb mobileFileWeb = new FileWeb(c, page);
+			if(router.mobile != null && router.mobile.path != null) {
+				FileWeb mobileFileWeb = new FileWeb(c, router);
 
-				File file = FileUtils.getFileInWebContent(page.mobile().path());
+				File file = FileUtils.getFileInWebContent(router.mobile.path);
 				if(file.exists()) {
 					mobileFileWeb.file = file;
 					mobileFileWeb.isMobile = true;
@@ -383,13 +386,13 @@ public final class FileWeb {
 
 					pReference.mobileFile = mobileFileWeb;
 				} else
-					throw new JRenderError(LogMessage.getMessage("0014", page.mobile().path()));
+					throw new JRenderError(LogMessage.getMessage("0014", router.mobile.path));
 			} else {
 				
 			}
 
-			if(!page.jsModule().isEmpty()) {
-				final String modulePath = StringUtils.replace(page.jsModule(), ".", "/") + ".js";
+			if(router.jsModule != null) {
+				final String modulePath = StringUtils.replace(router.jsModule, ".", "/") + ".js";
 
 				final URL url = classLoader.getResource(modulePath);
 
@@ -411,26 +414,26 @@ public final class FileWeb {
 						}
 					}
 
-					FileUtils.createFile("JRender.modules." + page.name() + "=function(principalElement, __viewId, __cid){" + methodsJS.toString() + FileUtils.getContentFile(url) + "}", modulesFolder.getPath() + "/" + modulePath.substring(modulePath.lastIndexOf('/')));
+					FileUtils.createFile("JRender.modules." + router.name + "=function(principalElement, __viewId, __cid){" + methodsJS.toString() + FileUtils.getContentFile(url) + "}", modulesFolder.getPath() + "/" + modulePath.substring(modulePath.lastIndexOf('/')));
 				} catch(IOException e) {
 					e.printStackTrace();
 				}
 			}
 
-			File file = FileUtils.getFileInWebContent(page.path());
+			File file = FileUtils.getFileInWebContent(router.path);
 			if(file.exists()) {
 				pReference.file = file;
-				files.put(page.URLName().isEmpty() ? page.path() : page.URLName(), pReference);
+				files.put(router.urlName == null ? router.path : router.urlName, pReference);
 
 				if(JRenderConfig.Server.View.bootable)
 					loadStructure(file, pReference, true);
 			} else
-				throw new JRenderError(LogMessage.getMessage("0014", page.path()));
+				throw new JRenderError(LogMessage.getMessage("0014", router.path));
 		}
 	}
 	
 	static String getModuleName(String jsModule) {
-		if(jsModule.isEmpty())
+		if(jsModule == null)
 			return null;
 		
 		final String modulePath = StringUtils.replace(jsModule, ".", "/") + ".js";
@@ -453,7 +456,7 @@ public final class FileWeb {
 					return fileWeb;
 				}
 
-				servletPath = fileWeb.pageAnnotation.path();
+				servletPath = fileWeb.router.path;
 				isView = true;
 			} else {
 				final String ext = FileUtils.getExtension(servletPath);

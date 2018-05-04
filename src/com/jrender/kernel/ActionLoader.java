@@ -21,12 +21,13 @@ import com.jrender.jscript.dom.window.annotation.Validate;
 import com.jrender.jscript.dom.window.annotation.ViewSessionAttribute;
 import com.jrender.util.ClassUtils;
 import com.jrender.util.GenericReflection;
-import com.jrender.util.StringUtils;
 import com.jrender.util.GenericReflection.Condition;
+import com.jrender.util.StringUtils;
 import com.jrender.validator.DataValidation;
 
 final class ActionLoader {
-	private ActionLoader() {}
+	private ActionLoader() {
+	}
 
 	private final static Condition<Field> conditionAnnotationField = new GenericReflection.Condition<Field>() {
 		public boolean init(Field f) {
@@ -64,18 +65,18 @@ final class ActionLoader {
 					if (value != null) {
 						value = fieldType.equals(String.class) ? StringUtils.toCharset((String) value, JRenderConfig.Server.View.charset) : GenericReflection.getDeclaredMethod(ClassUtils.toWrapperClass(fieldType), "valueOf", String.class).invoke(null, context.request.getParameter(parametro));
 
-						if(value instanceof String) {
+						if (value instanceof String) {
 							if (requestParameterAnnotation.trim())
 								value = ((String) value).trim();
 
 							if (requestParameterAnnotation.removeMultipleSpaces())
 								value = StringUtils.removeMultipleSpaces(((String) value));
-							
-							if(((String) value).isEmpty()) {
+
+							if (((String) value).isEmpty()) {
 								value = null;
 							}
 						}
-						
+
 						f.set(controller, value);
 					} else {
 						f.set(controller, ClassUtils.getDefaultValue(fieldType));

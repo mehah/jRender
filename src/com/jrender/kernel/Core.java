@@ -46,8 +46,8 @@ import com.jrender.http.HttpAction;
 import com.jrender.http.HttpRequest;
 import com.jrender.jscript.DOM;
 import com.jrender.jscript.DOMHandle;
-import com.jrender.jscript.JSExecutor;
 import com.jrender.jscript.DOMHandle.UIDReference;
+import com.jrender.jscript.JSExecutor;
 import com.jrender.jscript.dom.Element;
 import com.jrender.jscript.dom.ElementHandle;
 import com.jrender.jscript.dom.Form;
@@ -70,11 +70,11 @@ import com.jrender.kernel.implementation.PluginImplementation;
 import com.jrender.util.ArrayUtils;
 import com.jrender.util.ClassUtils;
 import com.jrender.util.FileUtils;
+import com.jrender.util.FileUtils.FileRead;
 import com.jrender.util.GenericReflection;
 import com.jrender.util.LogMessage;
 import com.jrender.util.ObjectUtils;
 import com.jrender.util.PackageUtils;
-import com.jrender.util.FileUtils.FileRead;
 
 @WebFilter(displayName = "core", urlPatterns = "/*")
 public final class Core implements Filter {
@@ -203,9 +203,9 @@ public final class Core implements Filter {
 					listArgsClass = new Class<?>[] { JRenderContext.class };
 					String content;
 					if (!isFirstRequest)
-						content = page.pageAnnotation.ajaxSelector().isEmpty() ? page.getContent(context) : page.getAjaxSelectedContent(page.pageAnnotation.ajaxSelector(), context);
-					else if (!page.pageAnnotation.selector().isEmpty())
-						content = page.getSelectedContent(page.pageAnnotation.selector(), context);
+						content = page.router.ajaxSelector == null ? page.getContent(context) : page.getAjaxSelectedContent(page.router.ajaxSelector, context);
+					else if (page.router.selector != null)
+						content = page.getSelectedContent(page.router.selector, context);
 					else
 						content = page.getContent(context);
 					
@@ -220,7 +220,7 @@ public final class Core implements Filter {
 						context.response.getWriter().write(content);
 					}
 
-					String moduleName = FileWeb.getModuleName(page.pageAnnotation.jsModule());
+					String moduleName = FileWeb.getModuleName(page.router.jsModule);
 					if (moduleName != null) {
 						DOMScanner.registerExecution(new JSExecutor(context, "JRender.util.loadScript", JSExecutor.TYPE.METHOD, Core.CONTEXT_PATH + "/jscript/jrender/modules/" + moduleName + ".js", false, JRenderConfig.Server.View.charset));
 					}
@@ -384,7 +384,7 @@ public final class Core implements Filter {
 						if (requestController instanceof Window && methodName.equals(Core.INIT_METHOD_NAME)) {
 							((Window) requestController).init(context);
 
-							String moduleName = FileWeb.getModuleName(context.currentPageAnnotation().jsModule());
+							String moduleName = FileWeb.getModuleName(context.currentRouter().jsModule);
 							if (moduleName != null) {
 								DOMHandle.execCommand(context.currentWindow, "JRender.modules." + moduleName + ".call", context.currentWindow.principalElement(), context.currentWindow.principalElement(), context.request.getViewSession().getId(), context.request.getConversationId());
 							}

@@ -43,7 +43,7 @@ public final class JRenderContext {
 	final HttpRequest request;
 	final HttpServletResponse response;
 	final WebSocketData webSocketData;
-	final com.jrender.jscript.dom.window.annotation.Page currentPageAnnotation;
+	final Router currentRouter;
 	final public Gson gsonInstance = getGsonInstance();
 	
 	boolean userLocaleChanged = false;	
@@ -71,17 +71,16 @@ public final class JRenderContext {
 		if(currentPage == null) {
 			String servletPath = this.request.getParameter("servletPath");
 			if(servletPath != null) {
-				this.currentPageAnnotation = FileWeb.files.get(servletPath).pageAnnotation;
+				this.currentRouter = FileWeb.files.get(servletPath).router;
 			} else {
-				this.currentPageAnnotation = null;
+				this.currentRouter = null;
 			}
 		} else
-			this.currentPageAnnotation = currentPage.pageAnnotation;
+			this.currentRouter = currentPage.router;
 		
-		if(this.currentPageAnnotation != null) {
-			if (!(this.currentPageAnnotation.parameters().length == 1 && this.currentPageAnnotation.parameters()[0].name().isEmpty())) {
-				for (PageParameter p : this.currentPageAnnotation.parameters())
-					com.jrender.http.$HttpRequest.getParameters(this.request).put(p.name(), p.value());
+		if(this.currentRouter != null && this.currentRouter.parameters != null) {
+			for (String key :  this.currentRouter.parameters.keySet()) {
+				com.jrender.http.$HttpRequest.getParameters(this.request).put(key, this.currentRouter.parameters.get(key));
 			}
 		}
 		
@@ -143,10 +142,10 @@ public final class JRenderContext {
 		return this.requestedMethod;
 	}
 	
-	public com.jrender.jscript.dom.window.annotation.Page currentPageAnnotation() {
+	public Router currentRouter() {
 		exceptionCheck();
 		
-		return this.currentPageAnnotation == null ? com.jrender.jscript.dom.$Window.getCurrentPageAnnotation(currentWindow()) : this.currentPageAnnotation;
+		return this.currentRouter == null ? com.jrender.jscript.dom.$Window.getCurrentRouter(currentWindow()) : this.currentRouter;
 	}
 	
 	Gson getGsonInstance() {
