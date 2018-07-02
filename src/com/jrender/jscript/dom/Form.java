@@ -23,11 +23,13 @@ import com.jrender.kernel.JRenderContext;
 import com.jrender.util.ClassUtils;
 import com.jrender.util.GenericReflection;
 import com.jrender.util.LogMessage;
+import com.jrender.validator.DataValidation;
 import com.jrender.util.GenericReflection.Condition;
 
 public abstract class Form extends Element implements ContainerElementImplementation {
 	final Field[] elementFields = $Container.processFields(getClass());
 	Map<Integer, ContainerElement<?>> containers;
+	DataValidation dataValidation;
 
 	private static final Condition<Field> fieldsWithRegisterEvent = new Condition<Field>() {
 		public boolean init(Field arg0) {
@@ -51,7 +53,7 @@ public abstract class Form extends Element implements ContainerElementImplementa
 
 		Visible visibleAnnotation = getClass().getAnnotation(Visible.class);
 
-		if(visibleAnnotation == null)
+		if (visibleAnnotation == null)
 			DOMHandle.registerReturnByCommand(this, window.principalElement(), "querySelector", "form[name=\"" + name + "\"]");
 		else
 			DOMHandle.registerReturnByCommand(this, window.principalElement(), "querySelector", "form[name=\"" + name + "\"]", "return (this.offsetHeight " + (visibleAnnotation.value() ? "!" : "=") + "== 0);");
@@ -59,53 +61,53 @@ public abstract class Form extends Element implements ContainerElementImplementa
 
 	void processAnnotation() {
 		Field[] fields = GenericReflection.getDeclaredFieldsByConditionId(getClass(), "form:fieldsWithFindElement");
-		if(fields == null)
+		if (fields == null)
 			fields = GenericReflection.getDeclaredFieldsByCondition(getClass(), "form:fieldsWithFindElement", fieldsWithFindElement, true);
 
-		for(Field f: fields) {
-			if(GenericReflection.NoThrow.getValue(f, this) != null)
+		for (Field f : fields) {
+			if (GenericReflection.NoThrow.getValue(f, this) != null)
 				continue;
 
 			QuerySelector a = f.getAnnotation(QuerySelector.class);
 			Object v = null;
 			Class<? extends Element> type = (Class<? extends Element>) f.getType();
 
-			if(a != null) {
+			if (a != null) {
 				Element context;
 				searchContext: {
-					if(!a.context().isEmpty()) {
-						for(Field f2: fields) {
-							if(f2.getName().equals(a.context())) {
+					if (!a.context().isEmpty()) {
+						for (Field f2 : fields) {
+							if (f2.getName().equals(a.context())) {
 								context = (Element) GenericReflection.NoThrow.getValue(f2, this);
 								break searchContext;
 							}
 						}
-						
+
 						throw new JRenderError(LogMessage.getMessage("0041", a.context(), f.getName(), getClass().getSimpleName()));
-					}else
+					} else
 						context = this;
 				}
-				
-				if(type.isArray()) {
+
+				if (type.isArray()) {
 					v = ElementHandle.cast(context.querySelectorAll(a.selector()), (Class<? extends Element>) type.getComponentType());
 				} else {
 					v = context.querySelector(a.selector(), type);
 				}
 			} else {
-				if(!type.isArray()) {
+				if (!type.isArray()) {
 					ElementValue aev = f.getAnnotation(ElementValue.class);
-					
+
 					String name = aev.name().isEmpty() ? f.getName() : aev.name();
 					String selector = "[name='" + name + "']";
-				
+
 					Class<?> typeValue = null;
-					
-					if(com.jrender.jscript.dom.elements.$Element.isElementWithValue(type)) {
-						typeValue = f.getGenericType() instanceof ParameterizedType ? (Class<?>)((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0] : String.class;						
+
+					if (com.jrender.jscript.dom.elements.$Element.isElementWithValue(type)) {
+						typeValue = f.getGenericType() instanceof ParameterizedType ? (Class<?>) ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0] : String.class;
 					}
-					
+
 					v = this.querySelector(selector, type, typeValue);
-					DOMHandle.setVariableValue((DOM)v, "name", name);
+					DOMHandle.setVariableValue((DOM) v, "name", name);
 				}
 			}
 
@@ -113,21 +115,21 @@ public abstract class Form extends Element implements ContainerElementImplementa
 		}
 
 		fields = GenericReflection.getDeclaredFieldsByConditionId(getClass(), "form:elementsWithRegisterEvent");
-		if(fields == null)
+		if (fields == null)
 			fields = GenericReflection.getDeclaredFieldsByCondition(getClass(), "form:elementsWithRegisterEvent", fieldsWithRegisterEvent);
 
-		for(Field f: fields) {
+		for (Field f : fields) {
 			Event[] events = f.getAnnotation(RegisterEvent.class).value();
 			EventTarget et = (EventTarget) GenericReflection.NoThrow.getValue(f, this);
 
-			if(et == null)
+			if (et == null)
 				throw new RuntimeException(LogMessage.getMessage("0036", f.getName(), getClass().getSimpleName()));
 
-			for(Event e: events) {
+			for (Event e : events) {
 				FunctionHandle fh = new FunctionHandle(e.windowAction(), e.method());
 				fh.setRequestMethod(e.requestMethod());
 
-				for(String n: e.name())
+				for (String n : e.name())
 					et.addEventListener(n, fh);
 			}
 		}
@@ -188,15 +190,15 @@ public abstract class Form extends Element implements ContainerElementImplementa
 	public void reset() {
 		Field[] fields = com.jrender.jscript.dom.$Container.getElementFields(this);
 		try {
-			for(Field f: fields) {
+			for (Field f : fields) {
 				Class<?> fieldType = f.getType();
-				
-				if(com.jrender.jscript.dom.elements.$Element.isElementWithValue(fieldType))
+
+				if (com.jrender.jscript.dom.elements.$Element.isElementWithValue(fieldType))
 					DOMHandle.setVariableValue((Element) f.get(this), "value", null);
 				else
 					f.set(this, ClassUtils.getDefaultValue(fieldType));
 			}
-		} catch(Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -210,39 +212,43 @@ public abstract class Form extends Element implements ContainerElementImplementa
 	public void fill() {
 		com.jrender.jscript.dom.$Container.fill(this, elementFields);
 	}
-	
+
 	public String toString() {
 		try {
 			StringBuilder query = new StringBuilder();
 			Field[] fields = com.jrender.jscript.dom.$Container.getElementFields(this);
 			for (int i = -1, s = fields.length; ++i < s;) {
 				Field f = fields[i];
-				
+
 				Object value = f.get(this);
-				if(Modifier.isTransient(f.getModifiers()) || value == null) {
+				if (Modifier.isTransient(f.getModifiers()) || value == null) {
 					continue;
 				}
-				
+
 				if (value instanceof Element) {
-					value = DOMHandle.getVariableValue((Element)value, "value", Object.class);
-					if(value == null) {
+					value = DOMHandle.getVariableValue((Element) value, "value", Object.class);
+					if (value == null) {
 						continue;
 					}
 				}
-				
-				if(i > 0) {
+
+				if (i > 0) {
 					query.append('&');
 				}
-				
+
 				ElementValue aev = f.getAnnotation(ElementValue.class);
-				query.append(aev.name().isEmpty() ? f.getName() : aev.name()).append('=').append(value.toString());	
+				query.append(aev.name().isEmpty() ? f.getName() : aev.name()).append('=').append(value.toString());
 			}
-			
+
 			return URLEncoder.encode(query.toString(), JRenderConfig.Server.View.charset);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
+	}
+
+	public DataValidation getValidation() {
+		return this.dataValidation;
 	}
 }

@@ -91,8 +91,9 @@ final class Validate {
 		Console.log("Calling Validator of "+name+": [" + oValidation.getClass().getSimpleName() + "]");
 
 		boolean res = oValidation.validate(context.currentWindow, form, container, element, name, value, validation.labels(), dataValidation);
-		if(!res)
-			context.executeAction = false;
+		if(!res) {
+			com.jrender.validator.$DataValidation.putError(dataValidation, validation.value());
+		}
 
 		return res;
 	}

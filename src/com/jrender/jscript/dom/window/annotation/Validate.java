@@ -13,4 +13,5 @@ public @interface Validate {
 	public String[] fields() default {};
 	public String[] blocks() default {};
 	public ValidateType type() default ValidateType.PARTIAL;
+	public boolean proceed() default false;
 }

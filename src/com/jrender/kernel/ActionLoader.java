@@ -107,7 +107,12 @@ final class ActionLoader {
 				Cache.bootAction.beforeValidation(data);
 			}
 
+			com.jrender.jscript.dom.$Form.setDataValidation(context.requestedForm, data);
 			com.jrender.kernel.Validate.validate(context, requestMethod, context.requestedForm, null, data);
+			
+			if(!data.getRequester().proceed() && data.hasError()) {
+				context.executeAction = false;
+			}
 
 			if (Cache.bootAction != null) {
 				Console.log("Calling AfterValidation: [" + classNameBootAction + "]");
