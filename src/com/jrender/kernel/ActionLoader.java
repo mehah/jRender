@@ -63,7 +63,7 @@ final class ActionLoader {
 
 					Object value = context.request.getParameter(parametro);
 					if (value != null) {
-						value = fieldType.equals(String.class) ? StringUtils.toCharset((String) value, JRenderConfig.Server.View.charset) : GenericReflection.getDeclaredMethod(ClassUtils.toWrapperClass(fieldType), "valueOf", String.class).invoke(null, context.request.getParameter(parametro));
+						value = fieldType.equals(String.class) ? requestParameterAnnotation.useServerCharset() ? StringUtils.toCharset((String) value, JRenderConfig.Server.View.charset) : value : GenericReflection.getDeclaredMethod(ClassUtils.toWrapperClass(fieldType), "valueOf", String.class).invoke(null, context.request.getParameter(parametro));
 
 						if (value instanceof String) {
 							if (requestParameterAnnotation.trim())

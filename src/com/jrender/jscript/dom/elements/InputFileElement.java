@@ -20,11 +20,6 @@ public class InputFileElement extends InputElementDisabling<Part> {
 		DOMHandle.setProperty(this, "accept", "accept");
 	}
 
-	public Part partFile() {
-		return DOMHandle.getVariableValueByProperty(this, "$$_file_" + DOMHandle.getUID(this), Part.class,
-				"__partFile");
-	}
-
 	public static InputFileElement cast(Element e) {
 		return ElementHandle.cast(e, InputFileElement.class);
 	}

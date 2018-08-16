@@ -6,11 +6,14 @@ import java.lang.reflect.ParameterizedType;
 import java.net.URLEncoder;
 import java.util.Map;
 
+import javax.servlet.http.Part;
+
 import com.jrender.exception.JRenderError;
 import com.jrender.http.enumeration.RequestMethod;
 import com.jrender.jscript.DOM;
 import com.jrender.jscript.DOMHandle;
 import com.jrender.jscript.dom.annotation.QuerySelector;
+import com.jrender.jscript.dom.elements.InputFileElement;
 import com.jrender.jscript.dom.elements.custom.ContainerElement;
 import com.jrender.jscript.dom.elements.custom.implementation.ContainerElementImplementation;
 import com.jrender.jscript.dom.form.annotation.ElementValue;
@@ -102,7 +105,7 @@ public abstract class Form extends Element implements ContainerElementImplementa
 
 					Class<?> typeValue = null;
 
-					if (com.jrender.jscript.dom.elements.$Element.isElementWithValue(type)) {
+					if (!type.equals(InputFileElement.class) && com.jrender.jscript.dom.elements.$Element.isElementWithValue(type)) {
 						typeValue = f.getGenericType() instanceof ParameterizedType ? (Class<?>) ((ParameterizedType) f.getGenericType()).getActualTypeArguments()[0] : String.class;
 					}
 

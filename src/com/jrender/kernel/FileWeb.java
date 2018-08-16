@@ -23,6 +23,8 @@ import com.googlecode.htmlcompressor.compressor.HtmlCompressor;
 import com.jrender.exception.JRenderError;
 import com.jrender.jscript.dom.FunctionHandle;
 import com.jrender.jscript.dom.Window;
+import com.jrender.jscript.dom.window.annotation.DynamicRouter;
+import com.jrender.jscript.dom.window.annotation.Sync;
 import com.jrender.util.FileUtils;
 import com.jrender.util.GenericReflection;
 import com.jrender.util.LogMessage;
@@ -54,6 +56,8 @@ public final class FileWeb {
 
 	private FileWeb mobileFile;
 	private boolean isMobile;
+	
+	boolean initSynchronized;
 
 	private FileWeb getCurrent(JRenderContext context) {
 		return mobileFile != null && context.getRequest().isMobile() ? mobileFile : this;
@@ -372,6 +376,10 @@ public final class FileWeb {
 			Console.warning(LogMessage.getMessage("0022", path, c.getSimpleName(), files.get(path).window.getSimpleName()));
 		} else {
 			FileWeb pReference = new FileWeb(c, router);
+			
+			Method initMethod = GenericReflection.NoThrow.getMethod(c, Core.INIT_METHOD_NAME, new Class<?>[]{JRenderContext.class});
+			
+			pReference.initSynchronized = initMethod.getAnnotation(Sync.class) != null;
 
 			if(router.mobile != null && router.mobile.path != null) {
 				FileWeb mobileFileWeb = new FileWeb(c, router);
@@ -420,15 +428,19 @@ public final class FileWeb {
 				}
 			}
 
-			File file = FileUtils.getFileInWebContent(router.path);
-			if(file.exists()) {
-				pReference.file = file;
+			if(c.getAnnotation(DynamicRouter.class) == null || router.path != null) {
+				File file = FileUtils.getFileInWebContent(router.path);
+				if(file.exists()) {
+					pReference.file = file;
+					files.put(router.urlName == null ? router.path : router.urlName, pReference);
+		
+					if(JRenderConfig.Server.View.bootable)
+						loadStructure(file, pReference, true);
+				} else
+					throw new JRenderError(LogMessage.getMessage("0014", router.path));
+			} else {
 				files.put(router.urlName == null ? router.path : router.urlName, pReference);
-
-				if(JRenderConfig.Server.View.bootable)
-					loadStructure(file, pReference, true);
-			} else
-				throw new JRenderError(LogMessage.getMessage("0014", router.path));
+			}
 		}
 	}
 	

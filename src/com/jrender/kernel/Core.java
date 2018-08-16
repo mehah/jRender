@@ -217,7 +217,10 @@ public final class Core implements Filter {
 						if (!isFirstRequest && com.jrender.http.$HttpRequest.contentIsHtml(context.request)) {
 							content = "<ajaxcontent>" + content + "</ajaxcontent>";
 						}
-						context.response.getWriter().write(content);
+						
+						if(content != null) {
+							context.response.getWriter().write(content);
+						}
 					}
 
 					String moduleName = FileWeb.getModuleName(page.router.jsModule);
@@ -225,7 +228,7 @@ public final class Core implements Filter {
 						DOMScanner.registerExecution(new JSExecutor(context, "JRender.util.loadScript", JSExecutor.TYPE.METHOD, Core.CONTEXT_PATH + "/jscript/jrender/modules/" + moduleName + ".js", false, JRenderConfig.Server.View.charset));
 					}
 					
-					if(isFirstRequest) {						
+					if(isFirstRequest && !page.initSynchronized) {						
 						if (context.userLocaleChanged) {
 							DOMScanner.registerExecution(new JSExecutor(context, "JRender.util.loadScript", JSExecutor.TYPE.METHOD, Core.CONTEXT_PATH + "/jscript/jrender/msg_" + context.userLocale.toString() + ".js", false, JRenderConfig.Server.View.charset));
 						}
@@ -246,8 +249,6 @@ public final class Core implements Filter {
 			}
 			
 			Method requestedMethod = null;
-			Object[] listArgs = null;
-			
 			if (hashcodeRequestMethod == null && hasAccess && methodName.equals(INIT_METHOD_NAME)) {
 				context.requestedMethod = requestedMethod = GenericReflection.getMethod(requestClass, methodName, new Class<?>[]{JRenderContext.class});
 				if (requestedMethod.isAnnotationPresent(Destroy.class)) {
@@ -293,6 +294,7 @@ public final class Core implements Filter {
 			} else
 				registeredFunctions = null;
 
+			Object[] listArgs = null;
 			com.jrender.kernel.Form.processRequestedForm(context);
 
 			try {

@@ -26,7 +26,6 @@ import com.jrender.jscript.DOMHandle;
 import com.jrender.jscript.dom.Form;
 import com.jrender.jscript.dom.Window;
 import com.jrender.jscript.dom.function.implementation.SimpleFunction;
-import com.jrender.jscript.dom.window.annotation.PageParameter;
 import com.jrender.kernel.implementation.BootActionImplementation;
 import com.jrender.kernel.serialization.DOMDeserializer;
 import com.jrender.kernel.serialization.DOMSerializer;

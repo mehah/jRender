@@ -3,6 +3,7 @@ package com.jrender.jscript.dom;
 import com.jrender.http.ViewSession;
 import com.jrender.jscript.DOM;
 import com.jrender.jscript.DOMHandle;
+import com.jrender.jscript.dom.function.implementation.SimpleFunction;
 
 public abstract class EventTarget extends DOM {
 	protected EventTarget(Window window) {
@@ -15,6 +16,10 @@ public abstract class EventTarget extends DOM {
 
 	public void addEventListener(String eventName, FunctionHandle handle) {
 		DOMHandle.execCommand(this, "registerEvent", eventName, handle);
+	}
+	
+	public void addEventListener(String eventName, SimpleFunction handle) {
+		DOMHandle.execCommand(this, "registerEvent", eventName, new FunctionHandle(handle));
 	}
 
 	public void addEventListener(String eventName, FunctionHandle handle, Object... args) {

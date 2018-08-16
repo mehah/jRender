@@ -1,6 +1,8 @@
 package com.jrender.util;
 
 import java.io.UnsupportedEncodingException;
+import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.Iterator;
 
 public final class StringUtils {
@@ -27,6 +29,13 @@ public final class StringUtils {
 	}
 	
 	public static boolean isEmpty(String str) { return str == null || str.length() == 0; }
+	public static boolean isEmpty(StringBuilder str) { return str == null || str.length() == 0; }
+	
+	public static String removeAccents(String text) {
+	    return text == null ? null :
+	        Normalizer.normalize(text, Form.NFD)
+	            .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+	}
 	
 	/* Java Commons */
 	

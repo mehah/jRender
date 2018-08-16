@@ -122,7 +122,7 @@ var IframeHttpRequest = function() {
 				value: data[i]
 			};
 
-			if (p.key.toLowerCase() == "submit")
+			if (p.key.toLowerCase() === "submit")
 				p.key = '_submit';
 
 			if (JRender.jQuery.isArray(p.value)) {

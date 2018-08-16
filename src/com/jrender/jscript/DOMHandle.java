@@ -127,7 +127,7 @@ public final class DOMHandle {
 	private static <C> C getVariableValue(final DOM owner, final String varName, Class<C> cast, final String _name, JSExecutor.TYPE type, Object... parameters) {
 		JRenderContext context = JRenderContext.getInstance();
 
-		if ((ClassUtils.isPrimitiveOrWrapper(cast) || ClassUtils.isParent(cast, JsonElement.class)) && (com.jrender.kernel.$JRenderContext.isForcingSynchronization(context, owner, _name) || !owner.variables.containsKey(varName))) {
+		if ((ClassUtils.isPrimitiveOrWrapper(cast) || ClassUtils.isParent(cast, JsonElement.class) || cast.equals(Part.class)) && (com.jrender.kernel.$JRenderContext.isForcingSynchronization(context, owner, _name) || !owner.variables.containsKey(varName))) {
 			Object v = getSyncValue(context, owner, varName, cast, _name, type, parameters);
 
 			if (com.jrender.kernel.$JRenderContext.isImmediateSync(context)) {

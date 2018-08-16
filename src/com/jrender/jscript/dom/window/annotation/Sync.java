@@ -5,11 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.FIELD)
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RequestParameter {
-	public String value() default "";
-	public boolean trim() default false;
-	public boolean removeMultipleSpaces() default false;
-	public boolean useServerCharset() default true;
+public @interface Sync {
 }

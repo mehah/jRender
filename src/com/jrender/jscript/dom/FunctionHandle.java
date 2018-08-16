@@ -16,6 +16,7 @@ import com.jrender.jscript.DOM;
 import com.jrender.jscript.dom.elements.custom.ContainerElement;
 import com.jrender.jscript.dom.form.annotation.Name;
 import com.jrender.jscript.dom.function.implementation.Function;
+import com.jrender.jscript.dom.function.implementation.SimpleFunction;
 import com.jrender.jscript.dom.window.annotation.Form;
 import com.jrender.kernel.JRenderConfig;
 import com.jrender.kernel.JRenderContext;
@@ -48,6 +49,10 @@ public final class FunctionHandle {
 			this.methodParameters = context.gsonInstance.toJsonTree(parameters);
 	}
 
+	public FunctionHandle(SimpleFunction o) {
+		this.setUrl(o);
+	}
+	
 	public FunctionHandle(Function o) {
 		this.setUrl(o);
 	}

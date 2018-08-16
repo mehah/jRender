@@ -8,8 +8,7 @@ public class $Element {
 	
 	public static boolean isValueText(Class<?> clazz) {
 		return clazz.equals(TextareaElement.class) || clazz.equals(InputTextElement.class) || clazz.equals(InputRadioElement.class) || clazz.equals(InputCheckboxElement.class)
-				|| clazz.equals(InputPasswordElement.class) || clazz.equals(InputHiddenElement.class)
-				|| clazz.equals(InputFileElement.class);
+				|| clazz.equals(InputPasswordElement.class) || clazz.equals(InputHiddenElement.class);
 	}
 	
 	public static boolean isValueSelectable(Class<?> clazz) {
@@ -25,6 +24,6 @@ public class $Element {
 	}
 	
 	public static boolean isElementWithValue(Class<?> clazz) {
-		return isValueText(clazz) || isValueSelectable(clazz) || isValueMultiSelectable(clazz) || isValueCheckable(clazz); 
+		return isValueText(clazz) || isValueSelectable(clazz) || isValueMultiSelectable(clazz) || isValueCheckable(clazz) || clazz.equals(InputFileElement.class); 
 	}
 }

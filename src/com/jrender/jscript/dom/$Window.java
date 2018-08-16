@@ -6,7 +6,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.jrender.http.Conversation;
 import com.jrender.jscript.dom.function.implementation.Function;
-import com.jrender.jscript.dom.window.annotation.Page;
 import com.jrender.kernel.Router;
 
 public class $Window {
