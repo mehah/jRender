@@ -6,8 +6,6 @@ import java.lang.reflect.ParameterizedType;
 import java.net.URLEncoder;
 import java.util.Map;
 
-import javax.servlet.http.Part;
-
 import com.jrender.exception.JRenderError;
 import com.jrender.http.enumeration.RequestMethod;
 import com.jrender.jscript.DOM;
@@ -25,9 +23,9 @@ import com.jrender.kernel.JRenderConfig;
 import com.jrender.kernel.JRenderContext;
 import com.jrender.util.ClassUtils;
 import com.jrender.util.GenericReflection;
+import com.jrender.util.GenericReflection.Condition;
 import com.jrender.util.LogMessage;
 import com.jrender.validator.DataValidation;
-import com.jrender.util.GenericReflection.Condition;
 
 public abstract class Form extends Element implements ContainerElementImplementation {
 	final Field[] elementFields = $Container.processFields(getClass());

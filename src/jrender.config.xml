@@ -20,7 +20,7 @@
 			type: auto, websocket, iframe, ajax
 			methodType: post, get
 		-->
-		<request type="auto" methodType="get">
+		<request type="auto" methodType="post">
 			<multipart autodectetion="false" maxRequestSize="2097152" />
 			<websocket port="" maxTextMessageSize="8192" maxBinaryMessageSize="8192" maxIdleTimeout="0" />
 		</request>

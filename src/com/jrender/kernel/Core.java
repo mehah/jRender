@@ -123,7 +123,10 @@ public final class Core implements Filter {
 		
 		HttpServletRequest _request = ((HttpServletRequest) request);
 
-		final String servletPath = _request.getServletPath().substring(1);
+		String servletPath = _request.getServletPath().substring(1);
+		if(servletPath.endsWith("/")) {
+			servletPath = servletPath.substring(0, servletPath.length()-1);
+		}
 	
 		if (servletPath.equals("coreWebSocket")) {
 			request.setAttribute("httpResponse", response);
