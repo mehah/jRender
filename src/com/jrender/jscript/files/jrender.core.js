@@ -275,7 +275,7 @@ JRender.core = {
 				if (JRender.EVENT_REQUEST_TYPE !== 'iframe') {
 					for( var i in param) {
 						var v = param[i];
-						if (v.type && v.type === 'file') {
+						if (v && v.type === 'file') {
 							hasFile = true;
 							break;
 						}

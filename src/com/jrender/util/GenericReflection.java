@@ -8,18 +8,19 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class GenericReflection {
-	private static final Hashtable<Class<?>, Hashtable<Integer, Constructor<?>>> cacheConstructor = new Hashtable<Class<?>, Hashtable<Integer,Constructor<?>>>();
-	private static final Hashtable<Class<?>, Hashtable<Integer, Constructor<?>>> cacheDeclaredConstructor = new Hashtable<Class<?>, Hashtable<Integer,Constructor<?>>>();
-	private static final Hashtable<Class<?>, Method[]> cacheMethods = new Hashtable<Class<?>, Method[]>();
-	private static final Hashtable<Class<?>, Field[]> cacheFields = new Hashtable<Class<?>, Field[]>();
-	private static final Hashtable<Class<?>, Hashtable<String, Field[]>> cacheConditionFields = new Hashtable<Class<?>, Hashtable<String, Field[]>>();
-	private static final Hashtable<Class<?>, Hashtable<String, Field>> cacheField = new Hashtable<Class<?>, Hashtable<String, Field>>();
-	private static final Hashtable<Class<?>, Hashtable<String, Method>> cacheDeclaredMethods = new Hashtable<Class<?>, Hashtable<String,Method>>();
-	private static final Hashtable<Class<?>, Hashtable<String, Hashtable<Integer, Method>>> cacheMethod = new Hashtable<Class<?>, Hashtable<String,Hashtable<Integer,Method>>>();
-	private static final Hashtable<Class<?>, HashSet<Class<?>>> interfaces = new Hashtable<Class<?>, HashSet<Class<?>>>(); 
+	private static final Map<Class<?>, Map<Integer, Constructor<?>>> cacheConstructor = new ConcurrentHashMap<Class<?>, Map<Integer,Constructor<?>>>();
+	private static final Map<Class<?>, Map<Integer, Constructor<?>>> cacheDeclaredConstructor = new ConcurrentHashMap<Class<?>, Map<Integer,Constructor<?>>>();
+	private static final Map<Class<?>, Method[]> cacheMethods = new ConcurrentHashMap<Class<?>, Method[]>();
+	private static final Map<Class<?>, Field[]> cacheFields = new ConcurrentHashMap<Class<?>, Field[]>();
+	private static final Map<Class<?>, Map<String, Field[]>> cacheConditionFields = new ConcurrentHashMap<Class<?>, Map<String, Field[]>>();
+	private static final Map<Class<?>, Map<String, Field>> cacheField = new ConcurrentHashMap<Class<?>, Map<String, Field>>();
+	private static final Map<Class<?>, Map<String, Method>> cacheDeclaredMethods = new ConcurrentHashMap<Class<?>, Map<String,Method>>();
+	private static final Map<Class<?>, Map<String, Map<Integer, Method>>> cacheMethod = new ConcurrentHashMap<Class<?>, Map<String,Map<Integer,Method>>>();
+	private static final Map<Class<?>, HashSet<Class<?>>> interfaces = new ConcurrentHashMap<Class<?>, HashSet<Class<?>>>(); 
 
 	private GenericReflection() {}
 	
@@ -40,10 +41,10 @@ public final class GenericReflection {
 	}
 	
 	public static Field getDeclaredField(Class<?> Class, String fieldName) throws SecurityException, NoSuchFieldException {
-		Hashtable<String, Field> fields = cacheField.get(Class);
+		Map<String, Field> fields = cacheField.get(Class);
 		
 		if(fields == null)
-			cacheField.put(Class, fields = new Hashtable<String, Field>());
+			cacheField.put(Class, fields = new ConcurrentHashMap<String, Field>());
 		
 		Field field = fields.get(fieldName);
 		
@@ -70,15 +71,15 @@ public final class GenericReflection {
 	}
 	
 	public static void registerDeclaredFields(Class<?> Class, String id, Field[] fields) {
-		Hashtable<String, Field[]> hashFields = cacheConditionFields.get(Class);
+		Map<String, Field[]> hashFields = cacheConditionFields.get(Class);
 		if(hashFields == null)
-			cacheConditionFields.put(Class, hashFields = new Hashtable<String, Field[]>());
+			cacheConditionFields.put(Class, hashFields = new ConcurrentHashMap<String, Field[]>());
 		
 		hashFields.put(id, fields);
 	}
 	
 	public static Field[] getDeclaredFieldsByConditionId(Class<?> Class, String id) {
-		Hashtable<String, Field[]> hashFields = cacheConditionFields.get(Class);
+		Map<String, Field[]> hashFields = cacheConditionFields.get(Class);
 		if(hashFields != null)
 			return hashFields.get(id);
 		
@@ -117,10 +118,10 @@ public final class GenericReflection {
 	
 	public static Method getDeclaredMethod(Class<?> Class, String methodName, Class<?>... parameterTypes) throws SecurityException, NoSuchMethodException
 	{
-		Hashtable<String, Method> methods = cacheDeclaredMethods.get(Class);
+		Map<String, Method> methods = cacheDeclaredMethods.get(Class);
 		
 		if(methods == null)
-			cacheDeclaredMethods.put(Class, methods = new Hashtable<String, Method>());
+			cacheDeclaredMethods.put(Class, methods = new ConcurrentHashMap<String, Method>());
 		
 		Method method = methods.get(methodName);
 		
@@ -134,15 +135,15 @@ public final class GenericReflection {
 	
 	public static Method getMethod(Class<?> Class, String methodName, Class<?>... parameterTypes) throws SecurityException, NoSuchMethodException
 	{
-		Hashtable<String, Hashtable<Integer, Method>> methods = cacheMethod.get(Class);
+		Map<String, Map<Integer, Method>> methods = cacheMethod.get(Class);
 		
 		if(methods == null)
-			cacheMethod.put(Class, methods = new Hashtable<String, Hashtable<Integer,Method>>());
+			cacheMethod.put(Class, methods = new ConcurrentHashMap<String, Map<Integer,Method>>());
 		
-		Hashtable<Integer, Method> methodArgs = methods.get(methodName);
+		Map<Integer, Method> methodArgs = methods.get(methodName);
 		
 		if(methodArgs == null)
-			methods.put(methodName, methodArgs = new Hashtable<Integer, Method>());
+			methods.put(methodName, methodArgs = new ConcurrentHashMap<Integer, Method>());
 		
 		final int hashCode = Arrays.hashCode(parameterTypes);
 		
@@ -177,10 +178,10 @@ public final class GenericReflection {
 	{
 		final int hashcode = Arrays.hashCode(parameterTypes);
 		
-		Hashtable<Integer, Constructor<?>> constructors = cacheConstructor.get(Class);
+		Map<Integer, Constructor<?>> constructors = cacheConstructor.get(Class);
 		
 		if(constructors == null)
-			cacheConstructor.put(Class, constructors = new Hashtable<Integer, Constructor<?>>());
+			cacheConstructor.put(Class, constructors = new ConcurrentHashMap<Integer, Constructor<?>>());
 		
 		Constructor<C> constructor = (Constructor<C>) constructors.get(hashcode);
 		
@@ -197,10 +198,10 @@ public final class GenericReflection {
 	{
 		final int hashcode = Arrays.hashCode(parameterTypes);
 		
-		Hashtable<Integer, Constructor<?>> constructors = cacheDeclaredConstructor.get(Class);
+		Map<Integer, Constructor<?>> constructors = cacheDeclaredConstructor.get(Class);
 		
 		if(constructors == null)
-			cacheDeclaredConstructor.put(Class, constructors = new Hashtable<Integer, Constructor<?>>());
+			cacheDeclaredConstructor.put(Class, constructors = new ConcurrentHashMap<Integer, Constructor<?>>());
 		
 		Constructor<C> constructor = (Constructor<C>) constructors.get(hashcode);
 		
